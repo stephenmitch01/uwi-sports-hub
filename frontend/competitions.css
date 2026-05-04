@@ -1,0 +1,2 @@
+#competitionsEmpty{display:flex;align-items:center;justify-content:center;min-height:220px;background:linear-gradient(180deg,var(--shell-accent-soft),#fff);border:1px dashed var(--shell-accent-border)}
+#competitionsEmpty .empty-state{width:100%;background:transparent;border:none;padding:0}

@@ -1,0 +1,2 @@
+#teamsPageMessage{display:none}
+#teamsPageMessage.is-visible,#teamsPageMessage.success,#teamsPageMessage.error{display:block}

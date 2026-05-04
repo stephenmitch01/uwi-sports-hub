@@ -1,0 +1,22 @@
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#102033;margin-bottom:10px}
+.hero-copy h1{font-size:38px;line-height:1.08;letter-spacing:-.7px;color:#102033}
+.hero-text{color:var(--muted);line-height:1.75;margin-top:12px}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature-card{padding:18px;border:1px solid rgba(0,0,0,.06);border-radius:16px;background:#fff}
+.feature-card h3{font-size:20px;color:#102033}
+.feature-card p{margin-top:8px;color:var(--muted);line-height:1.65}
+.card-link{display:inline-block;margin-top:12px;font-weight:600;color:var(--campus-color)}
+.card-link:hover{text-decoration:underline}
+@media (max-width:1120px){.feature-grid{grid-template-columns:1fr}}
+.hero-card {
+  margin-bottom: 28px;
+}
+/* Space below the section that contains Platform Overview */
+.section-head + * {
+  margin-top: 12px;
+}
+
+/* Add extra space after the entire Platform Overview card */
+.card {
+  margin-bottom: 24px;
+}

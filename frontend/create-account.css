@@ -1,0 +1,6 @@
+.layout-grid{margin-top:16px}
+.invite-status{font-weight:600}
+.info-card h3{font-size:18px;color:#102033}
+.info-card p{margin-top:8px;color:var(--muted);line-height:1.65}
+#createAccountMessage{display:none}
+#createAccountMessage.is-visible,#createAccountMessage.success,#createAccountMessage.error{display:block}

@@ -1,0 +1,50 @@
+/* =========================================
+   UWI Sports Hub — Legal Page
+   Extends public design system
+========================================= */
+
+/* Body copy styling (same tone as about) */
+.legal-copy {
+  margin-top: 16px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.legal-copy p + p {
+  margin-top: 14px;
+}
+
+/* Section spacing */
+.legal-section {
+  margin-top: 18px;
+}
+
+/* Optional emphasis box for key rules */
+.legal-highlight {
+  border: 1px solid var(--public-navy-border);
+  background: var(--public-navy-soft);
+  border-radius: 16px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.legal-highlight strong {
+  display: block;
+  font-weight:600;
+  color: #0f2742;
+  margin-bottom: 6px;
+}
+
+/* Grid for grouped legal content (if needed later) */
+.legal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* Mobile */
+@media (max-width: 1120px) {
+  .legal-grid {
+    grid-template-columns: 1fr;
+  }
+}

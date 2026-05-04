@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Support | UWI Sports Hub</title>
+  <link rel="stylesheet" href="uwi-core-base.css" />
+  <link rel="stylesheet" href="uwi-signed-base.css" />
+  <link rel="stylesheet" href="support.css" />
+</head>
+<body>
+<div class="top-bar" id="topBar">
+  <div class="top-left">
+    <span>UWI Sports Hub</span>
+    <span class="top-divider">•</span>
+    <span data-shell-context></span>
+  </div>
+  <div class="top-right">
+    <span data-session-email></span>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </div>
+</div>
+
+<header class="signed-navbar" id="shellNav">
+  <div class="signed-navbar-inner">
+    <div class="brand-wrap">
+      <a class="brand" href="dashboard.html">
+        <img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/>
+        <div class="brand-text">
+          <strong>UWI Sports Hub</strong>
+          <span>University Sports Records Platform</span>
+        </div>
+      </a>
+      <div class="signed-campus-pill" data-campus-name></div>
+    </div>
+    <button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="signed-nav-links" id="signedNavLinks">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="athletes.html">Athletes</a>
+      <a href="coaches.html">Coaches</a>
+      <a href="teams.html">Teams</a>
+      <a href="competitions.html">Competitions</a>
+      <a href="reports.html">Reports</a>
+      <a class="active" href="support.html">Support</a>
+      <button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <div aria-live="polite" class="message" id="supportMessageBox"></div>
+
+  <section class="card head">
+    <div>
+      <h1>Contact platform support from your signed-in UWI Sports Hub account.</h1>
+      <p class="muted">
+        Use this page for account issues, technical problems, data concerns, and record correction requests.
+        Requests on this page are tied to your authenticated UWI Sports Hub account and campus context.
+      </p>
+      <div class="pill-row">
+        <span class="status-pill ok">Signed-in support</span>
+        <span class="status-pill subtle">Campus-aware</span>
+        <span class="status-pill subtle">Account-linked</span>
+      </div>
+      <p class="fine">
+        Your account identity is filled in automatically below so support requests stay clearly attributed.
+      </p>
+    </div>
+
+    <div class="head-right support-mini-grid">
+      <div class="mini-card">
+        <div class="mini-label">Request Source</div>
+        <div class="mini-value">Authenticated</div>
+        <div class="mini-sub">Sent from your signed-in UWI Sports Hub account</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-label">Campus Scope</div>
+        <div class="mini-value" data-campus-name></div>
+        <div class="mini-sub">Support context follows the active campus session</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-label">Best Use</div>
+        <div class="mini-value">Structured</div>
+        <div class="mini-sub">Include enough detail for access, data, or technical issues</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">
+      <div>
+        <h2>Common support topics</h2>
+        <p>Choose the topic that best matches your issue, then describe the problem clearly.</p>
+      </div>
+    </div>
+
+    <div class="support-grid">
+      <article class="support-box">
+        <h3>Account Access</h3>
+        <p>Use this for sign-in problems, access confusion, password issues, or account availability concerns.</p>
+      </article>
+      <article class="support-box">
+        <h3>Technical Issue</h3>
+        <p>Use this for broken page behavior, failed actions, layout problems, or errors affecting your workflow.</p>
+      </article>
+      <article class="support-box">
+        <h3>Record Correction</h3>
+        <p>Use this for athlete, coach, team, competition, or report data that needs review or correction.</p>
+      </article>
+      <article class="support-box">
+        <h3>General Question</h3>
+        <p>Use this for platform guidance, workflow clarification, or support requests that do not fit another category.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">
+      <div>
+        <h2>Submit a support request</h2>
+        <p>Your name, email, and campus are pulled from your current signed-in session.</p>
+      </div>
+    </div>
+
+    <form class="form-grid" id="supportForm">
+      <div class="field">
+        <label for="supportName">Full name</label>
+        <input class="input" id="supportName" readonly type="text" />
+      </div>
+
+      <div class="field">
+        <label for="supportEmail">USH account email</label>
+        <input class="input" id="supportEmail" readonly type="email" />
+      </div>
+
+      <div class="field">
+        <label for="supportCampus">Campus</label>
+        <input class="input" id="supportCampus" readonly type="text" />
+      </div>
+
+      <div class="field">
+        <label for="supportTopic">Topic</label>
+        <select class="input" id="supportTopic" required>
+          <option value="">Select topic</option>
+          <option value="account-access">Account access</option>
+          <option value="technical-issue">Technical issue</option>
+          <option value="record-correction">Record correction</option>
+          <option value="permissions">Permissions/access scope</option>
+          <option value="general-question">General question</option>
+        </select>
+      </div>
+
+      <div class="field field-full">
+        <label for="supportMessage">Message</label>
+        <textarea class="input" id="supportMessage" required rows="7" placeholder="Describe the problem clearly, including the page, action, and any relevant details."></textarea>
+      </div>
+
+      <div class="field field-full support-actions">
+        <button class="btn btn-primary" type="submit">Submit Request</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-left">
+    <strong>UWI Sports Hub</strong>
+    <span>Internal university sports platform</span>
+  </div>
+  <div class="footer-right">
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </div>
+</footer>
+
+<script src="uwi-app.js"></script>
+<script src="support.js"></script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Teams | UWI Sports Hub</title>
+<link rel="stylesheet" href="uwi-core-base.css" />
+  <link rel="stylesheet" href="uwi-signed-base.css" />
+  <link rel="stylesheet" href="teams.css" />
+</head>
+<body>
+<div class="top-bar" id="topBar">
+  <div class="top-left">
+    <span>UWI Sports Hub</span>
+    <span class="top-divider">•</span>
+    <span data-shell-context></span>
+  </div>
+<div class="top-right">
+<span data-session-email></span>
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</div>
+</div>
+<header class="signed-navbar" id="shellNav">
+<div class="signed-navbar-inner">
+<div class="brand-wrap">
+<a class="brand" href="dashboard.html">
+<img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/>
+<div class="brand-text">
+<strong>UWI Sports Hub</strong>
+<span>University Sports Records Platform</span>
+</div>
+</a>
+<div class="signed-campus-pill" data-campus-name></div>
+</div>
+<button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+<span></span><span></span><span></span>
+</button>
+<nav class="signed-nav-links" id="signedNavLinks">
+<a href="dashboard.html">Dashboard</a>
+<a href="athletes.html">Athletes</a>
+<a href="coaches.html">Coaches</a>
+<a class="active" href="teams.html">Teams</a>
+<a href="competitions.html">Competitions</a>
+<a href="reports.html">Reports</a>
+<a href="support.html">Support</a>
+<button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+</nav>
+</div>
+</header>
+<main class="page">
+<section class="card head">
+<div>
+<h1>Manage squads, roster structures, and staff-linked teams for your campus.</h1>
+<p class="muted">
+          Create and manage teams, assign squad structures, and open team pages for roster and staff control.
+        </p>
+<div class="pill-row">
+<span class="status-pill ok">Campus-scoped</span>
+<span class="status-pill subtle">Squad management</span>
+<span class="status-pill subtle">Team view linked</span>
+</div>
+<div class="quick-actions">
+<a class="btn btn-campus" href="dashboard.html">Dashboard</a>
+<a class="btn btn-soft" href="athletes.html">Open Athletes</a>
+</div>
+<p class="fine">
+          Teams created here are automatically assigned to
+          <strong data-campus-name></strong>.
+        </p>
+</div>
+<div class="head-right">
+<div class="mini-card">
+<div class="mini-label">Campus Scope</div>
+<div class="mini-value" data-campus-name></div>
+<div class="mini-sub">Only teams for this campus are managed here</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Management</div>
+<div class="mini-value">Squads</div>
+<div class="mini-sub">Create, edit, and open squads for roster and staff operations</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Routing</div>
+<div class="mini-value">Team View</div>
+<div class="mini-sub">Each squad opens into a detailed team page</div>
+</div>
+</div>
+</section>
+<div aria-live="polite" class="message" id="teamsPageMessage"></div>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Filters</h2>
+<p>Search and filter teams for this campus.</p>
+</div>
+</div>
+<div class="filter-grid">
+<div>
+<label for="teamSearch">Search</label>
+<input class="input" id="teamSearch" placeholder="Search team name, division, season, or notes" type="text"/>
+</div>
+<div>
+<label for="teamSport">Sport</label>
+<select class="select" id="teamSport">
+<option value="">All sports</option>
+</select>
+</div>
+<div>
+<label for="teamStatus">Status</label>
+<select class="select" id="teamStatus">
+<option value="">All statuses</option>
+<option value="active">Active</option>
+<option value="inactive">Inactive</option>
+</select>
+</div>
+<div>
+<label for="teamSeasonFilter">Season</label>
+<input class="input" id="teamSeasonFilter" placeholder="e.g. 2026" type="text"/>
+</div>
+</div>
+</section>
+<section class="grid grid-2">
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Add Team</h2>
+<p>Create a new squad for this campus.</p>
+</div>
+</div>
+<form class="filter-grid" id="teamCreateForm" novalidate="">
+<div>
+<label for="createTeamName">Team Name</label>
+<input class="input" id="createTeamName" placeholder="e.g. Cave Hill Men’s Cricket" type="text"/>
+</div>
+<div>
+<label for="createTeamSport">Sport</label>
+<select class="select" id="createTeamSport">
+<option value="">Select sport</option>
+</select>
+</div>
+<div>
+<label for="createTeamDivision">Division / Category</label>
+<input class="input" id="createTeamDivision" placeholder="e.g. Men’s Open / Women’s / U20" type="text"/>
+</div>
+<div>
+<label for="createTeamSeason">Season</label>
+<input class="input" id="createTeamSeason" placeholder="e.g. 2026" type="text"/>
+</div>
+<div>
+<label for="createTeamStatus">Status</label>
+<select class="select" id="createTeamStatus">
+<option value="active">Active</option>
+<option value="inactive">Inactive</option>
+</select>
+</div>
+<div>
+<label for="createTeamNotes">Notes</label>
+<input class="input" id="createTeamNotes" placeholder="Optional" type="text"/>
+</div>
+<div style="display:flex;align-items:flex-end;">
+<button class="btn btn-campus" style="width:100%;" type="submit">Add Team</button>
+</div>
+</form>
+</section>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Edit Team</h2>
+<p>Update squad details for this campus.</p>
+</div>
+</div>
+<form class="filter-grid" id="teamEditForm" novalidate="">
+<div>
+<label for="editTeamSelect">Team</label>
+<select class="select" id="editTeamSelect">
+<option value="">Select team</option>
+</select>
+</div>
+<div>
+<label for="editTeamName">Team Name</label>
+<input class="input" id="editTeamName" placeholder="Team name" type="text"/>
+</div>
+<div>
+<label for="editTeamSport">Sport</label>
+<select class="select" id="editTeamSport">
+<option value="">Select sport</option>
+</select>
+</div>
+<div>
+<label for="editTeamDivision">Division / Category</label>
+<input class="input" id="editTeamDivision" placeholder="e.g. Men’s Open / Women’s / U20" type="text"/>
+</div>
+<div>
+<label for="editTeamSeason">Season</label>
+<input class="input" id="editTeamSeason" placeholder="e.g. 2026" type="text"/>
+</div>
+<div>
+<label for="editTeamStatus">Status</label>
+<select class="select" id="editTeamStatus">
+<option value="active">Active</option>
+<option value="inactive">Inactive</option>
+</select>
+</div>
+<div>
+<label for="editTeamNotes">Notes</label>
+<input class="input" id="editTeamNotes" placeholder="Optional" type="text"/>
+</div>
+<div style="display:flex;align-items:flex-end;">
+<button class="btn btn-campus" style="width:100%;" type="submit">Save Changes</button>
+</div>
+</form>
+</section>
+</section>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Teams List</h2>
+<p>All squads currently in the system for <span data-campus-name></span>.</p>
+</div>
+</div>
+<div class="data-table-wrap">
+<table class="table">
+<thead>
+<tr>
+<th>Team</th>
+<th>Sport</th>
+<th>Division</th>
+<th>Season</th>
+<th>Status</th>
+<th>Campus</th>
+<th>Notes</th>
+<th>Open</th>
+</tr>
+</thead>
+<tbody id="teamsTableBody"></tbody>
+</table>
+</div>
+</section>
+</main>
+<footer class="footer">
+<div class="footer-left">
+<strong>UWI Sports Hub</strong>
+<span>Internal university sports platform</span>
+</div>
+<div class="footer-right">
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</div>
+</footer>
+
+<script src="uwi-app.js"></script><script src="teams.js"></script></body>
+</html>

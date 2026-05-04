@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sign In | UWI Sports Hub</title>
+<link rel="stylesheet" href="uwi-core-base.css" />
+  <link rel="stylesheet" href="uwi-public-base.css" />
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+<div class="top-bar" id="topBar">
+<div class="top-left">
+<span>UWI Sports Hub</span>
+<span class="top-divider">•</span>
+<span>Internal Sports Management Platform</span>
+</div>
+<div class="top-right">
+</div>
+</div>
+<header class="navbar public-navbar">
+<div class="brand-wrap">
+<a class="brand" href="index.html">
+<img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/>
+<div class="brand-text">
+<strong>UWI Sports Hub</strong>
+<span>University Sports Records Platform</span>
+</div>
+</a>
+<div aria-label="Platform badge" class="campus-logo campus-neutral">
+        INTERNAL
+      </div>
+</div>
+<button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+<span></span><span></span><span></span>
+</button>
+<nav class="nav-links" id="navLinks">
+<a class="active" href="index.html">Sign In</a>
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</nav>
+</header>
+<main class="page">
+<section class="hero-card">
+<div class="hero-copy">
+<div class="eyebrow">Internal Access</div>
+<h1>Manage athlete records, teams, competitions, and performance data in one place.</h1>
+<p class="hero-text">
+          UWI Sports Hub is an internal sports management platform for authorized university users.
+          Existing users can sign in below. New accounts are created through private invitation links
+          issued by platform administration.
+        </p>
+<div class="pill-row">
+<span class="status-pill">Invite-only account creation</span>
+<span class="status-pill subtle">Existing users sign in normally</span>
+<span class="status-pill subtle">Internal campus use</span>
+</div>
+<div class="info-grid">
+<div class="mini-card">
+<div class="mini-label">Supports</div>
+<div class="mini-value">Athletes</div>
+<div class="mini-sub">Roster management, athlete records, and profiles</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Tracks</div>
+<div class="mini-value">Competitions</div>
+<div class="mini-sub">Fixtures, event results, and sport-specific stats</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Built For</div>
+<div class="mini-value">UWI Staff</div>
+<div class="mini-sub">Admins, coaches, and approved support personnel</div>
+</div>
+</div>
+</div>
+<div class="sign-in-card">
+<div class="card-top">
+<h2>Sign In</h2>
+<p>Use your existing account credentials to enter the platform.</p>
+</div>
+<form class="form-grid" id="signInForm" novalidate="">
+<div class="field">
+<label for="email">Email address</label>
+<input id="email" name="email" placeholder="name@uwisportshub.com" required="" type="email"/>
+</div>
+<div class="field">
+<label for="password">Password</label>
+<input id="password" name="password" placeholder="Enter password" required="" type="password"/>
+</div>
+<div class="field field-inline">
+<label class="checkbox-wrap">
+<input id="rememberMe" type="checkbox"/>
+<span>Remember me on this device</span>
+</label>
+<span class="text-link">
+  Having trouble signing in? Contact your campus administrator.
+</span>
+</div>
+<button class="btn btn-primary" id="signInBtn" type="submit">Sign In</button>
+</form>
+<div class="invite-note">
+<strong>Account Creation</strong>
+<p>
+            Accounts are not created publicly. If you have received a private invitation,
+            use the link provided to access the account creation page.
+          </p>
+</div>
+<div aria-live="polite" class="message" id="signInMessage"></div>
+</div>
+</section>
+<section class="section-card">
+<div class="section-head">
+<h2>What The Platform Is For:</h2>
+<p>Built for structured internal sports administration across UWI campuses.</p>
+</div>
+<div class="feature-grid">
+<article class="feature-card">
+<h3>Athlete Records</h3>
+<p>Maintain internal athlete profiles, roster status, sport participation, and performance history.</p>
+</article>
+<article class="feature-card">
+<h3>Competition Management</h3>
+<p>Organize competitions by sport, divisions, rounds, events, matches, and result structures.</p>
+</article>
+<article class="feature-card">
+<h3>Comprehensive Stats</h3>
+<p>Support detailed sport-specific stats, retrospective score-entry workflows, and performance summaries.</p>
+</article>
+<article class="feature-card">
+<h3>Staff &amp; Teams</h3>
+<p>Support multiple staff roles, linked teams, rosters, and structured visibility across pages.</p>
+</article>
+</div>
+</section>
+</main>
+<footer class="footer">
+<div class="footer-left">
+<strong>UWI Sports Hub</strong>
+<span>Internal university sports platform</span>
+</div>
+<div class="footer-right">
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</div>
+</footer>
+
+<script src="uwi-app.js"></script>
+<script src="index.js"></script></body>
+</html>

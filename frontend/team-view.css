@@ -1,0 +1,3 @@
+#teamIdentity,#teamStaff,#teamRoster,#teamCompetitions,#teamPerformance{min-height:180px}
+#teamSquadMessage{display:none}
+#teamSquadMessage.is-visible,#teamSquadMessage.success,#teamSquadMessage.error{display:block}

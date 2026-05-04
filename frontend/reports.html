@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reports | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="reports.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar">
+  <div class="top-left">
+    <span>UWI Sports Hub</span>
+    <span class="top-divider">•</span>
+    <span data-shell-context></span>
+  </div>
+  <div class="top-right">
+    <span data-session-email></span>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </div>
+</div>
+
+<header class="signed-navbar" id="shellNav">
+  <div class="signed-navbar-inner">
+    <div class="brand-wrap">
+      <a class="brand" href="dashboard.html">
+        <img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/>
+        <div class="brand-text">
+          <strong>UWI Sports Hub</strong>
+          <span>University Sports Records Platform</span>
+        </div>
+      </a>
+      <div class="signed-campus-pill" data-campus-name></div>
+    </div>
+    <button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="signed-nav-links" id="signedNavLinks">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="athletes.html">Athletes</a>
+      <a href="coaches.html">Coaches</a>
+      <a href="teams.html">Teams</a>
+      <a href="competitions.html">Competitions</a>
+      <a class="active" href="reports.html">Reports</a>
+      <a href="support.html">Support</a>
+      <button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <section class="card head">
+    <div>
+      <h1>Generate athlete, team, competition, and campus reports from your live sports data.</h1>
+      <p class="muted">
+        The reports workspace is built for real internal operations. Select the report type,
+        narrow the data context, choose the subject of the report, and review the full output
+        before exporting or printing.
+      </p>
+      <div class="pill-row">
+        <span class="status-pill ok">Campus-aware</span>
+        <span class="status-pill subtle">Subject-driven reporting</span>
+        <span class="status-pill subtle">Preview and export ready</span>
+      </div>
+      <div class="quick-actions">
+        <a class="btn btn-campus" href="dashboard.html">Dashboard</a>
+        <a class="btn btn-soft" href="competitions.html">Competitions</a>
+      </div>
+    </div>
+    <div class="head-right">
+      <div class="mini-card">
+        <div class="mini-label">Priority</div>
+        <div class="mini-value">Athlete</div>
+        <div class="mini-sub">Deep internal athlete dossiers with identity, profile, stats, bests, and history</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-label">Also Supports</div>
+        <div class="mini-value">Team + Competition</div>
+        <div class="mini-sub">Structured reports for squads, events, results, and performance activity</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-label">Output</div>
+        <div class="mini-value">Live Preview</div>
+        <div class="mini-sub">Review on-page first, then preview or download as PDF</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">
+      <div>
+        <h2>Report generator</h2>
+        <p>Choose the report type, set the context filters, then select the person, team, or competition you want to report on.</p>
+      </div>
+    </div>
+
+    <div class="filter-grid report-selection-grid">
+      <div>
+        <label for="reportCampus">Campus</label>
+        <select class="select" id="reportCampus">
+          <option value="">Campus context</option>
+        </select>
+      </div>
+      <div>
+        <label for="reportType">Report type</label>
+        <select class="select" id="reportType">
+          <option value="">Choose report type</option>
+          <option value="athlete report">Athlete report</option>
+          <option value="team report">Team report</option>
+          <option value="competition report">Competition report</option>
+          <option value="campus summary">Campus summary</option>
+        </select>
+      </div>
+            <div>
+        <label for="reportSport">Sport</label>
+        <select class="select" id="reportSport">
+          <option value="">All sports</option>
+        </select>
+      </div>
+      <div>
+        <label for="reportSeason">Season</label>
+        <input class="input" id="reportSeason" placeholder="e.g. 2026" type="text"/>
+      </div>
+    </div>
+
+    <section class="inline-subcard hidden" id="reportSelectionCard">
+      <div class="section-title">
+        <div>
+          <h2 id="reportSelectionTitle">Report subject</h2>
+          <p id="reportSelectionSubtitle">Select the subject of the report.</p>
+        </div>
+      </div>
+
+      <div class="filter-grid report-subject-grid">
+        <div class="hidden" id="reportTeamFilterWrap">
+          <label for="reportTeamFilter">Team filter</label>
+          <select class="select" id="reportTeamFilter">
+            <option value="">All teams</option>
+          </select>
+        </div>
+
+        <div class="hidden" id="reportAthleteWrap">
+          <label for="reportAthlete">Athlete</label>
+          <select class="select" id="reportAthlete">
+            <option value="">Select athlete</option>
+          </select>
+        </div>
+
+        <div class="hidden" id="reportTeamWrap">
+          <label for="reportTeam">Team</label>
+          <select class="select" id="reportTeam">
+            <option value="">Select team</option>
+          </select>
+        </div>
+
+        <div class="hidden" id="reportCompetitionWrap">
+          <label for="reportCompetition">Competition</label>
+          <select class="select" id="reportCompetition">
+            <option value="">Select competition</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="report-selection-actions hidden" id="reportActionBar">
+        <div class="report-action-copy">
+          <strong id="reportActionTitle">Report output ready</strong>
+          <span id="reportActionSubtitle">Generate the current report in the live preview area, then preview or download it as a PDF.</span>
+        </div>
+        <div class="quick-actions">
+          <button class="btn btn-soft" id="generateReportButton" type="button">Generate report</button>
+          <button class="btn btn-soft" id="previewPdfButton" type="button">Preview PDF</button>
+          <button class="btn btn-campus" id="downloadPdfButton" type="button">Download PDF</button>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="grid grid-2 report-output-grid">
+    <section class="card" id="reportsList"></section>
+    <section class="card" id="reportsHelp"></section>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-left">
+    <strong>UWI Sports Hub</strong>
+    <span>Internal university sports platform</span>
+  </div>
+  <div class="footer-right">
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </div>
+</footer>
+
+<div class="report-preview-modal hidden" id="reportPreviewModal" aria-hidden="true">
+  <div class="report-preview-backdrop" id="reportPreviewBackdrop"></div>
+  <div class="report-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="reportPreviewTitle">
+    <div class="report-preview-header">
+      <div>
+        <h2 id="reportPreviewTitle">Report Preview</h2>
+        <p class="muted">Preview the current report layout before printing or saving to PDF.</p>
+      </div>
+      <button class="btn btn-soft" id="closePreviewButton" type="button">Close</button>
+    </div>
+    <div class="report-preview-body" id="reportPreviewBody"></div>
+  </div>
+</div>
+
+<script src="uwi-app.js"></script>
+<script src="reports.js"></script>
+</body>
+</html>

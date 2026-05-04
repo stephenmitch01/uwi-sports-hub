@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Competitions | UWI Sports Hub</title>
+
+  <link href="uwi-core-base.css" rel="stylesheet" />
+  <link href="uwi-signed-base.css" rel="stylesheet" />
+  <link href="competitions.css" rel="stylesheet" />
+</head>
+<body>
+
+  <div class="top-bar" id="topBar">
+    <div class="top-left">
+      <span>UWI Sports Hub</span>
+      <span class="top-divider">•</span>
+      <span data-shell-context></span>
+    </div>
+    <div class="top-right">
+      <span data-session-email></span>
+      <a href="about.html">About</a>
+      <a href="legal.html">Legal</a>
+    </div>
+  </div>
+
+  <header class="signed-navbar" id="shellNav">
+    <div class="signed-navbar-inner">
+      <div class="brand-wrap">
+        <a class="brand" href="dashboard.html">
+          <img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png" />
+          <div class="brand-text">
+            <strong>UWI Sports Hub</strong>
+            <span>University Sports Records Platform</span>
+          </div>
+        </a>
+        <div class="signed-campus-pill" data-campus-name></div>
+      </div>
+      <button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="signed-nav-links" id="signedNavLinks">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="athletes.html">Athletes</a>
+        <a href="coaches.html">Coaches</a>
+        <a href="teams.html">Teams</a>
+        <a class="active" href="competitions.html">Competitions</a>
+        <a href="reports.html">Reports</a>
+        <a href="support.html">Support</a>
+        <button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="card head">
+      <div>
+        <h1>Manage competitions, divisions, rounds, events, and matches across all supported sports.</h1>
+        <p class="muted">
+          This page is the competition registry for UWI Sports Hub. It supports one-sport competitions,
+          category structure, rounds or heats, participants, schedules, results, and routeable detail pages.
+        </p>
+        <div class="pill-row">
+          <span class="status-pill ok">Internal page</span>
+          <span class="status-pill subtle">Sport-aware formats</span>
+          <span class="status-pill subtle">Results-linked</span>
+        </div>
+        <div class="quick-actions">
+          <a class="btn btn-campus" href="dashboard.html">Dashboard</a>
+          <a class="btn btn-soft" href="competition-view.html">Open Detail View</a>
+        </div>
+      </div>
+      <div class="head-right">
+        <div class="mini-card">
+          <div class="mini-label">Formats</div>
+          <div class="mini-value">Sport-aware</div>
+          <div class="mini-sub">Competition structure depends on the sport</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Entry</div>
+          <div class="mini-value">Retrospective</div>
+          <div class="mini-sub">Results can be entered after the event or match</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-label">Routing</div>
+          <div class="mini-value">Detail view</div>
+          <div class="mini-sub">Each competition opens a full detail page</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <div>
+          <h2>Filters</h2>
+          <p>Search competitions by title, sport, season, campus scope, or format.</p>
+        </div>
+      </div>
+      <div class="filter-grid">
+        <div>
+          <label for="competitionSearch">Search</label>
+          <input class="input" id="competitionSearch" placeholder="Search competition title or code" type="text" />
+        </div>
+        <div>
+          <label for="competitionSport">Sport</label>
+          <select class="select" id="competitionSport">
+            <option value="">All sports</option>
+            <option value="track-and-field">Track and Field</option>
+            <option value="football">Football</option>
+            <option value="cricket">Cricket</option>
+            <option value="basketball">Basketball</option>
+            <option value="netball">Netball</option>
+            <option value="hockey">Hockey</option>
+            <option value="volleyball">Volleyball</option>
+            <option value="badminton">Badminton</option>
+            <option value="table-tennis">Table Tennis</option>
+            <option value="lawn-tennis">Lawn Tennis</option>
+            <option value="swimming">Swimming</option>
+            <option value="chess">Chess</option>
+            <option value="taekwondo">Taekwondo</option>
+            <option value="beach-volleyball">Beach Volleyball</option>
+          </select>
+        </div>
+        <div>
+          <label for="competitionCampus">Campus Scope</label>
+          <select class="select" id="competitionCampus" aria-describedby="competitionCampusHelp">
+            <option value="">Campus-scoped</option>
+          </select>
+          <p class="fine" id="competitionCampusHelp">
+            Campus scope is set automatically from the signed-in session.
+          </p>
+        </div>
+        <div>
+          <label for="competitionFormat">Format</label>
+          <select class="select" id="competitionFormat">
+            <option value="">All formats</option>
+            <option>League</option>
+            <option>Round robin</option>
+            <option>Knockout</option>
+            <option>Heats + final</option>
+            <option>Timed final</option>
+            <option>Custom</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-2">
+      <section class="card">
+        <div class="section-title">
+          <div>
+            <h2>Competitions list</h2>
+            <p>Competition records will appear here once added.</p>
+          </div>
+        </div>
+        <div class="data-table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Competition</th>
+                <th>Sport</th>
+                <th>Campus</th>
+                <th>Stage Type</th>
+                <th>Season</th>
+                <th>View</th>
+              </tr>
+            </thead>
+            <tbody id="competitionsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" id="competitionsEmpty"></section>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">
+      <strong>UWI Sports Hub</strong>
+      <span>Internal university sports platform</span>
+    </div>
+    <div class="footer-right">
+      <a href="about.html">About</a>
+      <a href="legal.html">Legal</a>
+    </div>
+  </footer>
+
+  <script src="uwi-app.js"></script>
+  <script src="competitions.js"></script>
+</body>
+</html>

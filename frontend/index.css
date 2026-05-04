@@ -1,0 +1,32 @@
+.campus-neutral{min-width:96px}
+.sign-in-card{align-self:start}
+.invite-note{margin-top:16px;padding:16px;border-radius:16px;background:#f5f8fb;border:1px solid var(--public-navy-border)}
+.invite-note p{margin-top:8px;color:var(--muted);line-height:1.65}
+#signInMessage{display:none}
+#signInMessage.is-visible,#signInMessage.success,#signInMessage.error{display:block}
+
+.sign-in-card .form-grid {
+  grid-template-columns: 1fr;
+}
+
+
+.sign-in-card .field {
+  width: 100%;
+}
+
+
+.sign-in-card label {
+  margin-bottom: 6px;
+  display: block;
+}
+
+.hero-card {
+  margin-bottom: 72px;
+}
+
+.section-card {
+  padding-left: 8px;
+}
+.section-card .section-head h2 {
+  margin-left: 24px;
+}

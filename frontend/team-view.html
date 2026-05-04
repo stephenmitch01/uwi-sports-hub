@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Team View | UWI Sports Hub</title>
+<link rel="stylesheet" href="uwi-core-base.css" />
+  <link rel="stylesheet" href="uwi-signed-base.css" />
+  <link rel="stylesheet" href="team-view.css" />
+</head>
+<body>
+<div class="top-bar" id="topBar">
+  <div class="top-left">
+    <span>UWI Sports Hub</span>
+    <span class="top-divider">•</span>
+    <span data-shell-context></span>
+  </div>
+<div class="top-right">
+<span data-session-email></span>
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</div>
+</div>
+<header class="signed-navbar" id="shellNav">
+<div class="signed-navbar-inner">
+<div class="brand-wrap">
+<a class="brand" href="dashboard.html">
+<img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/>
+<div class="brand-text">
+<strong>UWI Sports Hub</strong>
+<span>University Sports Records Platform</span>
+</div>
+</a>
+<div class="signed-campus-pill" data-campus-name></div>
+</div>
+<button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+<span></span><span></span><span></span>
+</button>
+<nav class="signed-nav-links" id="signedNavLinks">
+<a href="dashboard.html">Dashboard</a>
+<a href="athletes.html">Athletes</a>
+<a href="coaches.html">Coaches</a>
+<a class="active" href="teams.html">Teams</a>
+<a href="competitions.html">Competitions</a>
+<a href="reports.html">Reports</a>
+<a href="support.html">Support</a>
+<button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+</nav>
+</div>
+</header>
+<main class="page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="teamNameHeading">Team Detail</h1>
+<p class="muted" id="teamSubtitle">
+          Team View is the main destination for roster membership, staff assignments,
+          competition participation, and season-level team summaries.
+        </p>
+<div class="pill-row">
+<span class="status-pill subtle" id="teamStatusPill">Status</span>
+<span class="status-pill subtle" id="teamCampusPill">Campus Scoped</span>
+<span class="status-pill subtle" id="teamSportPill">Sport</span>
+</div>
+<div class="quick-actions">
+<a class="btn btn-campus" href="teams.html">Back to Teams</a>
+<a class="btn btn-soft" href="competitions.html">Open Competitions</a>
+</div>
+<p class="fine" id="teamHeadNote">
+          This page shows the current team identity, roster, staff assignments, competition activity,
+          and performance summary for the selected team.
+        </p>
+</div>
+<div class="head-right">
+<div class="mini-card">
+<div class="mini-label">Roster Size</div>
+<div class="mini-value" id="rosterCountStat">—</div>
+<div class="mini-sub">Athletes currently linked to this team.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Staff Assignments</div>
+<div class="mini-value" id="staffCountStat">—</div>
+<div class="mini-sub">Coaches and support staff assigned to this team.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Competitions</div>
+<div class="mini-value" id="competitionCountStat">—</div>
+<div class="mini-sub">Competitions currently linked to this team.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Results</div>
+<div class="mini-value" id="resultCountStat">—</div>
+<div class="mini-sub">Result records currently tied to this team.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Primary Sport</div>
+<div class="mini-value" id="primarySportStat">—</div>
+<div class="mini-sub">The sport attached to this team record.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Season</div>
+<div class="mini-value" id="seasonStat">—</div>
+<div class="mini-sub">Current season label for this team.</div>
+</div>
+</div>
+</section>
+<section class="grid grid-2">
+<section class="card" id="teamIdentity"></section>
+<section class="card" id="teamStaff"></section>
+</section>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Squad Management</h2>
+<p>Add athletes and coaches to this team using backend-linked assignments.</p>
+</div>
+</div>
+<div class="grid grid-2">
+<form class="card" id="addAthleteForm" novalidate="" style="margin-top:0;">
+<div class="section-title">
+<div>
+<h2>Add Athlete</h2>
+<p>Select an athlete and assign squad details.</p>
+</div>
+</div>
+<label for="athleteSelect">Athlete</label>
+<select class="select" id="athleteSelect">
+<option value="">Select athlete</option>
+</select>
+<label for="athleteRole" style="margin-top:12px;">Role</label>
+<input class="input" id="athleteRole" placeholder="e.g. Bowler, Striker, Defender" type="text"/>
+<label for="athleteJersey" style="margin-top:12px;">Jersey / Bib</label>
+<input class="input" id="athleteJersey" placeholder="Optional" type="text"/>
+<button class="btn btn-campus" style="margin-top:14px;" type="submit">
+            Add Athlete
+          </button>
+</form>
+<form class="card" id="addCoachForm" novalidate="" style="margin-top:0;">
+<div class="section-title">
+<div>
+<h2>Add Coach / Staff</h2>
+<p>Select a coach or staff member and assign a role.</p>
+</div>
+</div>
+<label for="coachSelect">Coach / Staff</label>
+<select class="select" id="coachSelect">
+<option value="">Select coach/staff</option>
+</select>
+<label for="coachRole" style="margin-top:12px;">Role</label>
+<input class="input" id="coachRole" placeholder="Head Coach / Assistant / Physio / Manager" type="text"/>
+<label for="coachPrimary" style="margin-top:12px;">Assignment Type</label>
+<select class="select" id="coachPrimary">
+<option value="true">Primary</option>
+<option value="false">Support</option>
+</select>
+<button class="btn btn-campus" style="margin-top:14px;" type="submit">
+            Add Coach
+          </button>
+</form>
+</div>
+<div class="message" id="teamSquadMessage" style="margin-top:12px;"></div>
+</section>
+<section class="grid grid-2">
+<section class="card" id="teamRoster"></section>
+<section class="card" id="teamCompetitions"></section>
+</section>
+<section class="card" id="teamPerformance"></section>
+</main>
+<footer class="footer">
+<div class="footer-left">
+<strong>UWI Sports Hub</strong>
+<span>Internal university sports platform</span>
+</div>
+<div class="footer-right">
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</div>
+</footer>
+
+<script src="uwi-app.js"></script><script src="team-view.js"></script></body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Coaches | UWI Sports Hub</title>
+
+<link href="uwi-core-base.css" rel="stylesheet"/><link href="uwi-signed-base.css" rel="stylesheet"/><link href="coaches.css" rel="stylesheet"/></head>
+<body>
+
+<div class="top-bar" id="topBar">
+<div class="top-left">
+<span>UWI Sports Hub</span>
+<span class="top-divider">•</span>
+<span data-shell-context></span>
+</div>
+<div class="top-right">
+<span data-session-email></span>
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</div>
+</div>
+
+
+<header class="signed-navbar" id="shellNav">
+<div class="signed-navbar-inner">
+<div class="brand-wrap">
+<a class="brand" href="dashboard.html">
+<img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/>
+<div class="brand-text">
+<strong>UWI Sports Hub</strong>
+<span>University Sports Records Platform</span>
+</div>
+</a>
+<div class="signed-campus-pill" data-campus-name></div>
+</div>
+<button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+<span></span><span></span><span></span>
+</button>
+<nav class="signed-nav-links" id="signedNavLinks">
+<a class="" href="dashboard.html">Dashboard</a>
+<a class="" href="athletes.html">Athletes</a>
+<a class="active" href="coaches.html">Coaches</a>
+<a class="" href="teams.html">Teams</a>
+<a class="" href="competitions.html">Competitions</a>
+<a class="" href="reports.html">Reports</a>
+<a class="" href="support.html">Support</a>
+<button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+</nav>
+</div>
+</header>
+
+<main class="page">
+<section class="card head">
+<div>
+<h1>Manage coaches, support staff, team assignments, and profile records for your campus.</h1>
+<p class="muted">
+          Create and update internal coach and staff records for <span data-campus-name></span>.
+          This page supports role type, sport coverage, contact info, headshots, and team assignments.
+        </p>
+<div class="pill-row">
+<span class="status-pill ok">Campus-scoped</span>
+<span class="status-pill subtle">Coach registry</span>
+<span class="status-pill subtle">Coach view linked</span>
+</div>
+<div class="quick-actions">
+<button class="btn btn-campus" id="focusCreateCoachBtn" type="button">Add Coach</button>
+<button class="btn btn-soft" id="focusAssignmentsBtn" type="button">Add Assignment</button>
+</div>
+<p class="fine">
+          Coach and staff records here are internal only and structured for real operational use.
+        </p>
+</div>
+<div class="head-right">
+<div class="mini-card">
+<div class="mini-label">Campus Scope</div>
+<div class="mini-value" data-campus-name></div>
+<div class="mini-sub">Only coaches and staff for this campus are managed here</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Coverage</div>
+<div class="mini-value">Staffing</div>
+<div class="mini-sub">Supports coaches, physios, managers, analysts, and more</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Routing</div>
+<div class="mini-value">Coach View</div>
+<div class="mini-sub">Each record opens into a detailed coach profile page</div>
+</div>
+</div>
+</section>
+<div aria-live="polite" class="message" id="registryMessage"></div>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Registry Overview</h2>
+<p>Live coach and support staff summary for <span data-campus-name></span>.</p>
+</div>
+</div>
+<div class="summary-cards">
+<div class="mini-card">
+<div class="mini-label">Total Coaches</div>
+<div class="mini-value" id="totalCoachesStat">0</div>
+<div class="mini-sub">All coach and staff records for this campus</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Head Coaches</div>
+<div class="mini-value" id="headCoachesStat">0</div>
+<div class="mini-sub">Primary technical leads</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Support Staff</div>
+<div class="mini-value" id="supportStaffStat">0</div>
+<div class="mini-sub">Managers, physios, analysts, and other staff</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Teams Covered</div>
+<div class="mini-value" id="teamsCoveredStat">0</div>
+<div class="mini-sub">Distinct team assignments</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Sports Covered</div>
+<div class="mini-value" id="sportsCoveredStat">0</div>
+<div class="mini-sub">Unique sports in coach registry</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Unassigned Staff</div>
+<div class="mini-value" id="unassignedStaffStat">0</div>
+<div class="mini-sub">Staff records without a team assignment</div>
+</div>
+</div>
+</section>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Filters</h2>
+<p>Search and filter coaches and support staff by role, sport, and status.</p>
+</div>
+</div>
+<div class="filter-grid">
+<div>
+<label for="searchInput">Search</label>
+<input class="input" id="searchInput" placeholder="Search name, email, phone, role, team, or sport" type="text"/>
+</div>
+<div>
+<label for="filterRole">Role</label>
+<select class="select" id="filterRole">
+<option value="">All roles</option>
+<option value="head_coach">Head Coach</option>
+<option value="assistant_coach">Assistant Coach</option>
+<option value="strength_conditioning_coach">Strength &amp; Conditioning Coach</option>
+<option value="physio">Physio</option>
+<option value="manager">Manager</option>
+<option value="analyst">Analyst</option>
+<option value="team_staff">Team Staff</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div>
+<label for="filterSport">Sport</label>
+<select class="select" id="filterSport">
+<option value="">All sports</option>
+</select>
+</div>
+<div>
+<label for="filterStatus">Status</label>
+<select class="select" id="filterStatus">
+<option value="">All statuses</option>
+<option value="active">Active</option>
+<option value="inactive">Inactive</option>
+<option value="on_leave">On Leave</option>
+</select>
+</div>
+</div>
+</section>
+<section class="grid grid-2">
+<section class="card" id="createCoachSection">
+<div class="section-title">
+<div>
+<h2>Add Coach / Staff Member</h2>
+<p>Create a new coach or support-staff record for <span data-campus-name></span>.</p>
+</div>
+</div>
+<form id="coachForm" novalidate="">
+<div class="filter-grid">
+<div>
+<label for="firstName">First Name</label>
+<input class="input" id="firstName" placeholder="First name" type="text"/>
+</div>
+<div>
+<label for="lastName">Last Name</label>
+<input class="input" id="lastName" placeholder="Last name" type="text"/>
+</div>
+<div>
+<label for="email">Email</label>
+<input class="input" id="email" placeholder="Optional email" type="email"/>
+</div>
+<div>
+<label for="phone">Phone</label>
+<input class="input" id="phone" placeholder="Optional phone" type="text"/>
+</div>
+<div>
+<label for="role">Primary Role</label>
+<select class="select" id="role">
+<option value="">Select role</option>
+<option value="head_coach">Head Coach</option>
+<option value="assistant_coach">Assistant Coach</option>
+<option value="strength_conditioning_coach">Strength &amp; Conditioning Coach</option>
+<option value="physio">Physio</option>
+<option value="manager">Manager</option>
+<option value="analyst">Analyst</option>
+<option value="team_staff">Team Staff</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div class="hidden" id="otherRoleWrap">
+<label for="otherRole">Other Role Title</label>
+<input class="input" id="otherRole" placeholder="Specify role title" type="text"/>
+</div>
+<div>
+<label for="sport">Primary Sport</label>
+<select class="select" id="sport">
+<option value="">Select sport</option>
+</select>
+</div>
+<div>
+<label for="employmentStatus">Status</label>
+<select class="select" id="employmentStatus">
+<option value="active">Active</option>
+<option value="inactive">Inactive</option>
+<option value="on_leave">On Leave</option>
+</select>
+</div>
+<div>
+<label for="assignmentMode">Assignment Mode</label>
+<select class="select" id="assignmentMode">
+<option value="none">Add coach first, assign later</option>
+<option value="single">Assign to one team now</option>
+</select>
+</div>
+<div class="hidden" id="teamAssignmentWrap">
+<label for="teamId">Team</label>
+<select class="select" id="teamId">
+<option value="">Select team</option>
+</select>
+</div>
+<div class="hidden" id="assignmentRoleWrap">
+<label for="assignmentRole">Team Assignment Role</label>
+<select class="select" id="assignmentRole">
+<option value="">Select assignment role</option>
+<option value="head_coach">Head Coach</option>
+<option value="assistant_coach">Assistant Coach</option>
+<option value="strength_conditioning_coach">Strength &amp; Conditioning Coach</option>
+<option value="physio">Physio</option>
+<option value="manager">Manager</option>
+<option value="analyst">Analyst</option>
+<option value="team_staff">Team Staff</option>
+</select>
+</div>
+<div>
+<label for="coachHeadshot">Headshot</label>
+<input accept="image/*" class="input" id="coachHeadshot" type="file"/>
+<p class="fine">Optional coach profile image.</p>
+</div>
+</div>
+<div>
+<label for="notes">Notes</label>
+<textarea class="textarea" id="notes" placeholder="Optional notes about this coach or staff member."></textarea>
+</div>
+<div class="form-actions">
+<button class="btn btn-campus" id="saveCoachBtn" type="submit">Save Coach</button>
+<button class="btn btn-soft" id="resetCoachFormBtn" type="button">Reset</button>
+</div>
+<div aria-live="polite" class="message" id="coachFormMessage"></div>
+</form>
+</section>
+<section class="card" id="assignmentSection">
+<div class="section-title">
+<div>
+<h2>Add Team Assignment</h2>
+<p>Assign an existing coach or staff member to a team.</p>
+</div>
+</div>
+<form id="assignmentForm" novalidate="">
+<div class="filter-grid">
+<div>
+<label for="assignmentCoachId">Coach / Staff</label>
+<select class="select" id="assignmentCoachId">
+<option value="">Select coach</option>
+</select>
+</div>
+<div>
+<label for="assignmentTeamId">Team</label>
+<select class="select" id="assignmentTeamId">
+<option value="">Select team</option>
+</select>
+</div>
+<div>
+<label for="assignmentRoleExisting">Assignment Role</label>
+<select class="select" id="assignmentRoleExisting">
+<option value="">Select role</option>
+<option value="head_coach">Head Coach</option>
+<option value="assistant_coach">Assistant Coach</option>
+<option value="strength_conditioning_coach">Strength &amp; Conditioning Coach</option>
+<option value="physio">Physio</option>
+<option value="manager">Manager</option>
+<option value="analyst">Analyst</option>
+<option value="team_staff">Team Staff</option>
+</select>
+</div>
+<div>
+<label for="assignmentPrimaryFlag">Primary Assignment</label>
+<select class="select" id="assignmentPrimaryFlag">
+<option value="false">No</option>
+<option value="true">Yes</option>
+</select>
+</div>
+</div>
+<div class="form-actions">
+<button class="btn btn-campus" type="submit">Save Assignment</button>
+</div>
+<div aria-live="polite" class="message" id="assignmentMessage"></div>
+</form>
+</section>
+</section>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Coach Registry</h2>
+<p>Internal coach and support-staff records for <span data-campus-name></span>.</p>
+</div>
+</div>
+<div class="data-table-wrap hidden" id="coachTableWrap">
+<table class="table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Role</th>
+<th>Sport</th>
+<th>Teams</th>
+<th>Phone</th>
+<th>Email</th>
+<th>Status</th>
+<th>Open</th>
+</tr>
+</thead>
+<tbody id="coachTableBody"></tbody>
+</table>
+</div>
+<div class="empty-state hidden" id="emptyState">
+<h3>No coach records match the current filters.</h3>
+<p>Add coach or staff records to begin building assignments and detailed profiles.</p>
+</div>
+</section>
+</main>
+<footer class="footer">
+<div class="footer-left">
+<strong>UWI Sports Hub</strong>
+<span>Internal university sports platform</span>
+</div>
+<div class="footer-right">
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</div>
+</footer>
+<script src="uwi-app.js"></script>
+<script src="coaches.js"></script>
+</body>
+</html>

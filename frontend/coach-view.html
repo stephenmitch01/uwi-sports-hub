@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Coach View | UWI Sports Hub</title>
+<link rel="stylesheet" href="uwi-core-base.css" />
+  <link rel="stylesheet" href="uwi-signed-base.css" />
+  <link rel="stylesheet" href="coach-view.css" />
+</head>
+<body>
+<div class="top-bar" id="topBar">
+<div class="top-left">
+<span>UWI Sports Hub</span>
+<span class="top-divider">•</span>
+<span data-shell-context></span>
+</div>
+<div class="top-right">
+<span data-session-email></span>
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</div>
+</div>
+<header class="signed-navbar" id="shellNav">
+<div class="signed-navbar-inner">
+<div class="brand-wrap">
+<a class="brand" href="dashboard.html">
+<img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/>
+<div class="brand-text">
+<strong>UWI Sports Hub</strong>
+<span>University Sports Records Platform</span>
+</div>
+</a>
+<div class="signed-campus-pill" data-campus-name></div>
+</div>
+<button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+<span></span><span></span><span></span>
+</button>
+<nav class="signed-nav-links" id="signedNavLinks">
+<a href="dashboard.html">Dashboard</a>
+<a href="athletes.html">Athletes</a>
+<a class="active" href="coaches.html">Coaches</a>
+<a href="teams.html">Teams</a>
+<a href="competitions.html">Competitions</a>
+<a href="reports.html">Reports</a>
+<a href="support.html">Support</a>
+<button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+</nav>
+</div>
+</header>
+<main class="page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="coachNameHeading">Coach Profile</h1>
+<p class="muted" id="coachRoleSportLine">
+          Reviewing coach/staff information, assignments, and team links.
+        </p>
+<div class="pill-row">
+<span class="status-pill ok" id="coachStatusPill">Status</span>
+<span class="status-pill subtle" id="coachCampusPill">Campus</span>
+<span class="status-pill subtle" id="coachPrimaryRolePill">Role</span>
+</div>
+<p class="fine" id="coachNotesPreview">
+          Internal notes and role context will appear here when available.
+        </p>
+<div class="quick-actions">
+<a class="btn btn-campus" href="#" id="editCoachBtn">Edit Coach</a>
+<a class="btn btn-soft" href="coaches.html">Back to Coaches</a>
+<button class="btn btn-soft" id="printBtn" type="button">Print</button>
+</div>
+</div>
+<div class="head-right">
+<div class="mini-card">
+<div class="mini-label">Assigned Teams</div>
+<div class="mini-value" id="assignedTeamsStat">—</div>
+<div class="mini-sub">Teams currently linked to this staff member.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Sports Covered</div>
+<div class="mini-value" id="sportsCoveredStat">—</div>
+<div class="mini-sub">Sports represented across assignments.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Primary Role</div>
+<div class="mini-value" id="primaryRoleStat">—</div>
+<div class="mini-sub">Main role recorded on the profile.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Status</div>
+<div class="mini-value" id="statusStat">—</div>
+<div class="mini-sub">Current staff status.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Primary Sport</div>
+<div class="mini-value" id="primarySportStat">—</div>
+<div class="mini-sub">Main sport tied to the coach profile.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Contact Ready</div>
+<div class="mini-value" id="contactReadyStat">—</div>
+<div class="mini-sub">Whether phone/email details are available.</div>
+</div>
+</div>
+</section>
+<div class="grid grid-2">
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Profile Information</h2>
+<p>Core identity, contact details, and role metadata for this staff member.</p>
+</div>
+</div>
+<div class="details-grid">
+<div class="detail-item">
+<span class="detail-label">First Name</span>
+<strong id="firstNameValue">—</strong>
+</div>
+<div class="detail-item">
+<span class="detail-label">Last Name</span>
+<strong id="lastNameValue">—</strong>
+</div>
+<div class="detail-item">
+<span class="detail-label">Email</span>
+<strong id="emailValue">—</strong>
+</div>
+<div class="detail-item">
+<span class="detail-label">Phone</span>
+<strong id="phoneValue">—</strong>
+</div>
+<div class="detail-item">
+<span class="detail-label">Primary Role</span>
+<strong id="roleValue">—</strong>
+</div>
+<div class="detail-item">
+<span class="detail-label">Other Role Title</span>
+<strong id="otherRoleValue">—</strong>
+</div>
+<div class="detail-item">
+<span class="detail-label">Primary Sport</span>
+<strong id="sportValue">—</strong>
+</div>
+<div class="detail-item">
+<span class="detail-label">Campus</span>
+<strong id="campusValue">—</strong>
+</div>
+<div class="detail-item">
+<span class="detail-label">Status</span>
+<strong id="statusValue">—</strong>
+</div>
+<div class="detail-item">
+<span class="detail-label">Record ID</span>
+<strong id="recordIdValue">—</strong>
+</div>
+</div>
+</section>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Notes &amp; Role Context</h2>
+<p>Internal notes, certifications, specializations, and operational comments.</p>
+</div>
+</div>
+<div class="notes-box" id="notesBox">
+          No notes available for this coach/staff record yet.
+        </div>
+</section>
+</div>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Team Assignments</h2>
+<p>
+            Every assignment should reference existing institution teams rather than duplicate staff records.
+          </p>
+</div>
+</div>
+<div class="data-table-wrap" id="assignmentTableWrap">
+<table class="table">
+<thead>
+<tr>
+<th>Team</th>
+<th>Sport</th>
+<th>Assignment Role</th>
+<th>Primary</th>
+<th>Season</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="assignmentTableBody"></tbody>
+</table>
+</div>
+<div class="empty-state hidden" id="assignmentEmptyState">
+<h3>No assignments found</h3>
+<p>
+          This coach/staff record is not yet linked to any team. Add an assignment from the Coaches page when ready.
+        </p>
+</div>
+</section>
+<section class="card">
+<div class="section-title">
+<div>
+<h2>Linked Teams Summary</h2>
+<p>
+            Quick overview of the teams and athlete groups this staff member is connected to through assignments.
+          </p>
+</div>
+</div>
+<div class="data-table-wrap" id="teamsSummaryWrap">
+<table class="table">
+<thead>
+<tr>
+<th>Team</th>
+<th>Sport</th>
+<th>Roster Size</th>
+<th>Staff Count</th>
+<th>View Team</th>
+</tr>
+</thead>
+<tbody id="teamsSummaryBody"></tbody>
+</table>
+</div>
+<div class="empty-state hidden" id="teamsSummaryEmptyState">
+<h3>No linked teams yet</h3>
+<p>
+          Once this coach is assigned to teams, the linked team summary will appear here.
+        </p>
+</div>
+</section>
+</main>
+<footer class="footer">
+<div class="footer-left">
+<strong>UWI Sports Hub</strong>
+<span>Institutional sports management for UWI campuses.</span>
+</div>
+<div class="footer-right">
+<a href="about.html">About</a>
+<a href="legal.html">Legal</a>
+</div>
+</footer>
+
+<script src="uwi-app.js"></script>
+<script src="coach-view.js"></script>
+</body>
+</html>
