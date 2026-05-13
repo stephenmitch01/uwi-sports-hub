@@ -221,7 +221,23 @@ table{width:100%;border-collapse:collapse;border-spacing:0}
   padding-left:18px;
   padding-right:18px;
 }
-.recent-searches{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:13px}
+.recent-searches{
+  grid-column:1 / -1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  margin-top:8px;
+  padding-bottom:4px;
+  color:var(--muted);
+  font-size:13px;
+}
+.recent-searches > span,
+.recent-search-chip{
+  flex:0 0 auto;
+  white-space:nowrap;
+}
 .recent-search-chip{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:6px 10px;color:#102033;font-weight:550}
 .nested-detail{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:14px;background:#fff}
 .nested-detail summary{cursor:pointer;font-weight:600;color:#102033}

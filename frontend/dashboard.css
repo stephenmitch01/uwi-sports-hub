@@ -1,7 +1,7 @@
 .eyebrow{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#102033;margin-bottom:10px}
 .hero-copy h1{font-size:38px;line-height:1.08;letter-spacing:-.7px;color:#102033}
 .hero-text{color:var(--muted);line-height:1.75;margin-top:12px}
-.hero-card .mini-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.hero-card .mini-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 .compact-value{font-size:18px;line-height:1.2;overflow:hidden;text-overflow:ellipsis}
 .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .feature-card{padding:18px;border:1px solid rgba(0,0,0,.06);border-radius:16px;background:#fff}
