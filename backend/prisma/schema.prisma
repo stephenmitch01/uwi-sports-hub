@@ -1,0 +1,258 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id         String   @id @default(uuid())
+  authUserId String?  @unique
+  email      String   @unique
+  fullName   String?
+  campus     String   @default("cavehill")
+  role       String   @default("viewer")
+  status     String   @default("active")
+  data       Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Athlete {
+  id        String   @id @default(uuid())
+  campus    String   @default("cavehill")
+  sport     String?
+  firstName String?
+  lastName  String?
+  status    String?
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campus])
+  @@index([sport])
+  @@index([campus, sport])
+  @@index([campus, updatedAt])
+}
+
+model Coach {
+  id        String   @id @default(uuid())
+  campus    String   @default("cavehill")
+  sport     String?
+  firstName String?
+  lastName  String?
+  status    String?
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campus])
+  @@index([sport])
+  @@index([campus, sport])
+  @@index([campus, updatedAt])
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  campus    String   @default("cavehill")
+  sport     String?
+  name      String?
+  status    String?
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campus])
+  @@index([sport])
+  @@index([campus, sport])
+  @@index([campus, updatedAt])
+}
+
+model Competition {
+  id        String   @id @default(uuid())
+  campus    String   @default("cavehill")
+  sport     String?
+  name      String?
+  status    String?
+  startDate DateTime?
+  endDate   DateTime?
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campus])
+  @@index([sport])
+  @@index([campus, sport])
+  @@index([campus, updatedAt])
+  @@index([campus, startDate])
+}
+
+model TeamRosterAssignment {
+  id        String   @id @default(uuid())
+  teamId    String
+  athleteId String
+  campus    String   @default("cavehill")
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId])
+  @@index([athleteId])
+  @@index([campus, teamId])
+  @@index([campus, athleteId])
+}
+
+model TeamStaffAssignment {
+  id        String   @id @default(uuid())
+  teamId    String
+  coachId   String?
+  campus    String   @default("cavehill")
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teamId])
+  @@index([coachId])
+  @@index([campus, teamId])
+  @@index([campus, coachId])
+}
+
+model CompetitionUnit {
+  id            String   @id @default(uuid())
+  competitionId String
+  campus        String   @default("cavehill")
+  data          Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([competitionId])
+  @@index([campus, competitionId])
+}
+
+model CompetitionParticipant {
+  id            String   @id @default(uuid())
+  competitionId String
+  subjectId     String?
+  subjectType   String?
+  campus        String   @default("cavehill")
+  data          Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([competitionId])
+  @@index([subjectId])
+  @@index([campus, competitionId])
+  @@index([campus, subjectId])
+}
+
+model CompetitionResult {
+  id            String   @id @default(uuid())
+  competitionId String?
+  teamId        String?
+  athleteId     String?
+  campus        String   @default("cavehill")
+  sport         String?
+  data          Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([competitionId])
+  @@index([teamId])
+  @@index([athleteId])
+  @@index([campus, competitionId])
+  @@index([campus, teamId])
+  @@index([campus, athleteId])
+}
+
+model CompetitionStatLine {
+  id            String   @id @default(uuid())
+  competitionId String?
+  subjectId     String?
+  subjectType   String?
+  teamId        String?
+  athleteId     String?
+  campus        String   @default("cavehill")
+  sport         String?
+  data          Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([competitionId])
+  @@index([subjectId])
+  @@index([teamId])
+  @@index([athleteId])
+  @@index([campus, competitionId])
+  @@index([campus, teamId])
+  @@index([campus, athleteId])
+  @@index([campus, sport])
+}
+
+model AthleteStatLine {
+  id        String   @id @default(uuid())
+  athleteId String
+  campus    String   @default("cavehill")
+  sport     String?
+  season    String?
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([athleteId])
+  @@index([sport])
+  @@index([campus, athleteId])
+  @@index([campus, sport])
+  @@index([athleteId, sport])
+}
+
+model AthletePersonalBest {
+  id        String   @id @default(uuid())
+  athleteId String
+  campus    String   @default("cavehill")
+  sport     String?
+  eventName String?
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([athleteId])
+  @@index([sport])
+  @@index([campus, athleteId])
+  @@index([campus, sport])
+}
+
+model SupportRequest {
+  id        String   @id @default(uuid())
+  campus    String   @default("cavehill")
+  email     String?
+  category  String?
+  status    String   @default("open")
+  data      Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campus])
+  @@index([status])
+  @@index([campus, status])
+  @@index([campus, updatedAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  campus     String   @default("cavehill")
+  actorId    String?
+  actorEmail String?
+  action     String
+  entityType String?
+  entityId   String?
+  summary    String?
+  data       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([campus])
+  @@index([campus, action])
+  @@index([campus, entityType])
+  @@index([campus, entityId])
+  @@index([campus, createdAt])
+}
