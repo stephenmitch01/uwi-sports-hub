@@ -9,7 +9,8 @@
     user: null,
     coaches: [],
     teams: [],
-    filteredCoaches: []
+    filteredCoaches: [],
+    registrySearchApplied: false
   };
 
   const els = {
@@ -57,17 +58,26 @@
     filterRole: document.getElementById("filterRole"),
     filterSport: document.getElementById("filterSport"),
     filterStatus: document.getElementById("filterStatus"),
+    filterQuality: document.getElementById("filterQuality"),
+    coachSearchButton: document.getElementById("coachSearchButton"),
     registryMessage: document.getElementById("registryMessage"),
     coachTableBody: document.getElementById("coachTableBody"),
     emptyState: document.getElementById("emptyState"),
-    coachTableWrap: document.getElementById("coachTableWrap")
+    coachTableWrap: document.getElementById("coachTableWrap"),
+    coachAlerts: document.getElementById("coachAlerts"),
+    coachActivity: document.getElementById("coachActivity"),
+    coachQualityScore: document.getElementById("coachQualityScore"),
+    coachQualityBar: document.getElementById("coachQualityBar"),
+    coachQualityCopy: document.getElementById("coachQualityCopy")
   };
 
   document.addEventListener("DOMContentLoaded", init);
 
   async function init() {
     bindEvents();
+    bindInsightActions();
     populateSports();
+    ensureArchivedQualityOption(els.filterQuality);
     clearMessage(els.registryMessage);
     clearMessage(els.coachFormMessage);
     clearMessage(els.assignmentMessage);
@@ -114,11 +124,13 @@
     });
 
     els.focusCreateCoachBtn.addEventListener("click", function () {
+      els.createCoachSection.open = true;
       els.createCoachSection.scrollIntoView({ behavior: "smooth", block: "start" });
       els.firstName.focus();
     });
 
     els.focusAssignmentsBtn.addEventListener("click", function () {
+      els.assignmentSection.open = true;
       els.assignmentSection.scrollIntoView({ behavior: "smooth", block: "start" });
       els.assignmentCoachId.focus();
     });
@@ -127,16 +139,35 @@
     els.resetCoachFormBtn.addEventListener("click", resetCoachForm);
     els.assignmentForm.addEventListener("submit", handleCreateAssignment);
 
-    els.searchInput.addEventListener("input", renderAll);
-    els.filterRole.addEventListener("change", renderAll);
-    els.filterSport.addEventListener("change", renderAll);
-    els.filterStatus.addEventListener("change", renderAll);
+    [els.searchInput, els.filterRole, els.filterSport, els.filterStatus, els.filterQuality].forEach(function (node) {
+      if (!node) return;
+      node.addEventListener("input", handleFilterChange);
+      node.addEventListener("change", handleFilterChange);
+    });
+    if (els.coachSearchButton) els.coachSearchButton.addEventListener("click", applyRegistrySearch);
+    mountRecentSearches("coaches");
+  }
+
+  function handleFilterChange() {
+    const panel = document.getElementById("coachRegistryPanel");
+    if (hasActiveRegistryFilter() && panel) panel.open = true;
+    state.registrySearchApplied = false;
+  }
+
+  function applyRegistrySearch() {
+    const panel = document.getElementById("coachRegistryPanel");
+    if (panel) panel.open = true;
+    state.registrySearchApplied = true;
+    saveCurrentSearch("coaches");
+    mountRecentSearches("coaches");
+    renderAll();
   }
 
   async function loadTeams() {
-  const data = await APP.apiGet("/teams", true);
+  const data = await APP.apiGet("/teams?includeArchived=true", true);
 
   state.teams =
+    Array.isArray(data) ? data :
     Array.isArray(data?.teams) ? data.teams :
     Array.isArray(data?.data?.teams) ? data.data.teams :
     Array.isArray(data?.data) ? data.data :
@@ -146,9 +177,10 @@
 }
 
   async function loadCoaches() {
-  const data = await APP.apiGet("/coaches", true);
+  const data = await APP.apiGet("/coaches?includeArchived=true", true);
 
   state.coaches =
+    Array.isArray(data) ? data :
     Array.isArray(data?.coaches) ? data.coaches :
     Array.isArray(data?.data?.coaches) ? data.data.coaches :
     Array.isArray(data?.data) ? data.data :
@@ -221,9 +253,23 @@
     setButtonLoading(els.saveCoachBtn, true, "Saving...");
 
     try {
+      const duplicate = APP.findSimilarRecord(state.coaches, {
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        primarySport: payload.primarySport,
+        sport: payload.primarySport
+      }, { type: "coach" });
+      if (duplicate) {
+        const action = APP.promptDuplicateAction(duplicate, "coach");
+        if (action === "cancel") return;
+        if (action === "use-existing" || action === "edit-existing") {
+          window.location.href = `coach-view.html?coachId=${encodeURIComponent(duplicate.id)}`;
+          return;
+        }
+      }
       const data = await APP.apiPost("/coaches", payload);
 
-      const createdCoach = data?.coach || null;
+      const createdCoach = data?.coach || data?.data?.coach || data?.data || data || null;
 
       if (els.assignmentMode.value === "single" && createdCoach?.id) {
         await APP.apiPost(
@@ -307,7 +353,41 @@
   function renderAll() {
     state.filteredCoaches = getFilteredCoaches();
     renderStats();
+    renderOperationalSummary();
     renderCoachTable();
+  }
+
+  function renderOperationalSummary() {
+    const coaches = state.coaches.filter((coach) => !APP.isArchivedRecord(coach));
+    const unassigned = coaches.filter((coach) => !getAssignments(coach).length);
+    const missingContact = coaches.filter((coach) => !coach.email && !coach.phone);
+    const missingSport = coaches.filter((coach) => !coach.primarySport);
+    const quality = coaches.length
+      ? Math.round(coaches.reduce((sum, coach) => sum + getCoachQuality(coach), 0) / coaches.length)
+      : 0;
+
+    renderInsightList(els.coachAlerts, [
+      { label: "Unassigned staff", value: unassigned.length, target: "coachRegistryPanel", filter: "incomplete" },
+      { label: "Missing contact info", value: missingContact.length, target: "coachRegistryPanel", filter: "incomplete" },
+      { label: "Missing primary sport", value: missingSport.length, target: "coachRegistryPanel", filter: "incomplete" }
+    ], "No coach alerts right now.");
+
+    renderActivityList(els.coachActivity, getRecentRecords(coaches, "coach"));
+    renderQuality(els.coachQualityScore, els.coachQualityBar, els.coachQualityCopy, quality, `${coaches.filter((coach) => getCoachQuality(coach) < 100).length} coach record${coaches.length === 1 ? "" : "s"} below 100% completion.`);
+  }
+
+  function getCoachQuality(coach) {
+    const checks = [
+      coach.firstName,
+      coach.lastName,
+      coach.primaryRole,
+      coach.primarySport,
+      coach.email || coach.phone,
+      coach.status,
+      getAssignments(coach).length,
+      coach.notes
+    ];
+    return Math.round((checks.filter(Boolean).length / checks.length) * 100);
   }
 
   function getFilteredCoaches() {
@@ -315,8 +395,10 @@
     const roleFilter = els.filterRole.value;
     const sportFilter = els.filterSport.value;
     const statusFilter = els.filterStatus.value;
+    const qualityFilter = els.filterQuality?.value || "";
 
     return state.coaches.filter(function (coach) {
+      const archived = APP.isArchivedRecord(coach);
       const fullName = formatCoachName(coach).toLowerCase();
       const email = String(coach.email || "").toLowerCase();
       const phone = String(coach.phone || "").toLowerCase();
@@ -338,13 +420,14 @@
       const matchesRole = !roleFilter || coach.primaryRole === roleFilter;
       const matchesSport = !sportFilter || coach.primarySport === sportFilter;
       const matchesStatus = !statusFilter || coach.status === statusFilter;
+      const matchesQuality = qualityFilter === "archived" ? archived : qualityFilter !== "incomplete" || getCoachQuality(coach) < 100;
 
-      return matchesSearch && matchesRole && matchesSport && matchesStatus;
+      return (qualityFilter === "archived" || !archived) && matchesSearch && matchesRole && matchesSport && matchesStatus && matchesQuality;
     });
   }
 
   function renderStats() {
-    const coaches = state.coaches;
+    const coaches = state.coaches.filter((coach) => !APP.isArchivedRecord(coach));
     const total = coaches.length;
     const headCoaches = coaches.filter(c => c.primaryRole === "head_coach").length;
     const supportStaff = coaches.filter(c => c.primaryRole !== "head_coach" && c.primaryRole !== "assistant_coach").length;
@@ -376,6 +459,22 @@
   function renderCoachTable() {
     els.coachTableBody.innerHTML = "";
 
+    if (!state.registrySearchApplied) {
+      els.coachTableWrap.classList.remove("hidden");
+      els.emptyState.classList.add("hidden");
+      els.coachTableBody.innerHTML = `
+        <tr>
+          <td colspan="9">
+            <div class="empty-state">
+              <h3>Search coach records.</h3>
+              <p>Click Search to show all coaches, or choose filters for a focused list.</p>
+            </div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
     if (!state.filteredCoaches.length) {
       els.coachTableWrap.classList.add("hidden");
       els.emptyState.classList.remove("hidden");
@@ -400,9 +499,10 @@
         <td>${escapeHtml(coach.phone || "—")}</td>
         <td>${escapeHtml(coach.email || "—")}</td>
         <td>${escapeHtml(formatStatus(coach.status))}</td>
+        <td>${completenessMarkup(getCoachQuality(coach))}</td>
         <td>
           <div class="action-row">
-            <button class="link-btn" type="button" data-action="view" data-id="${escapeHtml(String(coach.id))}">View</button>
+            <button class="btn btn-campus" type="button" data-action="view" data-id="${escapeHtml(String(coach.id))}">View</button>
           </div>
         </td>
       `;
@@ -420,20 +520,37 @@
     });
   }
 
+  function hasActiveRegistryFilter() {
+    return Boolean(
+      String(els.searchInput?.value || "").trim() ||
+      String(els.filterRole?.value || "").trim() ||
+      String(els.filterSport?.value || "").trim() ||
+      String(els.filterStatus?.value || "").trim() ||
+      String(els.filterQuality?.value || "").trim()
+    );
+  }
+
   function getAssignments(coach) {
   if (!coach) return [];
 
-  if (Array.isArray(coach.assignments)) return coach.assignments;
-  if (Array.isArray(coach.teamAssignments)) return coach.teamAssignments;
-  if (Array.isArray(coach.staffAssignments)) return coach.staffAssignments;
+  const assignments = Array.isArray(coach.assignments) ? coach.assignments
+    : Array.isArray(coach.teamAssignments) ? coach.teamAssignments
+      : Array.isArray(coach.staffAssignments) ? coach.staffAssignments
+        : [];
 
-  return [];
+  const seen = new Set();
+  return assignments.filter((assignment) => {
+    const key = String(assignment.teamId || assignment.team?.id || "");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
   function getAssignmentLabels(coach) {
     return getAssignments(coach).map(function (assignment) {
       const team = state.teams.find(t => String(t.id) === String(assignment.teamId));
-      const teamName = team?.name || "Unknown Team";
+      const teamName = team?.name || team?.teamName || assignment.teamName || assignment.team?.name || "Unknown Team";
       const role = formatRole(assignment.role, assignment.otherRoleTitle);
       return `${teamName} (${role})`;
     });
@@ -532,5 +649,109 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  function renderInsightList(node, rows, emptyText) {
+    if (!node) return;
+    const activeRows = rows.filter((row) => Number(row.value) > 0);
+    if (!activeRows.length) {
+      node.innerHTML = `<div class="insight-item"><span>${escapeHtml(emptyText)}</span><span class="insight-meta">Clear</span></div>`;
+      return;
+    }
+    node.innerHTML = activeRows.map((row) => `
+      <button class="insight-item insight-action" type="button" data-target="${escapeHtml(row.target || "")}" data-filter="${escapeHtml(row.filter || "")}">
+        <span>${escapeHtml(row.label)}</span>
+        <strong>${escapeHtml(String(row.value))}</strong>
+      </button>
+    `).join("");
+  }
+
+  function bindInsightActions() {
+    document.addEventListener("click", function (event) {
+      const action = event.target.closest(".insight-action[data-target]");
+      if (!action) return;
+      const target = document.getElementById(action.getAttribute("data-target"));
+      if (!target) return;
+      if (action.getAttribute("data-filter") === "incomplete" && els.filterQuality) {
+        els.filterQuality.value = "incomplete";
+        state.registrySearchApplied = true;
+        renderAll();
+      }
+      if (target.tagName.toLowerCase() === "details") target.open = true;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function renderActivityList(node, records) {
+    if (!node) return;
+    if (!records.length) {
+      node.innerHTML = `<div class="insight-item"><span>No recent records yet.</span><span class="insight-meta">--</span></div>`;
+      return;
+    }
+    node.innerHTML = records.map((record) => `
+      <div class="insight-item">
+        <span>${escapeHtml(record.label)}</span>
+        <span class="insight-meta">${escapeHtml(record.type)}</span>
+      </div>
+    `).join("");
+  }
+
+  function getRecentRecords(records, type) {
+    return records
+      .slice()
+      .sort((a, b) => getRecordTime(b) - getRecordTime(a))
+      .slice(0, 3)
+      .map((record) => ({ label: formatCoachName(record), type }));
+  }
+
+  function getRecordTime(record) {
+    return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || "") || 0;
+  }
+
+  function renderQuality(scoreNode, barNode, copyNode, score, copy) {
+    if (scoreNode) scoreNode.textContent = `${score}%`;
+    if (barNode) barNode.style.width = `${Math.max(0, Math.min(100, score))}%`;
+    if (copyNode) copyNode.textContent = copy;
+  }
+
+  function completenessMarkup(score) {
+    const normalized = Math.max(0, Math.min(100, Number(score) || 0));
+    return `<div class="completeness-cell"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
+  }
+
+  function ensureArchivedQualityOption(select) {
+    if (!select || select.querySelector("option[value='archived']")) return;
+    select.insertAdjacentHTML("beforeend", `<option value="archived">Archived records</option>`);
+  }
+
+  function saveCurrentSearch(scope) {
+    if (!APP.saveRecentSearch) return;
+    const values = {
+      q: els.searchInput?.value || "",
+      role: els.filterRole?.value || "",
+      sport: els.filterSport?.value || "",
+      status: els.filterStatus?.value || "",
+      quality: els.filterQuality?.value || ""
+    };
+    const label = [values.q, values.role, values.sport, values.status, values.quality].filter(Boolean).join(" / ") || "All coaches";
+    APP.saveRecentSearch(scope, label, values);
+  }
+
+  function mountRecentSearches(scope) {
+    if (!APP.renderRecentSearches || !els.coachSearchButton?.parentElement) return;
+    document.querySelector(`[data-recent-searches='${scope}']`)?.remove();
+    els.coachSearchButton.parentElement.insertAdjacentHTML("afterend", APP.renderRecentSearches(scope));
+    document.querySelectorAll("[data-recent-searches='coaches'] [data-recent-search-index]").forEach((button) => {
+      button.addEventListener("click", function () {
+        const item = APP.readRecentSearches(scope)[Number(this.dataset.recentSearchIndex)];
+        if (!item) return;
+        if (els.searchInput) els.searchInput.value = item.values.q || "";
+        if (els.filterRole) els.filterRole.value = item.values.role || "";
+        if (els.filterSport) els.filterSport.value = item.values.sport || "";
+        if (els.filterStatus) els.filterStatus.value = item.values.status || "";
+        if (els.filterQuality) els.filterQuality.value = item.values.quality || "";
+        applyRegistrySearch();
+      });
+    });
   }
 })();

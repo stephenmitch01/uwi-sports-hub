@@ -319,7 +319,7 @@
     const redirectOn401 = opts.redirectOn401 !== false;
 
     if (["POST", "PATCH", "PUT", "DELETE"].includes(method) && !isPublicMutationPath(pathOrUrl) && !canManageRecords(currentSession)) {
-      const error = new Error("Your current role does not permit this action. The backend must also enforce this permission.");
+      const error = new Error("Your current role does not permit this action.");
       error.status = 403;
       if (tolerateFailure) return null;
       throw error;
@@ -348,6 +348,10 @@
       body
     });
 
+    if (response.status === 401 && (tolerateFailure || !redirectOn401)) {
+      return null;
+    }
+
     if (response.status === 401 && redirectOn401) {
       window.location.href = "index.html";
       return null;
@@ -357,7 +361,7 @@
 
     if (!response.ok) {
       if (tolerateFailure) return null;
-      const error = new Error(data?.message || `Request failed with status ${response.status}.`);
+      const error = new Error(data?.message || data?.error || `Request failed with status ${response.status}.`);
       error.status = response.status;
       error.data = data;
       throw error;
@@ -410,6 +414,7 @@
       ["teams", "Teams", "teams.html"],
       ["competitions", "Competitions", "competitions.html"],
       ["reports", "Reports", "reports.html"],
+      ["audit", "Audit Logs", "audit-logs.html"],
       ["support", "Support", "support.html"]
     ];
     return {
@@ -458,6 +463,7 @@
       teams: "teams.html",
       competitions: "competitions.html",
       reports: "reports.html",
+      audit: "audit-logs.html",
       support: "support.html"
     };
 
@@ -482,6 +488,15 @@
       const campusPill = shellNav.querySelector(".signed-campus-pill");
       if (campusPill) {
         campusPill.textContent = campusMeta.name;
+      }
+
+      const signedLinks = shellNav.querySelector(".signed-nav-links");
+      if (signedLinks && !signedLinks.querySelector('a[href="audit-logs.html"]')) {
+        const auditLink = document.createElement("a");
+        auditLink.href = "audit-logs.html";
+        auditLink.textContent = "Audit Logs";
+        const supportLink = signedLinks.querySelector('a[href="support.html"]');
+        signedLinks.insertBefore(auditLink, supportLink || signedLinks.querySelector(".sign-out-link"));
       }
 
       const navLinks = Array.from(shellNav.querySelectorAll(".signed-nav-links a[href]"));
@@ -777,6 +792,206 @@
     return value === null ? "—" : String(value);
   }
 
+  function normalizeComparableName(value) {
+    return String(value || "")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  }
+
+  function levenshteinDistance(a, b) {
+    const left = normalizeComparableName(a);
+    const right = normalizeComparableName(b);
+    if (!left) return right.length;
+    if (!right) return left.length;
+    const row = Array.from({ length: right.length + 1 }, (_value, index) => index);
+    for (let i = 1; i <= left.length; i += 1) {
+      let previous = row[0];
+      row[0] = i;
+      for (let j = 1; j <= right.length; j += 1) {
+        const current = row[j];
+        row[j] = left[i - 1] === right[j - 1] ? previous : Math.min(previous + 1, row[j] + 1, row[j - 1] + 1);
+        previous = current;
+      }
+    }
+    return row[right.length];
+  }
+
+  function nameSimilarity(a, b) {
+    const left = normalizeComparableName(a);
+    const right = normalizeComparableName(b);
+    if (!left && !right) return 1;
+    if (!left || !right) return 0;
+    return 1 - levenshteinDistance(left, right) / Math.max(left.length, right.length, 1);
+  }
+
+  function recordDisplayName(record) {
+    return record?.fullName || record?.name || record?.title || [record?.firstName, record?.lastName].filter(Boolean).join(" ") || "Unnamed record";
+  }
+
+  function isArchivedRecord(record) {
+    const data = record?.data && typeof record.data === "object" ? record.data : {};
+    return String(record?.status || data.status || "").trim().toLowerCase() === "archived" || data.archived === true || Boolean(data.archivedAt);
+  }
+
+  function findSimilarRecord(records, candidate, options = {}) {
+    const threshold = options.threshold ?? 0.82;
+    const candidateName = recordDisplayName(candidate);
+    const candidateSport = normalizeSportSlug(candidate?.sportSlug || candidate?.sport || candidate?.primarySport || candidate?.profile?.sportSlug);
+    const candidateDate = candidate?.startDate || candidate?.date || "";
+    let best = null;
+    (Array.isArray(records) ? records : []).forEach((record) => {
+      if (isArchivedRecord(record)) return;
+      const score = nameSimilarity(candidateName, recordDisplayName(record));
+      if (score < threshold) return;
+      const recordSport = normalizeSportSlug(record?.sportSlug || record?.sport || record?.primarySport || record?.profile?.sportSlug);
+      if (candidateSport && recordSport && candidateSport !== recordSport) return;
+      if (options.type === "competition" && candidateDate) {
+        const recordDate = record?.startDate || record?.date || "";
+        if (recordDate && Math.abs(new Date(candidateDate) - new Date(recordDate)) > 1000 * 60 * 60 * 24 * 7) return;
+      }
+      if (!best || score > best.score) best = { record, score };
+    });
+    return best?.record || null;
+  }
+
+  function promptDuplicateAction(record, type = "record") {
+    const competition = type === "competition";
+    const title = recordDisplayName(record);
+    const message = competition
+      ? `A similar competition already exists:\n\n${title}\n\nChoose an option:\n1. View\n2. Create Anyway\n3. Edit Existing\n4. Cancel`
+      : `A similar ${type} record already exists:\n\n${title}\n\nChoose an option:\n1. Use Existing\n2. Create Anyway\n3. Edit Existing\n4. Cancel`;
+    const choice = window.prompt(message, "1");
+    if (choice === null) return "cancel";
+    if (choice.trim() === "2") return "create-anyway";
+    if (choice.trim() === "3") return "edit-existing";
+    if (choice.trim() === "4") return "cancel";
+    return competition ? "view" : "use-existing";
+  }
+
+  function confirmReportImpact(hasLinkedData) {
+    return !hasLinkedData || window.confirm("This will update standings and reports connected to this record. Continue?");
+  }
+
+  function confirmArchive(recordType, record) {
+    const linked = Array.isArray(record?.linkedDataSummary) && record.linkedDataSummary.length
+      ? `\n\nLinked data will be preserved:\n${record.linkedDataSummary.map((item) => `- ${item.count} ${item.label}`).join("\n")}`
+      : "";
+    return window.confirm(`Archive this ${recordType}?\n\n${recordDisplayName(record)}${linked}\n\nArchived records are hidden unless you search archived records.`);
+  }
+
+  function trackUnsavedChanges(form) {
+    if (!form) return { markClean() {}, markDirty() {}, isDirty: () => false };
+    let dirty = false;
+    let submitting = false;
+    const markDirty = () => { dirty = true; };
+    const markClean = () => { dirty = false; };
+    form.addEventListener("input", markDirty);
+    form.addEventListener("change", markDirty);
+    form.addEventListener("submit", () => {
+      submitting = true;
+      dirty = false;
+      window.setTimeout(() => { submitting = false; }, 1200);
+    });
+    window.addEventListener("beforeunload", (event) => {
+      if (!dirty || submitting) return;
+      event.preventDefault();
+      event.returnValue = "";
+    });
+    document.addEventListener("click", (event) => {
+      const link = event.target.closest?.("a[href]");
+      if (!link || !dirty || submitting) return;
+      const href = link.getAttribute("href") || "";
+      if (!href || href.startsWith("#") || link.target === "_blank") return;
+      if (!window.confirm("You have unsaved changes. Leave without saving?")) event.preventDefault();
+    });
+    return { markClean, markDirty, isDirty: () => dirty };
+  }
+
+  function saveRecentSearch(scope, label, values) {
+    const key = `uwi_recent_searches_${String(scope || "general")}`;
+    const entry = {
+      label: String(label || "Recent search").trim(),
+      values: values || {},
+      at: new Date().toISOString()
+    };
+    if (!entry.label) return;
+    const existing = readRecentSearches(scope).filter((item) => item.label !== entry.label);
+    localStorage.setItem(key, JSON.stringify([entry].concat(existing).slice(0, 5)));
+  }
+
+  function readRecentSearches(scope) {
+    try {
+      const key = `uwi_recent_searches_${String(scope || "general")}`;
+      const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function renderRecentSearches(scope, onApply) {
+    const items = readRecentSearches(scope);
+    if (!items.length) return "";
+    return `
+      <div class="recent-searches" data-recent-searches="${escapeHtml(scope)}">
+        <span>Recent searches</span>
+        ${items.map((item, index) => `<button type="button" class="recent-search-chip" data-recent-search-index="${index}">${escapeHtml(item.label)}</button>`).join("")}
+      </div>
+    `;
+  }
+
+  async function quickAddAthleteForTeam(options = {}) {
+    const teamId = options.teamId || "";
+    const sportSlug = normalizeSportSlug(options.sportSlug || options.sport || "");
+    const teamName = options.teamName || "this team";
+    if (!teamId) {
+      window.alert("Select the UWI team first, then quick-add the athlete.");
+      return null;
+    }
+    const firstName = String(window.prompt("Quick Add New Athlete\n\nFirst name:", "") || "").trim();
+    if (!firstName) return null;
+    const lastName = String(window.prompt("Quick Add New Athlete\n\nLast name:", "") || "").trim();
+    if (!lastName) return null;
+    const sportName = getSportName(sportSlug) || sportSlug || "the team sport";
+    if (!window.confirm(`${firstName} ${lastName} will be added to ${teamName}, assigned to ${sportName}, and available in this scorecard. You must complete their full profile later.`)) return null;
+    return apiPost("/athletes", {
+      firstName,
+      lastName,
+      fullName: `${firstName} ${lastName}`,
+      primarySport: sportSlug,
+      sportSlug,
+      teamId,
+      profile: { sportSlug, profileStatus: "incomplete" },
+      activeRosterAssignment: { teamId, status: "ACTIVE" }
+    });
+  }
+
+  function confirmScorecardValues(form, sportSlug) {
+    if (!form) return true;
+    const values = Array.from(form.querySelectorAll("input[type='number']")).map((input) => {
+      const max = input.getAttribute("max");
+      return {
+        input,
+        label: input.getAttribute("aria-label") || input.id || input.name || "value",
+        value: input.value === "" ? null : Number(input.value),
+        max: max === null || max === "" ? null : Number(max)
+      };
+    }).filter((item) => item.value !== null && Number.isFinite(item.value));
+    const impossible = values.filter((item) => item.value < 0 || (Number.isFinite(item.max) && item.value > item.max));
+    if (impossible.length) {
+      window.alert(`Please fix these values before saving:\n${impossible.map((item) => `${item.label}: ${item.value}`).join("\n")}`);
+      return false;
+    }
+    const thresholds = { cricket: 400, football: 50, basketball: 100, volleyball: 80, hockey: 60, swimming: 30, "track-and-field": 100, netball: 120, badminton: 40, "table-tennis": 30, "lawn-tennis": 80, taekwondo: 10 };
+    const limit = thresholds[normalizeSportSlug(sportSlug)] || 100;
+    const unusual = values.filter((item) => item.value > limit);
+    if (!unusual.length) return true;
+    return window.confirm(`This value seems unusually high:\n${unusual.slice(0, 8).map((item) => `${item.label}: ${item.value}`).join("\n")}\n\nSave anyway?`);
+  }
+
   window.UWISportsHub = {
     API_BASE,
     CAMPUS_META,
@@ -815,6 +1030,20 @@
     computeTrackAndFieldSummary,
     computeTrackDerivedMetrics,
     getBestDisplayValue,
+    normalizeComparableName,
+    nameSimilarity,
+    recordDisplayName,
+    findSimilarRecord,
+    promptDuplicateAction,
+    isArchivedRecord,
+    confirmReportImpact,
+    confirmArchive,
+    trackUnsavedChanges,
+    saveRecentSearch,
+    readRecentSearches,
+    renderRecentSearches,
+    quickAddAthleteForTeam,
+    confirmScorecardValues,
     getSportName,
     showMessage,
     showSuccess,

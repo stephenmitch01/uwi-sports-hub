@@ -60,40 +60,63 @@
           This page is the competition registry for UWI Sports Hub. It supports one-sport competitions,
           category structure, rounds or heats, participants, schedules, results, and routeable detail pages.
         </p>
-        <div class="pill-row">
-          <span class="status-pill ok">Internal page</span>
-          <span class="status-pill subtle">Sport-aware formats</span>
-          <span class="status-pill subtle">Results-linked</span>
-        </div>
         <div class="quick-actions">
           <a class="btn btn-campus" href="dashboard.html">Dashboard</a>
           <a class="btn btn-soft" href="competition-view.html">Open Detail View</a>
         </div>
       </div>
-      <div class="head-right">
-        <div class="mini-card">
-          <div class="mini-label">Formats</div>
-          <div class="mini-value">Sport-aware</div>
-          <div class="mini-sub">Competition structure depends on the sport</div>
-        </div>
-        <div class="mini-card">
-          <div class="mini-label">Entry</div>
-          <div class="mini-value">Retrospective</div>
-          <div class="mini-sub">Results can be entered after the event or match</div>
-        </div>
-        <div class="mini-card">
-          <div class="mini-label">Routing</div>
-          <div class="mini-value">Detail view</div>
-          <div class="mini-sub">Each competition opens a full detail page</div>
-        </div>
-      </div>
+<div class="head-right">
+<div class="mini-card">
+<div class="mini-label">Competitions</div>
+<div class="mini-value" id="totalCompetitionsStat">0</div>
+<div class="mini-sub">Campus competition records</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Active</div>
+<div class="mini-value" id="activeCompetitionsStat">0</div>
+<div class="mini-sub">Currently active competitions</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Sports Covered</div>
+<div class="mini-value" id="competitionSportsStat">0</div>
+<div class="mini-sub">Sports represented by competitions</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Completed</div>
+<div class="mini-value" id="completedCompetitionsStat">0</div>
+<div class="mini-sub">Finished competitions</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Missing Results</div>
+<div class="mini-value" id="competitionsMissingResultsStat">0</div>
+<div class="mini-sub">Need result data</div>
+</div>
+</div>
+    </section>
+    <section class="insight-grid" aria-label="Competition operational insights">
+      <article class="insight-card alert-card">
+        <div class="insight-label">Operational Alerts</div>
+        <div id="competitionAlerts" class="insight-list"></div>
+      </article>
+      <article class="insight-card">
+        <div class="insight-label">Recent Activity</div>
+        <div id="competitionActivity" class="insight-list"></div>
+      </article>
+      <article class="insight-card">
+        <div class="insight-label">Setup Quality</div>
+        <div class="quality-score" id="competitionQualityScore">0%</div>
+        <div class="quality-track"><span id="competitionQualityBar"></span></div>
+        <p id="competitionQualityCopy" class="fine"></p>
+      </article>
     </section>
 
-    <section class="card">
+    <details class="card collapsible-section" id="competitionsListPanel" open>
+      <summary>Competitions List</summary>
+      <section>
       <div class="section-title">
         <div>
-          <h2>Filters</h2>
-          <p>Search competitions by title, sport, season, campus scope, or format.</p>
+          <h2>Competitions List</h2>
+          <p>Search competitions by title, sport, season, or format.</p>
         </div>
       </div>
       <div class="filter-grid">
@@ -122,15 +145,6 @@
           </select>
         </div>
         <div>
-          <label for="competitionCampus">Campus Scope</label>
-          <select class="select" id="competitionCampus" aria-describedby="competitionCampusHelp">
-            <option value="">Campus-scoped</option>
-          </select>
-          <p class="fine" id="competitionCampusHelp">
-            Campus scope is set automatically from the signed-in session.
-          </p>
-        </div>
-        <div>
           <label for="competitionFormat">Format</label>
           <select class="select" id="competitionFormat">
             <option value="">All formats</option>
@@ -142,17 +156,18 @@
             <option>Custom</option>
           </select>
         </div>
-      </div>
-    </section>
-
-    <section class="grid grid-2">
-      <section class="card">
-        <div class="section-title">
-          <div>
-            <h2>Competitions list</h2>
-            <p>Competition records will appear here once added.</p>
-          </div>
+        <div>
+          <label for="competitionQuality">Record Quality</label>
+          <select class="select" id="competitionQuality">
+            <option value="">All records</option>
+            <option value="incomplete">Incomplete records</option>
+          </select>
         </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="btn btn-campus" id="competitionSearchButton" type="button" style="width:100%;">Search</button>
+        </div>
+      </div>
         <div class="data-table-wrap">
           <table class="table">
             <thead>
@@ -162,6 +177,7 @@
                 <th>Campus</th>
                 <th>Stage Type</th>
                 <th>Season</th>
+                <th>Setup Completeness</th>
                 <th>View</th>
               </tr>
             </thead>
@@ -169,9 +185,12 @@
           </table>
         </div>
       </section>
+    </details>
 
-      <section class="card" id="competitionsEmpty"></section>
-    </section>
+    <details class="card collapsible-section" id="competitionCreatePanel">
+      <summary>Create Competition</summary>
+      <section id="competitionsEmpty"></section>
+    </details>
   </main>
 
   <footer class="footer">
@@ -185,6 +204,7 @@
     </div>
   </footer>
 
+  <script src="config.js"></script>
   <script src="uwi-app.js"></script>
   <script src="competitions.js"></script>
 </body>

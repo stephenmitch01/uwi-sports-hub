@@ -59,10 +59,8 @@
           Create and update internal athlete records for <span data-campus-name></span>.
           This page covers identity, body metrics, dominant hand/leg, role, events, headshots, and team assignment.
         </p>
-<div class="pill-row">
-<span class="status-pill ok">Campus-scoped</span>
-<span class="status-pill subtle">Detailed records</span>
-<span class="status-pill subtle">Athlete view linked</span>
+<div class="quick-actions">
+<a class="btn btn-campus" href="#athleteWorkflows">Add Athlete</a>
 </div>
 <p class="fine">
           Athlete records here are internal only and designed for real operations, not public browsing.
@@ -70,27 +68,55 @@
 </div>
 <div class="head-right">
 <div class="mini-card">
-<div class="mini-label">Campus Scope</div>
-<div class="mini-value" data-campus-name></div>
-<div class="mini-sub">Only athletes for this campus are managed here</div>
+<div class="mini-label">Total Athletes</div>
+<div class="mini-value" id="totalAthletesStat">0</div>
+<div class="mini-sub">Athlete records</div>
 </div>
 <div class="mini-card">
-<div class="mini-label">Profile Depth</div>
-<div class="mini-value">Detailed</div>
-<div class="mini-sub">Identity, role, body data, sport profile, headshot, and roster fields</div>
+<div class="mini-label">Active Athletes</div>
+<div class="mini-value" id="activeAthletesStat">0</div>
+<div class="mini-sub">Currently active</div>
 </div>
 <div class="mini-card">
-<div class="mini-label">Routing</div>
-<div class="mini-value">Athlete View</div>
-<div class="mini-sub">Each athlete record opens into a detailed athlete page</div>
+<div class="mini-label">Assigned to Teams</div>
+<div class="mini-value" id="assignedAthletesStat">0</div>
+<div class="mini-sub">Linked to squads</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Sports Represented</div>
+<div class="mini-value" id="athleteSportsStat">0</div>
+<div class="mini-sub">Across athlete profiles</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Incomplete Profiles</div>
+<div class="mini-value" id="incompleteAthletesStat">0</div>
+<div class="mini-sub">Need follow-up</div>
 </div>
 </div>
 </section>
 <div aria-live="polite" class="message" id="athletePageMessage"></div>
-<section class="card">
+<section class="insight-grid" aria-label="Athlete operational insights">
+<article class="insight-card alert-card">
+<div class="insight-label">Operational Alerts</div>
+<div id="athleteAlerts" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Recent Activity</div>
+<div id="athleteActivity" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Record Quality</div>
+<div class="quality-score" id="athleteQualityScore">0%</div>
+<div class="quality-track"><span id="athleteQualityBar"></span></div>
+<p id="athleteQualityCopy" class="fine"></p>
+</article>
+</section>
+<details class="card collapsible-section" id="athleteRegistryPanel" open>
+<summary>Athlete Registry</summary>
+<section>
 <div class="section-title">
 <div>
-<h2>Filters</h2>
+<h2>Athlete Registry</h2>
 <p>Search and filter athlete records for <span data-campus-name></span>.</p>
 </div>
 </div>
@@ -118,14 +144,69 @@
 </select>
 </div>
 <div>
+<label for="athleteGenderFilter">Sex</label>
+<select class="select" id="athleteGenderFilter">
+<option value="">All</option>
+<option value="male">Male</option>
+<option value="female">Female</option>
+</select>
+</div>
+<div>
 <label for="athleteSportFilter">Primary Sport</label>
 <select class="select" id="athleteSportFilter">
 <option value="">All sports</option>
 </select>
 </div>
+<div>
+<label for="athleteQualityFilter">Record Quality</label>
+<select class="select" id="athleteQualityFilter">
+<option value="">All records</option>
+<option value="incomplete">Incomplete records</option>
+</select>
+</div>
+<div>
+<label>&nbsp;</label>
+<button class="btn btn-campus" id="athleteSearchButton" type="button" style="width:100%;">Search</button>
+</div>
+</div>
+<div class="bulk-action-bar" id="athleteBulkActionBar" hidden>
+<div>
+<strong id="athleteBulkCount">0 selected</strong>
+<span class="fine">Apply one action to the selected athlete records.</span>
+</div>
+<div class="bulk-action-controls">
+<select class="select" id="bulkAssignTeamSelect">
+<option value="">Assign selected to team</option>
+</select>
+<button class="btn btn-campus" id="bulkAssignTeamButton" type="button">Assign</button>
+<button class="btn btn-soft" id="bulkClearSelectionButton" type="button">Clear</button>
+</div>
+</div>
+<div class="data-table-wrap">
+<table class="table">
+<thead>
+<tr>
+<th><input id="athleteSelectAll" type="checkbox" aria-label="Select all visible athletes"/></th>
+<th>Name</th>
+<th>Sex</th>
+<th>Sport</th>
+<th>Team</th>
+<th>Email</th>
+<th>Athlete Type</th>
+<th>Status</th>
+<th>Profile Completeness</th>
+<th>Headshot</th>
+<th>Open</th>
+</tr>
+</thead>
+<tbody id="athletesTableBody"></tbody>
+</table>
 </div>
 </section>
-<section class="grid grid-2">
+</details>
+<details class="card collapsible-section" id="athleteWorkflows">
+<summary>Add Athlete</summary>
+<section>
 <section class="card">
 <div class="section-title">
 <div>
@@ -153,6 +234,18 @@
 </select>
 </div>
 <div>
+<label for="createAthleteDateOfBirth">Date of Birth</label>
+<input class="input" id="createAthleteDateOfBirth" type="date"/>
+</div>
+<div>
+<label for="createAthleteGender">Sex</label>
+<select class="select" id="createAthleteGender">
+<option value="">Not recorded</option>
+<option value="male">Male</option>
+<option value="female">Female</option>
+</select>
+</div>
+<div>
 <label for="createAthleteEmail">Email</label>
 <input class="input" id="createAthleteEmail" placeholder="Optional email" type="email"/>
 </div>
@@ -169,8 +262,20 @@
 <input class="input" id="createAthleteYear" placeholder="Optional" type="text"/>
 </div>
 <div>
-<label for="createAthleteFaculty">Faculty / Program</label>
-<input class="input" id="createAthleteFaculty" placeholder="Optional" type="text"/>
+<label for="createAthleteFaculty">Faculty</label>
+<input class="input" id="createAthleteFaculty" placeholder="Optional faculty" type="text"/>
+</div>
+<div>
+<label for="createAthleteProgram">Program</label>
+<input class="input" id="createAthleteProgram" placeholder="Optional program" type="text"/>
+</div>
+<div>
+<label for="createAthleteNationality">Nationality</label>
+<input class="input" id="createAthleteNationality" placeholder="Optional nationality" type="text"/>
+</div>
+<div>
+<label for="createAthleteHometown">Hometown</label>
+<input class="input" id="createAthleteHometown" placeholder="Optional hometown" type="text"/>
 </div>
 <div>
 <label for="createAthleteStatus">Status</label>
@@ -241,153 +346,8 @@
 </div>
 </form>
 </section>
-<section class="card">
-<div class="section-title">
-<div>
-<h2>Edit Athlete</h2>
-<p>Update an existing athlete record.</p>
-</div>
-</div>
-<form id="athleteEditForm" novalidate="">
-<div class="filter-grid">
-<div>
-<label for="editAthleteSelect">Athlete</label>
-<select class="select" id="editAthleteSelect">
-<option value="">Select athlete</option>
-</select>
-</div>
-<div>
-<label for="editAthleteFirstName">First Name</label>
-<input class="input" id="editAthleteFirstName" placeholder="First name" type="text"/>
-</div>
-<div>
-<label for="editAthleteLastName">Last Name</label>
-<input class="input" id="editAthleteLastName" placeholder="Last name" type="text"/>
-</div>
-<div>
-<label for="editAthleteType">Athlete Type</label>
-<select class="select" id="editAthleteType">
-<option value="student-athlete">Student-Athlete</option>
-<option value="non-student representative">Non-Student Representative</option>
-<option value="alumni representative">Alumni Representative</option>
-<option value="other approved representative">Other Approved Representative</option>
-</select>
-</div>
-<div>
-<label for="editAthleteEmail">Email</label>
-<input class="input" id="editAthleteEmail" placeholder="Optional email" type="email"/>
-</div>
-<div>
-<label for="editAthletePhone">Phone</label>
-<input class="input" id="editAthletePhone" placeholder="Optional phone" type="text"/>
-</div>
-<div>
-<label for="editAthleteStudentId">Student ID</label>
-<input class="input" id="editAthleteStudentId" placeholder="Optional student ID" type="text"/>
-</div>
-<div>
-<label for="editAthleteYear">Year of Study</label>
-<input class="input" id="editAthleteYear" placeholder="Optional" type="text"/>
-</div>
-<div>
-<label for="editAthleteFaculty">Faculty / Program</label>
-<input class="input" id="editAthleteFaculty" placeholder="Optional" type="text"/>
-</div>
-<div>
-<label for="editAthleteStatus">Status</label>
-<select class="select" id="editAthleteStatus">
-<option value="active">Active</option>
-<option value="inactive">Inactive</option>
-</select>
-</div>
-<div>
-<label for="editAthletePrimarySport">Primary Sport</label>
-<select class="select" id="editAthletePrimarySport">
-<option value="">Not set</option>
-</select>
-</div>
-<div>
-<label for="editAthletePosition">Position / Role</label>
-<input class="input" id="editAthletePosition" placeholder="Optional" type="text"/>
-</div>
-<div>
-<label for="editAthleteEvents">Events / Specialties</label>
-<input class="input" id="editAthleteEvents" placeholder="Optional" type="text"/>
-</div>
-<div>
-<label for="editAthleteHeight">Height (cm)</label>
-<input class="input" id="editAthleteHeight" min="0" placeholder="Optional" step="0.1" type="number"/>
-</div>
-<div>
-<label for="editAthleteWeight">Weight (kg)</label>
-<input class="input" id="editAthleteWeight" min="0" placeholder="Optional" step="0.1" type="number"/>
-</div>
-<div>
-<label for="editAthleteHand">Dominant Hand</label>
-<input class="input" id="editAthleteHand" placeholder="Optional" type="text"/>
-</div>
-<div>
-<label for="editAthleteLeg">Dominant Leg</label>
-<input class="input" id="editAthleteLeg" placeholder="Optional" type="text"/>
-</div>
-<div>
-<label for="editAthleteTeam">Squad / Team</label>
-<select class="select" id="editAthleteTeam">
-<option value="">No squad selected</option>
-</select>
-</div>
-<div>
-<label for="editAthleteRole">Squad Role</label>
-<input class="input" id="editAthleteRole" placeholder="Optional" type="text"/>
-</div>
-<div>
-<label for="editAthleteJersey">Jersey / Bib</label>
-<input class="input" id="editAthleteJersey" placeholder="Optional" type="text"/>
-</div>
-<div>
-<label for="editAthleteCaptain">Captain</label>
-<select class="select" id="editAthleteCaptain">
-<option value="false">No</option>
-<option value="true">Yes</option>
-</select>
-</div>
-<div>
-<label for="editAthleteHeadshot">Headshot</label>
-<input accept="image/*" class="input" id="editAthleteHeadshot" type="file"/>
-<p class="fine" id="editAthleteHeadshotPreview">No athlete selected.</p>
-</div>
-</div>
-<div class="form-actions">
-<button class="btn btn-campus" type="submit">Save Changes</button>
-</div>
-</form>
 </section>
-</section>
-<section class="card">
-<div class="section-title">
-<div>
-<h2>Athlete Registry</h2>
-<p>All internal athlete records for <span data-campus-name></span>.</p>
-</div>
-</div>
-<div class="data-table-wrap">
-<table class="table">
-<thead>
-<tr>
-<th>Name</th>
-<th>Sport</th>
-<th>Team</th>
-<th>Email</th>
-<th>Athlete Type</th>
-<th>Status</th>
-<th>Headshot</th>
-<th>Open</th>
-</tr>
-</thead>
-<tbody id="athletesTableBody"></tbody>
-</table>
-</div>
-</section>
+</details>
 </main>
 <footer class="footer">
 <div class="footer-left">
@@ -399,6 +359,7 @@
 <a href="legal.html">Legal</a>
 </div>
 </footer>
+<script src="config.js"></script>
 <script src="uwi-app.js"></script>
 <script src="athletes.js"></script>
 </body>

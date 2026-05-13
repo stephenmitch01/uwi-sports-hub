@@ -1,2 +1,25 @@
 .inline-subcard{margin-top:14px}
 .section-title-sm{margin-bottom:10px}
+.collapsible-section{padding:0;overflow:hidden}
+.collapsible-section>summary{cursor:pointer;list-style:none;padding:18px 22px;font-size:18px;font-weight:600;color:#0f2742;display:flex;justify-content:space-between;align-items:center}
+.collapsible-section>summary::-webkit-details-marker{display:none}
+.collapsible-section>summary::after{content:"Open";font-size:13px;color:#4d5870;border:1px solid rgba(15,39,66,.14);border-radius:999px;padding:5px 10px}
+.collapsible-section[open]>summary{border-bottom:1px solid rgba(15,39,66,.1)}
+.collapsible-section[open]>summary::after{content:"Close"}
+.collapsible-section>section{padding:18px 22px}
+.collapsible-section .filter-grid{margin-bottom:16px}
+.insight-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.insight-card{background:rgba(255,255,255,.72);border:1px solid rgba(15,39,66,.08);border-radius:8px;padding:12px;box-shadow:none;min-height:104px}
+.insight-label{font-size:11px;font-weight:550;letter-spacing:.06em;text-transform:uppercase;color:#647084;margin-bottom:8px}
+.insight-list{display:grid;gap:8px}
+.insight-item{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid rgba(15,39,66,.06);color:#29364a;font-size:13px}
+.insight-item:last-child{border-bottom:0}
+.insight-item strong{font-weight:600}
+.insight-action{width:100%;background:transparent;border:0;text-align:left;font:inherit;cursor:pointer}
+.insight-action:hover span:first-child,.insight-action:focus-visible span:first-child{color:#0f3f66;text-decoration:underline}
+.insight-action:focus-visible{outline:2px solid rgba(15,63,102,.35);outline-offset:2px;border-radius:6px}
+.insight-meta{color:#627083;font-size:13px}
+.quality-score{font-size:22px;font-weight:600;color:#0f2742;margin-bottom:6px}
+.quality-track{height:6px;background:#e8eef4;border-radius:999px;overflow:hidden;margin-bottom:8px}
+.quality-track span{display:block;height:100%;width:0;background:#c28f00;border-radius:999px}
+@media(max-width:900px){.insight-grid{grid-template-columns:1fr}}

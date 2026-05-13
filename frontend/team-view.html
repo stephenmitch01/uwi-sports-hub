@@ -58,13 +58,9 @@
           Team View is the main destination for roster membership, staff assignments,
           competition participation, and season-level team summaries.
         </p>
-<div class="pill-row">
-<span class="status-pill subtle" id="teamStatusPill">Status</span>
-<span class="status-pill subtle" id="teamCampusPill">Campus Scoped</span>
-<span class="status-pill subtle" id="teamSportPill">Sport</span>
-</div>
 <div class="quick-actions">
 <a class="btn btn-campus" href="teams.html">Back to Teams</a>
+<button class="btn btn-campus" id="editTeamBtn" type="button">Edit Team</button>
 <a class="btn btn-soft" href="competitions.html">Open Competitions</a>
 </div>
 <p class="fine" id="teamHeadNote">
@@ -103,17 +99,63 @@
 <div class="mini-value" id="seasonStat">—</div>
 <div class="mini-sub">Current season label for this team.</div>
 </div>
+<div class="mini-card">
+<div class="mini-label">Division / Category</div>
+<div class="mini-value" id="divisionStat">—</div>
+<div class="mini-sub">Competition grouping for this team.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Team Status</div>
+<div class="mini-value" id="teamStatusStat">—</div>
+<div class="mini-sub">Current operational status.</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Setup Completeness</div>
+<div id="teamCompletenessStat" class="completeness-large"><span class="completeness-ring" style="--score:0"></span><span class="completeness-text">0%</span></div>
+<div class="mini-sub">Record quality score.</div>
+</div>
 </div>
 </section>
-<section class="grid grid-2">
-<section class="card" id="teamIdentity"></section>
-<section class="card" id="teamStaff"></section>
+<details class="card collapsible-section hidden" id="editTeamPanel">
+<summary>Edit Team</summary>
+<section>
+<form class="filter-grid" id="teamEditForm" novalidate>
+<div><label for="editTeamName">Team Name</label><input class="input" id="editTeamName" type="text" /></div>
+<div><label for="editTeamSport">Sport</label><select class="select" id="editTeamSport"><option value="">Select sport</option></select></div>
+<div><label for="editTeamDivision">Division / Category</label><input class="input" id="editTeamDivision" type="text" /></div>
+<div><label for="editTeamSeason">Season</label><input class="input" id="editTeamSeason" type="text" /></div>
+<div><label for="editTeamStatus">Status</label><select class="select" id="editTeamStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+<div><label for="editTeamNotes">Notes</label><input class="input" id="editTeamNotes" type="text" /></div>
+<div style="display:flex;align-items:flex-end;"><button class="btn btn-campus" style="width:100%;" type="submit">Save Team</button></div>
+</form>
+<div class="message" id="teamEditMessage" aria-live="polite"></div>
 </section>
+</details>
+<section class="card" id="teamRecentResults"></section>
+<section class="card" id="teamPerformance"></section>
+<details class="card collapsible-section">
+<summary>Team Metadata</summary>
+<section id="teamIdentity"></section>
+</details>
+<details class="card collapsible-section">
+<summary>Roster</summary>
+<section id="teamRoster"></section>
+</details>
+<details class="card collapsible-section">
+<summary>Staff Assignments</summary>
+<section id="teamStaff"></section>
+</details>
+<details class="card collapsible-section">
+<summary>Competition Activity</summary>
+<section id="teamCompetitions"></section>
+</details>
+<details class="card collapsible-section">
+<summary>Squad Management</summary>
 <section class="card">
 <div class="section-title">
 <div>
 <h2>Squad Management</h2>
-<p>Add athletes and coaches to this team using backend-linked assignments.</p>
+<p>Add athletes and coaches to this team using linked assignments.</p>
 </div>
 </div>
 <div class="grid grid-2">
@@ -161,11 +203,7 @@
 </div>
 <div class="message" id="teamSquadMessage" style="margin-top:12px;"></div>
 </section>
-<section class="grid grid-2">
-<section class="card" id="teamRoster"></section>
-<section class="card" id="teamCompetitions"></section>
-</section>
-<section class="card" id="teamPerformance"></section>
+</details>
 </main>
 <footer class="footer">
 <div class="footer-left">
@@ -178,5 +216,5 @@
 </div>
 </footer>
 
-<script src="uwi-app.js"></script><script src="team-view.js"></script></body>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="team-view.js"></script></body>
 </html>

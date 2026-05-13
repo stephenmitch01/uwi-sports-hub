@@ -6,19 +6,40 @@
   const state = {
     session: null,
     athletes: [],
-    teams: []
+    teams: [],
+    selectedAthleteIds: new Set(),
+    registrySearchApplied: false
   };
 
   const els = {
     pageMessage: document.getElementById("athletePageMessage"),
     athletesTableBody: document.getElementById("athletesTableBody"),
+    totalAthletesStat: document.getElementById("totalAthletesStat"),
+    activeAthletesStat: document.getElementById("activeAthletesStat"),
+    assignedAthletesStat: document.getElementById("assignedAthletesStat"),
+    athleteSportsStat: document.getElementById("athleteSportsStat"),
+    incompleteAthletesStat: document.getElementById("incompleteAthletesStat"),
+    athleteAlerts: document.getElementById("athleteAlerts"),
+    athleteActivity: document.getElementById("athleteActivity"),
+    athleteQualityScore: document.getElementById("athleteQualityScore"),
+    athleteQualityBar: document.getElementById("athleteQualityBar"),
+    athleteQualityCopy: document.getElementById("athleteQualityCopy"),
 
     campusNameNodes: Array.from(document.querySelectorAll("[data-campus-name]")),
 
     searchInput: document.getElementById("athleteSearch"),
     statusFilter: document.getElementById("athleteStatus"),
     athleteTypeFilter: document.getElementById("athleteTypeFilter"),
+    athleteGenderFilter: document.getElementById("athleteGenderFilter"),
     athleteSportFilter: document.getElementById("athleteSportFilter"),
+    athleteQualityFilter: document.getElementById("athleteQualityFilter"),
+    athleteSearchButton: document.getElementById("athleteSearchButton"),
+    athleteSelectAll: document.getElementById("athleteSelectAll"),
+    athleteBulkActionBar: document.getElementById("athleteBulkActionBar"),
+    athleteBulkCount: document.getElementById("athleteBulkCount"),
+    bulkAssignTeamSelect: document.getElementById("bulkAssignTeamSelect"),
+    bulkAssignTeamButton: document.getElementById("bulkAssignTeamButton"),
+    bulkClearSelectionButton: document.getElementById("bulkClearSelectionButton"),
 
     athleteCreateForm: document.getElementById("athleteCreateForm"),
     athleteEditForm: document.getElementById("athleteEditForm"),
@@ -27,11 +48,16 @@
     createAthleteFirstName: document.getElementById("createAthleteFirstName"),
     createAthleteLastName: document.getElementById("createAthleteLastName"),
     createAthleteType: document.getElementById("createAthleteType"),
+    createAthleteDateOfBirth: document.getElementById("createAthleteDateOfBirth"),
+    createAthleteGender: document.getElementById("createAthleteGender"),
     createAthleteEmail: document.getElementById("createAthleteEmail"),
     createAthletePhone: document.getElementById("createAthletePhone"),
     createAthleteStudentId: document.getElementById("createAthleteStudentId"),
     createAthleteYear: document.getElementById("createAthleteYear"),
     createAthleteFaculty: document.getElementById("createAthleteFaculty"),
+    createAthleteProgram: document.getElementById("createAthleteProgram"),
+    createAthleteNationality: document.getElementById("createAthleteNationality"),
+    createAthleteHometown: document.getElementById("createAthleteHometown"),
     createAthleteStatus: document.getElementById("createAthleteStatus"),
     createAthletePrimarySport: document.getElementById("createAthletePrimarySport"),
     createAthletePosition: document.getElementById("createAthletePosition"),
@@ -48,11 +74,16 @@
     editAthleteFirstName: document.getElementById("editAthleteFirstName"),
     editAthleteLastName: document.getElementById("editAthleteLastName"),
     editAthleteType: document.getElementById("editAthleteType"),
+    editAthleteDateOfBirth: document.getElementById("editAthleteDateOfBirth"),
+    editAthleteGender: document.getElementById("editAthleteGender"),
     editAthleteEmail: document.getElementById("editAthleteEmail"),
     editAthletePhone: document.getElementById("editAthletePhone"),
     editAthleteStudentId: document.getElementById("editAthleteStudentId"),
     editAthleteYear: document.getElementById("editAthleteYear"),
     editAthleteFaculty: document.getElementById("editAthleteFaculty"),
+    editAthleteProgram: document.getElementById("editAthleteProgram"),
+    editAthleteNationality: document.getElementById("editAthleteNationality"),
+    editAthleteHometown: document.getElementById("editAthleteHometown"),
     editAthleteStatus: document.getElementById("editAthleteStatus"),
     editAthletePrimarySport: document.getElementById("editAthletePrimarySport"),
     editAthletePosition: document.getElementById("editAthletePosition"),
@@ -84,9 +115,13 @@
 
       populateCampusLabels();
       populateSportSelects();
+      ensureArchivedQualityOption(els.athleteQualityFilter);
       bindFilters();
+      bindWorkflowLinks();
+      bindInsightActions();
       bindCreateForm();
       bindEditForm();
+      bindBulkActions();
 
       await refreshData();
       clearMessage();
@@ -98,8 +133,8 @@
 
   async function refreshData(selectedAthleteId = "") {
     const [teamsPayload, athletesPayload] = await Promise.all([
-      apiGet("/teams", true),
-      apiGet("/athletes", true)
+      apiGet("/teams?includeArchived=true", true),
+      apiGet("/athletes?includeArchived=true", true)
     ]);
 
     state.teams = normalizeCollection(teamsPayload, ["teams", "data", "items"])
@@ -113,10 +148,45 @@
   }
 
   function bindFilters() {
-    [els.searchInput, els.statusFilter, els.athleteTypeFilter, els.athleteSportFilter].forEach((node) => {
+    [els.searchInput, els.statusFilter, els.athleteTypeFilter, els.athleteGenderFilter, els.athleteSportFilter, els.athleteQualityFilter].forEach((node) => {
       if (!node) return;
-      node.addEventListener("input", renderAthletesTable);
-      node.addEventListener("change", renderAthletesTable);
+      node.addEventListener("input", handleFilterChange);
+      node.addEventListener("change", handleFilterChange);
+    });
+    if (els.athleteSearchButton) els.athleteSearchButton.addEventListener("click", applyRegistrySearch);
+    mountRecentSearches("athletes");
+  }
+
+  function handleFilterChange() {
+    const panel = document.getElementById("athleteRegistryPanel");
+    if (hasActiveRegistryFilter() && panel) panel.open = true;
+    state.registrySearchApplied = false;
+  }
+
+  function applyRegistrySearch() {
+    const panel = document.getElementById("athleteRegistryPanel");
+    if (!String(els.athleteSportFilter?.value || "").trim() && String(els.athleteQualityFilter?.value || "") !== "incomplete") {
+      if (els.athletesTableBody) {
+        els.athletesTableBody.innerHTML = `
+          <tr><td colspan="11"><div class="empty-state"><h3>Select a sport first.</h3><p>Athlete searches must be narrowed by sport before results are shown.</p></div></td></tr>
+        `;
+      }
+      if (panel) panel.open = true;
+      return;
+    }
+    if (panel) panel.open = true;
+    state.registrySearchApplied = true;
+    saveCurrentSearch("athletes");
+    mountRecentSearches("athletes");
+    renderAthletesTable();
+  }
+
+  function bindWorkflowLinks() {
+    document.querySelectorAll("a[href='#athleteWorkflows']").forEach((link) => {
+      link.addEventListener("click", () => {
+        const panel = document.getElementById("athleteWorkflows");
+        if (panel) panel.open = true;
+      });
     });
   }
 
@@ -135,7 +205,17 @@
       }
 
       try {
-        await apiPost("/athletes", buildAthleteRecord(payload));
+        const record = buildAthleteRecord(payload);
+        const duplicate = APP.findSimilarRecord(state.athletes, record, { type: "athlete" });
+        if (duplicate) {
+          const action = APP.promptDuplicateAction(duplicate, "athlete");
+          if (action === "cancel") return;
+          if (action === "use-existing" || action === "edit-existing") {
+            window.location.href = `athlete-view.html?athleteId=${encodeURIComponent(duplicate.id)}`;
+            return;
+          }
+        }
+        await apiPost("/athletes", record);
         els.athleteCreateForm.reset();
         const createPreview = document.getElementById("createAthleteHeadshotPreview");
         if (createPreview) createPreview.textContent = "Optional athlete headshot.";
@@ -192,7 +272,53 @@
 
   function renderAll(selectedAthleteId = "") {
     renderAthleteEditSelect(selectedAthleteId);
+    renderOperationalSummary();
     renderAthletesTable();
+  }
+
+  function renderOperationalSummary() {
+    const athletes = getCampusAthletes();
+    const active = athletes.filter((athlete) => normalizeStatus(athlete.status) !== "inactive");
+    const assigned = athletes.filter((athlete) => athlete.activeRosterAssignment?.teamId);
+    const sports = new Set(athletes.map((athlete) => athlete.profile?.sportSlug).filter(Boolean));
+    const incomplete = athletes.filter((athlete) => getAthleteQuality(athlete) < 100);
+    const quality = athletes.length
+      ? Math.round(athletes.reduce((sum, athlete) => sum + getAthleteQuality(athlete), 0) / athletes.length)
+      : 0;
+
+    setText(els.totalAthletesStat, athletes.length);
+    setText(els.activeAthletesStat, active.length);
+    setText(els.assignedAthletesStat, assigned.length);
+    setText(els.athleteSportsStat, sports.size);
+    setText(els.incompleteAthletesStat, incomplete.length);
+
+    renderInsightList(els.athleteAlerts, [
+      { label: "Unassigned athletes", value: athletes.length - assigned.length, target: "athleteRegistryPanel", filter: "incomplete" },
+      { label: "Missing primary sport", value: athletes.filter((athlete) => !athlete.profile?.sportSlug).length, target: "athleteRegistryPanel", filter: "incomplete" },
+      { label: "Missing body data", value: athletes.filter((athlete) => !athlete.profile?.heightCm || !athlete.profile?.weightKg).length, target: "athleteRegistryPanel", filter: "incomplete" }
+    ], "No athlete alerts right now.");
+
+    renderActivityList(els.athleteActivity, getRecentRecords(athletes, "athlete"));
+    renderQuality(els.athleteQualityScore, els.athleteQualityBar, els.athleteQualityCopy, quality, `${incomplete.length} athlete profile${incomplete.length === 1 ? "" : "s"} below 100% completion.`);
+  }
+
+  function getAthleteQuality(athlete) {
+    const profile = athlete.profile || {};
+    const checks = [
+      athlete.firstName,
+      athlete.lastName,
+      athlete.email || athlete.phone,
+      athlete.athleteType,
+      athlete.dateOfBirth || profile.dateOfBirth,
+      athlete.gender || profile.gender,
+      profile.sportSlug,
+      athlete.activeRosterAssignment?.teamId,
+      profile.position || profile.eventsSpecialties,
+      profile.heightCm,
+      profile.weightKg,
+      athlete.imageUrl
+    ];
+    return Math.round((checks.filter(Boolean).length / checks.length) * 100);
   }
 
   function populateCampusLabels() {
@@ -228,12 +354,18 @@
 
     if (els.createAthleteTeam) els.createAthleteTeam.innerHTML = options;
     if (els.editAthleteTeam) els.editAthleteTeam.innerHTML = options;
+    if (els.bulkAssignTeamSelect) {
+      els.bulkAssignTeamSelect.innerHTML = [
+        `<option value="">Assign selected to team</option>`,
+        ...teams.map((team) => `<option value="${escapeHtml(team.id)}">${escapeHtml(team.name || "Team")}</option>`)
+      ].join("");
+    }
   }
 
   function renderAthleteEditSelect(selectedAthleteId = "") {
     if (!els.editAthleteSelect) return;
 
-    const athletes = getCampusAthletes();
+    const athletes = getCampusAthletes(true);
 
     if (!athletes.length) {
       els.editAthleteSelect.innerHTML = `<option value="">No athletes available</option>`;
@@ -268,11 +400,16 @@
     if (els.editAthleteFirstName) els.editAthleteFirstName.value = athlete.firstName || "";
     if (els.editAthleteLastName) els.editAthleteLastName.value = athlete.lastName || "";
     if (els.editAthleteType) els.editAthleteType.value = athlete.athleteType || "student-athlete";
+    if (els.editAthleteDateOfBirth) els.editAthleteDateOfBirth.value = toDateInputValue(athlete.dateOfBirth || profile.dateOfBirth || "");
+    if (els.editAthleteGender) els.editAthleteGender.value = normalizeGender(athlete.gender || profile.gender || "");
     if (els.editAthleteEmail) els.editAthleteEmail.value = athlete.email || "";
     if (els.editAthletePhone) els.editAthletePhone.value = athlete.phone || "";
     if (els.editAthleteStudentId) els.editAthleteStudentId.value = athlete.studentId || "";
     if (els.editAthleteYear) els.editAthleteYear.value = athlete.yearOfStudy || "";
-    if (els.editAthleteFaculty) els.editAthleteFaculty.value = athlete.facultyProgram || "";
+    if (els.editAthleteFaculty) els.editAthleteFaculty.value = athlete.faculty || athlete.facultyProgram || "";
+    if (els.editAthleteProgram) els.editAthleteProgram.value = athlete.program || "";
+    if (els.editAthleteNationality) els.editAthleteNationality.value = athlete.nationality || "";
+    if (els.editAthleteHometown) els.editAthleteHometown.value = athlete.hometown || "";
     if (els.editAthleteStatus) els.editAthleteStatus.value = normalizeStatus(athlete.status);
     if (els.editAthletePrimarySport) els.editAthletePrimarySport.value = profile.sportSlug || "";
     if (els.editAthletePosition) els.editAthletePosition.value = profile.position || "";
@@ -298,11 +435,15 @@
     [
       els.editAthleteFirstName,
       els.editAthleteLastName,
+      els.editAthleteDateOfBirth,
       els.editAthleteEmail,
       els.editAthletePhone,
       els.editAthleteStudentId,
       els.editAthleteYear,
       els.editAthleteFaculty,
+      els.editAthleteProgram,
+      els.editAthleteNationality,
+      els.editAthleteHometown,
       els.editAthletePosition,
       els.editAthleteEvents,
       els.editAthleteHeight,
@@ -316,6 +457,7 @@
     });
 
     if (els.editAthleteType) els.editAthleteType.value = "student-athlete";
+    if (els.editAthleteGender) els.editAthleteGender.value = "";
     if (els.editAthleteStatus) els.editAthleteStatus.value = "active";
     if (els.editAthletePrimarySport) els.editAthletePrimarySport.value = "";
     if (els.editAthleteCaptain) els.editAthleteCaptain.value = "false";
@@ -332,15 +474,33 @@
   function renderAthletesTable() {
     if (!els.athletesTableBody) return;
 
-    const athletes = getFilteredAthletes();
-
-    if (!athletes.length) {
+    if (!hasActiveRegistryFilter() || !state.registrySearchApplied) {
+      state.selectedAthleteIds.clear();
+      updateBulkActionBar();
       els.athletesTableBody.innerHTML = `
         <tr>
-          <td colspan="8">
+              <td colspan="11">
+            <div class="empty-state">
+              <h3>Use filters to view athlete records.</h3>
+              <p>Choose filters, then click Search to show a focused list.</p>
+            </div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    const athletes = getFilteredAthletes();
+    pruneSelectionToVisibleAthletes(athletes);
+
+    if (!athletes.length) {
+      updateBulkActionBar();
+      els.athletesTableBody.innerHTML = `
+        <tr>
+              <td colspan="11">
             <div class="empty-state">
               <h3>No athlete records match the current filters.</h3>
-              <p>Add or edit athlete records to begin building profiles, squad assignments, and athlete-view routing.</p>
+              <p>Add athlete records to manage profiles, squad assignments, and athlete details.</p>
             </div>
           </td>
         </tr>
@@ -355,17 +515,125 @@
 
       return `
         <tr>
+          <td class="athlete-select-cell"><input type="checkbox" data-athlete-select="${escapeHtml(athlete.id)}" ${state.selectedAthleteIds.has(String(athlete.id)) ? "checked" : ""} aria-label="Select ${escapeHtml(athlete.fullName || "athlete")}"/></td>
           <td><strong>${escapeHtml(athlete.fullName || "Athlete")}</strong></td>
+          <td>${escapeHtml(formatGender(athlete.gender || profile.gender || ""))}</td>
           <td>${escapeHtml(getSportName(profile.sportSlug || "") || "—")}</td>
           <td>${escapeHtml(team?.name || "—")}</td>
           <td>${escapeHtml(athlete.email || "—")}</td>
           <td>${escapeHtml(formatAthleteType(athlete.athleteType))}</td>
           <td>${escapeHtml(normalizeStatus(athlete.status) === "inactive" ? "Inactive" : "Active")}</td>
+          <td>${completenessMarkup(getAthleteQuality(athlete))}</td>
           <td>${athlete.imageUrl ? "Yes" : "No"}</td>
-          <td><a class="btn btn-soft" href="athlete-view.html?athleteId=${encodeURIComponent(athlete.id)}">Open</a></td>
+          <td><a class="btn btn-campus" href="athlete-view.html?athleteId=${encodeURIComponent(athlete.id)}">Open</a></td>
         </tr>
       `;
     }).join("");
+    bindRowSelectionControls(athletes);
+    updateBulkActionBar(athletes);
+  }
+
+  function bindBulkActions() {
+    if (els.athleteSelectAll) {
+      els.athleteSelectAll.addEventListener("change", () => {
+        getFilteredAthletes().forEach((athlete) => {
+          const id = String(athlete.id || "");
+          if (!id) return;
+          if (els.athleteSelectAll.checked) state.selectedAthleteIds.add(id);
+          else state.selectedAthleteIds.delete(id);
+        });
+        renderAthletesTable();
+      });
+    }
+    if (els.bulkClearSelectionButton) {
+      els.bulkClearSelectionButton.addEventListener("click", () => {
+        state.selectedAthleteIds.clear();
+        renderAthletesTable();
+      });
+    }
+    if (els.bulkAssignTeamButton) {
+      els.bulkAssignTeamButton.addEventListener("click", handleBulkAssignTeam);
+    }
+  }
+
+  function bindRowSelectionControls(visibleAthletes) {
+    document.querySelectorAll("[data-athlete-select]").forEach((checkbox) => {
+      checkbox.addEventListener("change", () => {
+        const id = String(checkbox.dataset.athleteSelect || "");
+        if (!id) return;
+        if (checkbox.checked) state.selectedAthleteIds.add(id);
+        else state.selectedAthleteIds.delete(id);
+        updateBulkActionBar(visibleAthletes);
+      });
+    });
+  }
+
+  async function handleBulkAssignTeam() {
+    clearMessage();
+    const teamId = String(els.bulkAssignTeamSelect?.value || "").trim();
+    const athleteIds = Array.from(state.selectedAthleteIds);
+    if (!athleteIds.length) {
+      setError("Select at least one athlete first.");
+      return;
+    }
+    if (!teamId) {
+      setError("Choose a team to assign the selected athletes to.");
+      return;
+    }
+    const team = state.teams.find((item) => String(item.id) === teamId);
+    const confirmed = window.confirm(`Assign ${athleteIds.length} selected athlete${athleteIds.length === 1 ? "" : "s"} to ${team?.name || "this team"}?`);
+    if (!confirmed) return;
+    try {
+      await Promise.all(athleteIds.map((athleteId) => {
+        const athlete = state.athletes.find((item) => String(item.id) === String(athleteId)) || {};
+        return apiPost("/team-roster-assignments", {
+          athleteId,
+          teamId,
+          roleLabel: athlete.activeRosterAssignment?.roleLabel || "",
+          jerseyNumber: athlete.activeRosterAssignment?.jerseyNumber || "",
+          isCaptain: Boolean(athlete.activeRosterAssignment?.isCaptain),
+          status: "ACTIVE"
+        });
+      }));
+      state.selectedAthleteIds.clear();
+      if (els.bulkAssignTeamSelect) els.bulkAssignTeamSelect.value = "";
+      await refreshData();
+      setSuccess(`Assigned ${athleteIds.length} athlete${athleteIds.length === 1 ? "" : "s"} to ${team?.name || "the selected team"}.`);
+    } catch (error) {
+      console.error("Bulk athlete team assignment failed:", error);
+      setError(error?.message || "Selected athletes could not be assigned to the team.");
+    }
+  }
+
+  function pruneSelectionToVisibleAthletes(visibleAthletes) {
+    const visibleIds = new Set(visibleAthletes.map((athlete) => String(athlete.id || "")));
+    Array.from(state.selectedAthleteIds).forEach((id) => {
+      if (!visibleIds.has(id)) state.selectedAthleteIds.delete(id);
+    });
+  }
+
+  function updateBulkActionBar(visibleAthletes = getFilteredAthletes()) {
+    const count = state.selectedAthleteIds.size;
+    if (els.athleteBulkActionBar) els.athleteBulkActionBar.hidden = count === 0;
+    if (els.athleteBulkCount) els.athleteBulkCount.textContent = `${count} selected`;
+    if (els.bulkAssignTeamButton) els.bulkAssignTeamButton.disabled = count === 0;
+    if (els.athleteSelectAll) {
+      const visibleIds = visibleAthletes.map((athlete) => String(athlete.id || "")).filter(Boolean);
+      const selectedVisibleCount = visibleIds.filter((id) => state.selectedAthleteIds.has(id)).length;
+      els.athleteSelectAll.checked = Boolean(visibleIds.length && selectedVisibleCount === visibleIds.length);
+      els.athleteSelectAll.indeterminate = Boolean(selectedVisibleCount && selectedVisibleCount < visibleIds.length);
+    }
+  }
+
+  function hasActiveRegistryFilter() {
+    return Boolean(
+      String(els.searchInput?.value || "").trim() ||
+      String(els.statusFilter?.value || "").trim() ||
+      String(els.athleteTypeFilter?.value || "").trim() ||
+      String(els.athleteGenderFilter?.value || "").trim() ||
+      String(els.athleteSportFilter?.value || "").trim() ||
+      String(els.athleteQualityFilter?.value || "").trim()
+    );
   }
 
   async function collectAthleteFormPayload(mode) {
@@ -379,11 +647,16 @@
       lastName,
       fullName: `${firstName} ${lastName}`.trim(),
       athleteType: getValue(isEdit ? els.editAthleteType : els.createAthleteType) || "student-athlete",
+      dateOfBirth: getValue(isEdit ? els.editAthleteDateOfBirth : els.createAthleteDateOfBirth),
+      gender: normalizeGender(getValue(isEdit ? els.editAthleteGender : els.createAthleteGender)),
       email: getValue(isEdit ? els.editAthleteEmail : els.createAthleteEmail),
       phone: getValue(isEdit ? els.editAthletePhone : els.createAthletePhone),
       studentId: getValue(isEdit ? els.editAthleteStudentId : els.createAthleteStudentId),
       yearOfStudy: getValue(isEdit ? els.editAthleteYear : els.createAthleteYear),
-      facultyProgram: getValue(isEdit ? els.editAthleteFaculty : els.createAthleteFaculty),
+      faculty: getValue(isEdit ? els.editAthleteFaculty : els.createAthleteFaculty),
+      program: getValue(isEdit ? els.editAthleteProgram : els.createAthleteProgram),
+      nationality: getValue(isEdit ? els.editAthleteNationality : els.createAthleteNationality),
+      hometown: getValue(isEdit ? els.editAthleteHometown : els.createAthleteHometown),
       status: getValue(isEdit ? els.editAthleteStatus : els.createAthleteStatus) || "active",
       primarySport: getValue(isEdit ? els.editAthletePrimarySport : els.createAthletePrimarySport),
       position: getValue(isEdit ? els.editAthletePosition : els.createAthletePosition),
@@ -420,11 +693,18 @@
       lastName: payload.lastName,
       fullName: payload.fullName,
       athleteType: payload.athleteType,
+      dateOfBirth: payload.dateOfBirth,
+      gender: payload.gender,
+      age: calculateAge(payload.dateOfBirth),
       email: payload.email,
       phone: payload.phone,
       studentId: payload.studentId,
       yearOfStudy: payload.yearOfStudy,
-      facultyProgram: payload.facultyProgram,
+      faculty: payload.faculty,
+      program: payload.program,
+      facultyProgram: [payload.faculty, payload.program].filter(Boolean).join(" / "),
+      nationality: payload.nationality,
+      hometown: payload.hometown,
       status: payload.status,
       campus: normalizeCampus(state.session.campus),
       imageUrl: payload.imageUrl || base.imageUrl || "",
@@ -436,7 +716,13 @@
         heightCm: payload.heightCm,
         weightKg: payload.weightKg,
         dominantHand: payload.dominantHand,
-        dominantLeg: payload.dominantLeg
+        dominantLeg: payload.dominantLeg,
+        dateOfBirth: payload.dateOfBirth,
+        gender: payload.gender,
+        faculty: payload.faculty,
+        program: payload.program,
+        nationality: payload.nationality,
+        hometown: payload.hometown
       },
       activeRosterAssignment: payload.teamId
         ? {
@@ -456,7 +742,9 @@
     const searchValue = String(els.searchInput?.value || "").trim().toLowerCase();
     const statusValue = String(els.statusFilter?.value || "").trim().toLowerCase();
     const athleteTypeValue = String(els.athleteTypeFilter?.value || "").trim().toLowerCase();
+    const genderValue = String(els.athleteGenderFilter?.value || "").trim().toLowerCase();
     const sportFilterValue = String(els.athleteSportFilter?.value || "").trim().toLowerCase();
+    const qualityValue = String(els.athleteQualityFilter?.value || "").trim().toLowerCase();
 
     return athletes
       .filter((athlete) => {
@@ -474,16 +762,20 @@
 
         const matchesStatus = !statusValue || normalizeStatus(athlete.status) === statusValue;
         const matchesAthleteType = !athleteTypeValue || String(athlete.athleteType || "").toLowerCase() === athleteTypeValue;
+        const matchesGender = !genderValue || normalizeGender(athlete.gender || profile.gender || "") === genderValue;
         const matchesSport = !sportFilterValue || String(profile.sportSlug || "").toLowerCase() === sportFilterValue;
+        const archived = APP.isArchivedRecord(athlete);
+        const matchesQuality = qualityValue === "archived" ? archived : qualityValue !== "incomplete" || getAthleteQuality(athlete) < 100;
 
-        return matchesSearch && matchesStatus && matchesAthleteType && matchesSport;
+        return (qualityValue === "archived" || !archived) && matchesSearch && matchesStatus && matchesAthleteType && matchesGender && matchesSport && matchesQuality;
       })
       .sort((a, b) => String(a.fullName || "").localeCompare(String(b.fullName || "")));
   }
 
-  function getCampusAthletes() {
+  function getCampusAthletes(includeArchived = false) {
     return state.athletes.filter(
-      (athlete) => normalizeCampus(athlete.campus || state.session.campus) === normalizeCampus(state.session.campus)
+      (athlete) => normalizeCampus(athlete.campus || state.session.campus) === normalizeCampus(state.session.campus) &&
+        (includeArchived || !APP.isArchivedRecord(athlete))
     );
   }
 
@@ -491,6 +783,11 @@
     return state.teams.filter(
       (team) => normalizeCampus(team.campus || state.session.campus) === normalizeCampus(state.session.campus)
     );
+  }
+
+  function ensureArchivedQualityOption(select) {
+    if (!select || select.querySelector("option[value='archived']")) return;
+    select.insertAdjacentHTML("beforeend", `<option value="archived">Archived records</option>`);
   }
 
   function getSelectedAthleteTeamId(athleteId) {
@@ -559,6 +856,9 @@
       lastName: athlete.lastName || athlete.familyName || "",
       fullName: athlete.fullName || `${athlete.firstName || athlete.givenName || ""} ${athlete.lastName || athlete.familyName || ""}`.trim(),
       athleteType: athlete.athleteType || athlete.type || "student-athlete",
+      dateOfBirth: athlete.dateOfBirth || athlete.dob || profile.dateOfBirth || "",
+      gender: normalizeGender(athlete.gender || profile.gender || ""),
+      age: athlete.age || calculateAge(athlete.dateOfBirth || athlete.dob || profile.dateOfBirth || ""),
       email: athlete.email || "",
       phone: athlete.phone || "",
       studentId: athlete.studentId || "",
@@ -575,7 +875,9 @@
         heightCm: profile.heightCm ?? null,
         weightKg: profile.weightKg ?? null,
         dominantHand: profile.dominantHand || "",
-        dominantLeg: profile.dominantLeg || ""
+        dominantLeg: profile.dominantLeg || "",
+        dateOfBirth: profile.dateOfBirth || athlete.dateOfBirth || athlete.dob || "",
+        gender: normalizeGender(profile.gender || athlete.gender || "")
       },
       activeRosterAssignment: roster
         ? {
@@ -612,6 +914,40 @@
 
   function stringifyNullable(value) {
     return value === null || value === undefined ? "" : String(value);
+  }
+
+  function toDateInputValue(value) {
+    if (!value) return "";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return String(value).slice(0, 10);
+    return parsed.toISOString().slice(0, 10);
+  }
+
+  function calculateAge(dateOfBirth) {
+    if (!dateOfBirth) return "";
+    const birthDate = new Date(dateOfBirth);
+    if (Number.isNaN(birthDate.getTime())) return "";
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDelta = today.getMonth() - birthDate.getMonth();
+    if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < birthDate.getDate())) {
+      age -= 1;
+    }
+    return age >= 0 && age < 120 ? String(age) : "";
+  }
+
+  function normalizeGender(value) {
+    const raw = String(value || "").trim().toLowerCase();
+    if (raw === "m" || raw === "male") return "male";
+    if (raw === "f" || raw === "female") return "female";
+    return "";
+  }
+
+  function formatGender(value) {
+    const normalized = normalizeGender(value);
+    if (normalized === "male") return "Male";
+    if (normalized === "female") return "Female";
+    return "Not recorded";
   }
 
   function normalizeStatus(value) {
@@ -651,12 +987,118 @@
     return APP.escapeHtml(value);
   }
 
+  function setText(node, value) {
+    if (node) node.textContent = String(value);
+  }
+
+  function renderInsightList(node, rows, emptyText) {
+    if (!node) return;
+    const activeRows = rows.filter((row) => Number(row.value) > 0);
+    if (!activeRows.length) {
+      node.innerHTML = `<div class="insight-item"><span>${escapeHtml(emptyText)}</span><span class="insight-meta">Clear</span></div>`;
+      return;
+    }
+    node.innerHTML = activeRows.map((row) => `
+      <button class="insight-item insight-action" type="button" data-target="${escapeHtml(row.target || "")}" data-filter="${escapeHtml(row.filter || "")}">
+        <span>${escapeHtml(row.label)}</span>
+        <strong>${escapeHtml(row.value)}</strong>
+      </button>
+    `).join("");
+  }
+
+  function bindInsightActions() {
+    document.addEventListener("click", (event) => {
+      const action = event.target.closest(".insight-action[data-target]");
+      if (!action) return;
+      const target = document.getElementById(action.getAttribute("data-target"));
+      if (!target) return;
+      const filter = action.getAttribute("data-filter");
+      if (filter === "incomplete" && els.athleteQualityFilter) {
+        els.athleteQualityFilter.value = "incomplete";
+        state.registrySearchApplied = true;
+        renderAthletesTable();
+      }
+      if (target.tagName.toLowerCase() === "details") target.open = true;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function renderActivityList(node, records) {
+    if (!node) return;
+    if (!records.length) {
+      node.innerHTML = `<div class="insight-item"><span>No recent records yet.</span><span class="insight-meta">--</span></div>`;
+      return;
+    }
+    node.innerHTML = records.map((record) => `
+      <div class="insight-item">
+        <span>${escapeHtml(record.label)}</span>
+        <span class="insight-meta">${escapeHtml(record.type)}</span>
+      </div>
+    `).join("");
+  }
+
+  function getRecentRecords(records, type) {
+    return records
+      .slice()
+      .sort((a, b) => getRecordTime(b) - getRecordTime(a))
+      .slice(0, 3)
+      .map((record) => ({ label: record.fullName || record.name || record.title || "Record", type }));
+  }
+
+  function getRecordTime(record) {
+    return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || record.date || "") || 0;
+  }
+
+  function renderQuality(scoreNode, barNode, copyNode, score, copy) {
+    setText(scoreNode, `${score}%`);
+    if (barNode) barNode.style.width = `${Math.max(0, Math.min(100, score))}%`;
+    setText(copyNode, copy);
+  }
+
+  function completenessMarkup(score) {
+    const normalized = Math.max(0, Math.min(100, Number(score) || 0));
+    return `<div class="completeness-cell"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
+  }
+
   function readFileAsDataUrl(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(String(reader.result || ""));
       reader.onerror = reject;
       reader.readAsDataURL(file);
+    });
+  }
+
+  function saveCurrentSearch(scope) {
+    if (!APP.saveRecentSearch) return;
+    const values = {
+      q: els.searchInput?.value || "",
+      status: els.statusFilter?.value || "",
+      type: els.athleteTypeFilter?.value || "",
+      gender: els.athleteGenderFilter?.value || "",
+      sport: els.athleteSportFilter?.value || "",
+      quality: els.athleteQualityFilter?.value || ""
+    };
+    const label = [values.q, values.sport ? APP.getSportName?.(values.sport) || values.sport : "", values.gender ? formatGender(values.gender) : "", values.status, values.type, values.quality].filter(Boolean).join(" / ") || "Athlete search";
+    APP.saveRecentSearch(scope, label, values);
+  }
+
+  function mountRecentSearches(scope) {
+    if (!APP.renderRecentSearches || !els.athleteSearchButton?.parentElement) return;
+    document.querySelector(`[data-recent-searches='${scope}']`)?.remove();
+    els.athleteSearchButton.parentElement.insertAdjacentHTML("afterend", APP.renderRecentSearches(scope));
+    document.querySelectorAll("[data-recent-searches='athletes'] [data-recent-search-index]").forEach((button) => {
+      button.addEventListener("click", function () {
+        const item = APP.readRecentSearches(scope)[Number(this.dataset.recentSearchIndex)];
+        if (!item) return;
+        if (els.searchInput) els.searchInput.value = item.values.q || "";
+        if (els.statusFilter) els.statusFilter.value = item.values.status || "";
+        if (els.athleteTypeFilter) els.athleteTypeFilter.value = item.values.type || "";
+        if (els.athleteGenderFilter) els.athleteGenderFilter.value = item.values.gender || "";
+        if (els.athleteSportFilter) els.athleteSportFilter.value = item.values.sport || "";
+        if (els.athleteQualityFilter) els.athleteQualityFilter.value = item.values.quality || "";
+        applyRegistrySearch();
+      });
     });
   }
 

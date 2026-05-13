@@ -170,7 +170,7 @@
       if (els.reportAthlete) els.reportAthlete.value = "";
     }
     syncFiltersFromInputs();
-    renderAll();
+    renderSelectionControls();
   }
 
   function syncFiltersFromInputs() {
@@ -218,7 +218,7 @@
     els.reportActionBar.classList.toggle("hidden", !hasType);
 
     if (!hasType) {
-      setActionBarDisabled(true, "Choose a report type", "Select the kind of report you want to build first.");
+      setActionBarDisabled(true, "Choose a report type", "Select the kind of report you want to generate first.");
       return;
     }
 
@@ -230,7 +230,7 @@
       hydrateTeamFilter(els.reportTeamFilter, state.selectedTeamFilterId, "All teams");
       hydrateAthleteSelect();
       const enabled = Boolean(getSelectedAthlete());
-      setActionBarDisabled(!enabled, enabled ? "Athlete report ready" : "Select an athlete", enabled ? "Generate, preview, or download the current athlete report." : "Choose an athlete to unlock the report actions.");
+      setActionBarDisabled(!enabled, enabled ? "Athlete report selected" : "Select an athlete", enabled ? "Generate, preview, or download the current athlete report." : "Choose an athlete to unlock the report actions.");
       return;
     }
 
@@ -240,7 +240,7 @@
       els.reportTeamWrap.classList.remove("hidden");
       hydrateTeamFilter(els.reportTeam, state.selectedTeamId, "Select team");
       const enabled = Boolean(getSelectedTeam());
-      setActionBarDisabled(!enabled, enabled ? "Team report ready" : "Select a team", enabled ? "Generate, preview, or download the current team report." : "Choose a team to unlock the report actions.");
+      setActionBarDisabled(!enabled, enabled ? "Team report selected" : "Select a team", enabled ? "Generate, preview, or download the current team report." : "Choose a team to unlock the report actions.");
       return;
     }
 
@@ -250,14 +250,14 @@
       els.reportCompetitionWrap.classList.remove("hidden");
       hydrateCompetitionSelect();
       const enabled = Boolean(getSelectedCompetition());
-      setActionBarDisabled(!enabled, enabled ? "Competition report ready" : "Select a competition", enabled ? "Generate, preview, or download the current competition report." : "Choose a competition to unlock the report actions.");
+      setActionBarDisabled(!enabled, enabled ? "Competition report selected" : "Select a competition", enabled ? "Generate, preview, or download the current competition report." : "Choose a competition to unlock the report actions.");
       return;
     }
 
     if (state.reportType === "campus summary") {
       els.reportSelectionTitle.textContent = "Campus summary context";
       els.reportSelectionSubtitle.textContent = "No individual subject is required here. The report will reflect the current campus, sport, and season filters.";
-      setActionBarDisabled(false, "Campus summary ready", "Generate, preview, or download the current campus summary report.");
+      setActionBarDisabled(false, "Campus summary selected", "Generate, preview, or download the current campus summary report.");
     }
   }
 
@@ -292,8 +292,8 @@
     const athleteOptions = getSelectableAthletes().map((athlete) => {
       const id = compactId(athlete.id || athlete.athleteId);
       const label = getAthleteDisplayName(athlete);
-      const sport = getSportName(athlete.sportSlug || athlete.primarySportSlug || athlete.sport || athlete.primarySport);
-      const team = lookupTeamName(athlete.teamId || athlete.team || athlete.teamName);
+      const sport = getSportName(getAthleteSportSlug(athlete));
+      const team = lookupTeamName(getAthleteTeamId(athlete) || athlete.teamName);
       const descriptor = [sport, team].filter(Boolean).join(" • ");
       return `<option value="${escapeHtml(id)}">${escapeHtml(label)}${descriptor ? ` — ${escapeHtml(descriptor)}` : ""}</option>`;
     }).join("");
@@ -402,7 +402,7 @@
     if (!state.reportType) {
       return {
         title: "Reports",
-        html: `<div class="empty-state"><h3>Choose a report type to continue.</h3><p>Select athlete, team, competition, or campus summary to build the report workspace.</p></div>`
+        html: `<div class="empty-state"><h3>Choose a report type to continue.</h3><p>Select athlete, team, competition, or campus summary to generate a report.</p></div>`
       };
     }
 
@@ -411,7 +411,7 @@
       if (!athlete) {
         return {
           title: "Athlete report",
-          html: `<div class="empty-state"><h3>Select an athlete to build the report.</h3><p>Use the report filters, optionally narrow by team, then choose an athlete from the dropdown above. The full athlete dossier will appear here.</p></div>`
+          html: `<div class="empty-state"><h3>Select an athlete to generate the report.</h3><p>Use the report filters, optionally narrow by team, then choose an athlete from the dropdown above. The full athlete dossier will appear here.</p></div>`
         };
       }
       return {
@@ -425,7 +425,7 @@
       if (!team) {
         return {
           title: "Team report",
-          html: `<div class="empty-state"><h3>Select a team to build the report.</h3><p>Choose a team above and the full team report will appear here.</p></div>`
+          html: `<div class="empty-state"><h3>Select a team to generate the report.</h3><p>Choose a team above and the full team report will appear here.</p></div>`
         };
       }
       return {
@@ -439,7 +439,7 @@
       if (!competition) {
         return {
           title: "Competition report",
-          html: `<div class="empty-state"><h3>Select a competition to build the report.</h3><p>Choose a competition above and the full competition report will appear here.</p></div>`
+          html: `<div class="empty-state"><h3>Select a competition to generate the report.</h3><p>Choose a competition above and the full competition report will appear here.</p></div>`
         };
       }
       return {
@@ -456,6 +456,14 @@
 
   function renderAthleteReportContent(athlete, forPreview) {
     const athleteId = compactId(athlete.id || athlete.athleteId);
+    const athleteSportSlug = getAthleteSportSlug(athlete);
+    const athleteTeamName = lookupTeamName(getAthleteTeamId(athlete) || athlete.teamName);
+    const athleteProfile = getAthleteProfile(athlete);
+    const athleteRoster = getAthleteRosterAssignment(athlete);
+    const athleteDateOfBirth = athlete.dateOfBirth || athlete.dob || athleteProfile.dateOfBirth || "";
+    const athleteSex = formatSex(athlete.gender || athlete.sex || athleteProfile.gender || athleteProfile.sex || "");
+    const athleteSquadName = athlete.squadName || athlete.squad || athleteRoster.squadName || athleteRoster.squad || athleteRoster.division || athleteTeamName || "";
+    const athleteSchoolClub = athlete.schoolOrClub || athlete.school || athlete.club || athleteProfile.schoolOrClub || athleteProfile.school || athleteProfile.club || "";
     const allStats = getAthleteStats(athleteId, false);
     const filteredStats = getAthleteStats(athleteId, true);
     const bests = getAthleteBestRows(allStats);
@@ -470,9 +478,9 @@
         title: getAthleteDisplayName(athlete),
         subtitle: "Internal athlete dossier combining identity, institutional context, body profile, performance records, best marks, and competition history.",
         pills: [
-          getSportName(athlete.sportSlug || athlete.primarySportSlug || athlete.sport || athlete.primarySport) || "Sport not set",
+          getSportName(athleteSportSlug) || "Sport not set",
           getCampusName(athlete.campus || athlete.campusSlug || state.session.campus),
-          lookupTeamName(athlete.teamId || athlete.team || athlete.teamName) || "No team assigned"
+          athleteTeamName || "No team assigned"
         ],
         meta: [
           ["Filtered stats", filteredStats.length, "Visible stat lines in the current report view"],
@@ -492,8 +500,9 @@
             ${renderMetaItem("Email", athlete.email || "—")}
             ${renderMetaItem("Phone", athlete.phone || "—")}
             ${renderMetaItem("Nationality", athlete.nationality || athlete.country || "—")}
-            ${renderMetaItem("Date of birth", formatDate(athlete.dateOfBirth || athlete.dob) || "—")}
-            ${renderMetaItem("Age", athlete.age || calculateAge(athlete.dateOfBirth || athlete.dob) || "—")}
+            ${renderMetaItem("Sex", athleteSex || "—")}
+            ${renderMetaItem("Hometown", athlete.hometown || athleteProfile.hometown || "—")}
+            ${renderMetaItem("Date of birth", formatDate(athleteDateOfBirth) || "—")}
           </div>
         </section>
 
@@ -502,11 +511,16 @@
           <p class="section-copy">Administrative and representation details relevant to internal movement and review.</p>
           <div class="report-meta-grid">
             ${renderMetaItem("Campus", getCampusName(athlete.campus || athlete.campusSlug || state.session.campus))}
-            ${renderMetaItem("Sport", getSportName(athlete.sportSlug || athlete.primarySportSlug || athlete.sport || athlete.primarySport) || "—")}
-            ${renderMetaItem("Team", lookupTeamName(athlete.teamId || athlete.team || athlete.teamName) || "—")}
+            ${renderMetaItem("Sport", getSportName(athleteSportSlug) || "—")}
+            ${renderMetaItem("Team", athleteTeamName || "—")}
+            ${renderMetaItem("Squad", athleteSquadName || "—")}
+            ${renderMetaItem("School / club", athleteSchoolClub || "—")}
             ${renderMetaItem("Athlete type", athlete.athleteType || athlete.type || "—")}
             ${renderMetaItem("Status", athlete.status || "—")}
-            ${renderMetaItem("Position / role", athlete.position || athlete.role || athlete.eventGroup || athlete.events || "—")}
+            ${renderMetaItem("Position / role", getAthletePosition(athlete) || "—")}
+            ${renderMetaItem("Squad role", athleteRoster.role || athleteRoster.roleLabel || "—")}
+            ${renderMetaItem("Jersey / bib", athlete.jerseyNumber || athlete.bibNumber || athleteRoster.jerseyNumber || athleteRoster.bibNumber || "—")}
+            ${renderMetaItem("Captain", athlete.isCaptain || athleteRoster.isCaptain ? "Yes" : "No")}
           </div>
         </section>
 
@@ -516,7 +530,8 @@
           <div class="report-meta-grid">
             ${renderMetaItem("Student ID", athlete.studentId || "—")}
             ${renderMetaItem("Year of study", athlete.yearOfStudy || athlete.year || "—")}
-            ${renderMetaItem("Faculty / program", athlete.faculty || athlete.program || "—")}
+            ${renderMetaItem("Faculty", athlete.faculty || athleteProfile.faculty || "—")}
+            ${renderMetaItem("Program", athlete.program || athleteProfile.program || "—")}
             ${renderMetaItem("Representation season", athlete.season || state.filteredSeason || "—")}
           </div>
         </section>
@@ -525,10 +540,10 @@
           <h3>Body profile</h3>
           <p class="section-copy">Physical profile fields available on the athlete record.</p>
           <div class="report-meta-grid">
-            ${renderMetaItem("Height", athlete.height || "—")}
-            ${renderMetaItem("Weight", athlete.weight || "—")}
-            ${renderMetaItem("Dominant hand", athlete.dominantHand || athlete.hand || "—")}
-            ${renderMetaItem("Dominant foot / leg", athlete.dominantFoot || athlete.dominantLeg || athlete.leg || "—")}
+            ${renderMetaItem("Height", getAthleteHeight(athlete) || "—")}
+            ${renderMetaItem("Weight", getAthleteWeight(athlete) || "—")}
+            ${renderMetaItem("Dominant hand", getAthleteDominantHand(athlete) || "—")}
+            ${renderMetaItem("Dominant foot / leg", getAthleteDominantLeg(athlete) || "—")}
           </div>
         </section>
       </div>
@@ -540,7 +555,7 @@
           <div class="mini-card"><div class="mini-label">Visible stat lines</div><div class="mini-value">${filteredStats.length}</div><div class="mini-sub">Current filter context</div></div>
           <div class="mini-card"><div class="mini-label">Competitions</div><div class="mini-value">${performanceSummary.competitionCount}</div><div class="mini-sub">Distinct competitions represented</div></div>
           <div class="mini-card"><div class="mini-label">Best marks</div><div class="mini-value">${bests.length}</div><div class="mini-sub">Grouped best-performance entries</div></div>
-          <div class="mini-card"><div class="mini-label">Sport</div><div class="mini-value">${escapeHtml(getSportName(athlete.sportSlug || athlete.primarySportSlug || athlete.sport || athlete.primarySport) || "—")}</div><div class="mini-sub">Primary reporting sport</div></div>
+          <div class="mini-card"><div class="mini-label">Sport</div><div class="mini-value">${escapeHtml(getSportName(athleteSportSlug) || "—")}</div><div class="mini-sub">Primary reporting sport</div></div>
         </div>
       </section>
 
@@ -608,7 +623,7 @@
 
   function renderTeamReportContent(team, forPreview) {
     const teamId = compactId(team.id || team.teamId);
-    const athletes = getFilteredAthletes().filter((athlete) => compactId(athlete.teamId || athlete.team || athlete.teamName) === teamId);
+    const athletes = getFilteredAthletes().filter((athlete) => getAthleteTeamId(athlete) === teamId);
     const stats = getFilteredStats().filter((row) => compactId(row.teamId || row.team || row.teamName) === teamId);
     const competitions = getFilteredCompetitions().filter((competition) => compactId(competition.teamId || competition.team || competition.teamName) === teamId);
     const reportDate = new Date();
@@ -657,9 +672,9 @@
                   ${athletes.map((athlete) => `
                     <tr>
                       <td>${escapeHtml(getAthleteDisplayName(athlete))}</td>
-                      <td>${escapeHtml(getSportName(athlete.sportSlug || athlete.primarySportSlug || athlete.sport || athlete.primarySport) || "—")}</td>
+                      <td>${escapeHtml(getSportName(getAthleteSportSlug(athlete)) || "—")}</td>
                       <td>${escapeHtml(athlete.status || "—")}</td>
-                      <td>${escapeHtml(athlete.position || athlete.role || athlete.eventGroup || athlete.events || "—")}</td>
+                      <td>${escapeHtml(getAthletePosition(athlete) || "—")}</td>
                     </tr>
                   `).join("")}
                 </tbody>
@@ -923,11 +938,78 @@
     `;
   }
 
+  function getAthleteProfile(athlete) {
+    return athlete?.profile && typeof athlete.profile === "object" ? athlete.profile : {};
+  }
+
+  function getAthleteRosterAssignment(athlete) {
+    if (athlete?.activeRosterAssignment && typeof athlete.activeRosterAssignment === "object") {
+      return athlete.activeRosterAssignment;
+    }
+    if (athlete?.rosterAssignment && typeof athlete.rosterAssignment === "object") {
+      return athlete.rosterAssignment;
+    }
+    return {};
+  }
+
+  function getAthleteSportSlug(athlete) {
+    const profile = getAthleteProfile(athlete);
+    const roster = getAthleteRosterAssignment(athlete);
+    return APP.normalizeSportSlug(
+      athlete?.sportSlug ||
+      athlete?.primarySportSlug ||
+      athlete?.sport ||
+      athlete?.primarySport ||
+      profile.sportSlug ||
+      profile.sport ||
+      roster.sportSlug ||
+      roster.team?.sportSlug ||
+      roster.team?.sport
+    );
+  }
+
+  function getAthleteTeamId(athlete) {
+    const roster = getAthleteRosterAssignment(athlete);
+    return compactId(
+      athlete?.teamId ||
+      athlete?.team?.id ||
+      roster.teamId ||
+      roster.team?.id ||
+      roster.team?.teamId
+    );
+  }
+
+  function getAthletePosition(athlete) {
+    const profile = getAthleteProfile(athlete);
+    const roster = getAthleteRosterAssignment(athlete);
+    return athlete?.position || athlete?.role || athlete?.eventGroup || athlete?.events || profile.position || profile.eventsSpecialties || roster.roleLabel || roster.role || "";
+  }
+
+  function getAthleteHeight(athlete) {
+    const profile = getAthleteProfile(athlete);
+    return athlete?.height || athlete?.heightCm || profile.height || profile.heightCm || "";
+  }
+
+  function getAthleteWeight(athlete) {
+    const profile = getAthleteProfile(athlete);
+    return athlete?.weight || athlete?.weightKg || profile.weight || profile.weightKg || "";
+  }
+
+  function getAthleteDominantHand(athlete) {
+    const profile = getAthleteProfile(athlete);
+    return athlete?.dominantHand || athlete?.hand || profile.dominantHand || profile.hand || "";
+  }
+
+  function getAthleteDominantLeg(athlete) {
+    const profile = getAthleteProfile(athlete);
+    return athlete?.dominantFoot || athlete?.dominantLeg || athlete?.leg || profile.dominantFoot || profile.dominantLeg || profile.leg || "";
+  }
+
   function getFilteredAthletes() {
     const campus = APP.normalizeCampus(state.filteredCampus || state.session?.campus);
     return state.athletes.filter((athlete) => {
       const athleteCampus = APP.normalizeCampus(athlete.campus || athlete.campusSlug || state.session?.campus);
-      const sportSlug = APP.normalizeSportSlug(athlete.sportSlug || athlete.primarySportSlug || athlete.sport || athlete.primarySport);
+      const sportSlug = getAthleteSportSlug(athlete);
       const season = String(athlete.season || athlete.seasonLabel || "").trim();
 
       if (campus && athleteCampus !== campus) return false;
@@ -983,7 +1065,7 @@
     const teamFilterId = state.selectedTeamFilterId;
     const athletes = getFilteredAthletes();
     if (!teamFilterId) return athletes;
-    return athletes.filter((athlete) => compactId(athlete.teamId || athlete.team || athlete.teamName) === teamFilterId);
+    return athletes.filter((athlete) => getAthleteTeamId(athlete) === teamFilterId);
   }
 
   function getSelectedAthlete() {
@@ -1000,7 +1082,7 @@
 
   function getAthleteStats(athleteId, filteredOnly) {
     const source = filteredOnly ? getFilteredStats() : state.statLines;
-    return source.filter((row) => compactId(row.athleteId || row.athlete || row.participantId) === athleteId);
+    return source.filter((row) => compactId(row.athleteId || row.athlete || row.participantId || row.subjectId || row.playerId) === athleteId);
   }
 
   function getAthleteBestRows(rows) {
@@ -1185,6 +1267,9 @@
   }
 
   function lookupTeamName(teamValue) {
+    if (teamValue && typeof teamValue === "object") {
+      return teamValue.name || teamValue.teamName || lookupTeamName(teamValue.id || teamValue.teamId);
+    }
     const compact = compactId(teamValue);
     if (!compact) return typeof teamValue === "string" ? teamValue : "";
     const team = state.teams.find((item) => compactId(item.id || item.teamId) === compact);
@@ -1192,12 +1277,13 @@
   }
 
   function getAthleteDisplayName(athlete) {
-    return [athlete.firstName, athlete.lastName].filter(Boolean).join(" ").trim() || athlete.name || "Athlete";
+    return athlete.fullName || [athlete.firstName, athlete.lastName].filter(Boolean).join(" ").trim() || athlete.name || "Athlete";
   }
 
   function normalizeArray(result, preferredKeys, fallback) {
     if (!result) return fallback || [];
     const source = result.status === "fulfilled" ? result.value : null;
+    if (Array.isArray(source)) return source;
     if (!source || typeof source !== "object") return fallback || [];
     for (const key of preferredKeys) {
       if (Array.isArray(source[key])) return source[key];
@@ -1246,6 +1332,13 @@
     return age > 0 ? String(age) : "";
   }
 
+  function formatSex(value) {
+    const raw = String(value || "").trim().toLowerCase();
+    if (raw === "m" || raw === "male") return "Male";
+    if (raw === "f" || raw === "female") return "Female";
+    return "";
+  }
+
   function compareDatesDesc(a, b) {
     const aTime = a ? new Date(a).getTime() : 0;
     const bTime = b ? new Date(b).getTime() : 0;
@@ -1253,7 +1346,43 @@
   }
 
   function describeStat(row) {
-    return row.result || row.performance || row.resultTime || row.time || row.resultDistance || row.distance || row.height || row.score || row.value || "—";
+    const data = row?.statData && typeof row.statData === "object" ? row.statData : {};
+    const summary = data.summary && typeof data.summary === "object" ? data.summary : {};
+    const candidates = [
+      row.result,
+      row.performance,
+      row.resultTime,
+      row.time,
+      row.resultDistance,
+      row.distance,
+      row.height,
+      row.score,
+      row.value,
+      data.result,
+      data.performance,
+      data.resultTime,
+      data.time,
+      data.finalTime,
+      data.resultDistance,
+      data.distance,
+      data.bestDistance,
+      data.height,
+      data.bestHeight,
+      data.bestMark,
+      data.score,
+      data.value,
+      data.runs,
+      data.goals,
+      data.points,
+      summary.result,
+      summary.resultLabel,
+      summary.winningResult,
+      summary.finalScore,
+      summary.total,
+      summary.points
+    ];
+    const value = candidates.find((item) => item !== undefined && item !== null && String(item).trim() !== "");
+    return value === undefined ? "—" : String(value);
   }
 
   function escapeHtml(value) {

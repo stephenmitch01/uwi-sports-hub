@@ -60,40 +60,32 @@
                         Competition View displays competition metadata, division or category structure,
                         round or heat groupings, event or match listings, participant records, and approved results.
                     </p>
-<div class="pill-row">
-<span class="status-pill ok">One competition = one sport</span>
-<span class="status-pill subtle">Division/category aware</span>
-<span class="status-pill subtle">Results and audit</span>
-</div>
 <div class="quick-actions">
 <a class="btn btn-campus" href="competitions.html">Back to Competitions</a>
+<button class="btn btn-campus" id="editCompetitionBtn" type="button">Edit Competition</button>
 <a class="btn btn-soft" href="reports.html">Open Reports</a>
 </div>
 </div>
-<div class="head-right">
-<div class="mini-card">
-<div class="mini-label">Competition</div>
-<div class="mini-value">No Selection</div>
-<div class="mini-sub">Select a competition from the registry to open this view</div>
-</div>
-<div class="mini-card">
-<div class="mini-label">Sport</div>
-<div class="mini-value">Unassigned</div>
-<div class="mini-sub">Details adjust to the selected sport</div>
-</div>
-<div class="mini-card">
-<div class="mini-label">Structure</div>
-<div class="mini-value">Dynamic</div>
-<div class="mini-sub">Rounds, heats, divisions, or event grouping</div>
-</div>
-</div>
 </section>
+<details class="card collapsible-section hidden" id="editCompetitionPanel">
+<summary>Edit Competition</summary>
+<section>
+<form class="filter-grid" id="competitionEditForm" novalidate>
+<div><label for="editCompetitionTitle">Competition Title</label><input class="input" id="editCompetitionTitle" type="text" /></div>
+<div><label for="editCompetitionSport">Sport</label><select class="select" id="editCompetitionSport"><option value="">Select sport</option></select></div>
+<div><label for="editCompetitionFormat">Format</label><select class="select" id="editCompetitionFormat"><option value="">Select format</option><option value="league">League</option><option value="round-robin">Round Robin</option><option value="knockout">Knockout</option><option value="heats-final">Heats + Final</option><option value="timed-final">Timed Final</option><option value="custom">Custom</option></select></div>
+<div><label for="editCompetitionSeason">Season</label><input class="input" id="editCompetitionSeason" type="text" /></div>
+<div><label for="editCompetitionStart">Start Date</label><input class="input" id="editCompetitionStart" type="date" /></div>
+<div><label for="editCompetitionEnd">End Date</label><input class="input" id="editCompetitionEnd" type="date" /></div>
+<div><label for="editCompetitionStatus">Status</label><select class="select" id="editCompetitionStatus"><option value="DRAFT">Draft</option><option value="ACTIVE">Active</option><option value="COMPLETED">Completed</option><option value="ARCHIVED">Archived</option></select></div>
+<div style="display:flex;align-items:flex-end;"><button class="btn btn-campus" style="width:100%;" type="submit">Save Competition</button></div>
+</form>
+<div class="message" id="competitionEditMessage" aria-live="polite"></div>
+</section>
+</details>
 <section class="card" id="competitionMeta"></section>
+<section class="card" id="competitionRecentResults"></section>
 <section class="card" id="competitionStructure"></section>
-<section class="grid grid-2">
-<section class="card" id="competitionParticipants"></section>
-<section class="card" id="competitionResults"></section>
-</section>
 <section class="grid grid-2">
 <section class="card" id="competitionStats"></section>
 <section class="card" id="competitionAudit"></section>
@@ -109,6 +101,7 @@
 <a href="legal.html">Legal</a>
 </div>
 </footer>
+<script src="config.js"></script>
 <script src="uwi-app.js"></script>
 
 <script src="competition-view.js"></script>

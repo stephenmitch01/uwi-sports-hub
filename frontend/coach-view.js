@@ -12,7 +12,8 @@
     session: null,
     coachId: null,
     coach: null,
-    teams: []
+    teams: [],
+    staffAssignments: []
   };
 
   const els = {
@@ -24,6 +25,9 @@
     coachPrimaryRolePill: document.getElementById("coachPrimaryRolePill"),
     coachNotesPreview: document.getElementById("coachNotesPreview"),
     editCoachBtn: document.getElementById("editCoachBtn"),
+    editCoachPanel: document.getElementById("editCoachPanel"),
+    coachEditForm: document.getElementById("coachEditForm"),
+    coachEditMessage: document.getElementById("coachEditMessage"),
     printBtn: document.getElementById("printBtn"),
     assignedTeamsStat: document.getElementById("assignedTeamsStat"),
     sportsCoveredStat: document.getElementById("sportsCoveredStat"),
@@ -31,6 +35,7 @@
     statusStat: document.getElementById("statusStat"),
     primarySportStat: document.getElementById("primarySportStat"),
     contactReadyStat: document.getElementById("contactReadyStat"),
+    coachCompletenessStat: document.getElementById("coachCompletenessStat"),
     firstNameValue: document.getElementById("firstNameValue"),
     lastNameValue: document.getElementById("lastNameValue"),
     emailValue: document.getElementById("emailValue"),
@@ -68,7 +73,7 @@
       if (!session) return;
       state.session = session;
 
-      await Promise.all([loadCoach(), loadTeams()]);
+      await Promise.all([loadCoach(), loadTeams(), loadCoachAssignments()]);
       validateCoachCampus();
       renderCoachView();
     } catch (error) {
@@ -88,6 +93,20 @@
         window.print();
       });
     }
+
+    if (els.editCoachBtn && els.editCoachPanel) {
+      els.editCoachBtn.addEventListener("click", function () {
+        els.editCoachPanel.classList.remove("hidden");
+        els.editCoachPanel.open = true;
+        els.editCoachPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    if (els.coachEditForm) {
+      APP.trackUnsavedChanges(els.coachEditForm);
+      els.coachEditForm.addEventListener("submit", handleEditCoachSubmit);
+    }
+    mountArchiveButton();
   }
 
   function getCoachIdFromUrl() {
@@ -101,12 +120,27 @@
   }
 
   async function loadTeams() {
-    const data = await APP.apiGet("/teams", true);
+    const data = await APP.apiGet("/teams?includeArchived=true", true);
     state.teams =
+      Array.isArray(data) ? data :
       Array.isArray(data?.teams) ? data.teams :
       Array.isArray(data?.data?.teams) ? data.data.teams :
       Array.isArray(data?.data) ? data.data :
       [];
+  }
+
+  async function loadCoachAssignments() {
+    const data = await APP.apiGet(`/team-staff-assignments?coachId=${encodeURIComponent(state.coachId)}`, true);
+    const rows =
+      Array.isArray(data) ? data :
+      Array.isArray(data?.assignments) ? data.assignments :
+      Array.isArray(data?.staffAssignments) ? data.staffAssignments :
+      Array.isArray(data?.data?.assignments) ? data.data.assignments :
+      Array.isArray(data?.data) ? data.data :
+      [];
+    state.staffAssignments = rows.filter(function (assignment) {
+      return String(assignment.coachId || assignment.staffId || assignment.coach?.id || "") === String(state.coachId);
+    });
   }
 
   function normalizeCoach(raw) {
@@ -145,9 +179,7 @@
     const statusLabel = formatStatus(coach.status);
     const notes = coach.notes || "No notes available for this coach/staff record yet.";
 
-    if (els.editCoachBtn) {
-      els.editCoachBtn.href = `coaches.html?coachId=${encodeURIComponent(String(coach.id || state.coachId))}`;
-    }
+    populateCoachEditForm(coach);
 
     if (els.coachNameHeading) els.coachNameHeading.textContent = coach.fullName || "Coach Profile";
     if (els.coachRoleSportLine) els.coachRoleSportLine.textContent = `${primaryRole} • ${primarySport}`;
@@ -170,31 +202,153 @@
 
     const uniqueTeamIds = new Set();
     const uniqueSports = new Set();
+    const uniqueTeamNames = new Set();
     assignments.forEach(function (assignment) {
       const teamId = assignment.teamId || assignment.team?.id || null;
       const team = resolveTeam(teamId) || assignment.team || null;
       if (teamId) uniqueTeamIds.add(String(teamId));
+      const teamName = team?.name || team?.teamName || assignment.teamName || assignment.team?.name || "";
+      if (teamName) uniqueTeamNames.add(teamName);
       const sportValue = team?.sport || team?.sportSlug || coach.sport || "";
       if (sportValue) uniqueSports.add(APP.getSportName(sportValue));
     });
 
-    if (els.assignedTeamsStat) els.assignedTeamsStat.textContent = String(uniqueTeamIds.size);
+    if (els.assignedTeamsStat) els.assignedTeamsStat.textContent = Array.from(uniqueTeamNames).slice(0, 2).join(", ") || "Not assigned";
     if (els.sportsCoveredStat) els.sportsCoveredStat.textContent = String(uniqueSports.size || (coach.sport ? 1 : 0));
     if (els.primaryRoleStat) els.primaryRoleStat.textContent = primaryRole;
     if (els.statusStat) els.statusStat.textContent = statusLabel;
     if (els.primarySportStat) els.primarySportStat.textContent = primarySport;
     if (els.contactReadyStat) els.contactReadyStat.textContent = coach.email || coach.phone ? "Yes" : "No";
+    if (els.coachCompletenessStat) els.coachCompletenessStat.innerHTML = completenessMarkup(getCoachCompleteness(coach), true);
 
     renderAssignments(assignments);
     renderTeamsSummary(assignments);
   }
 
+  function populateCoachEditForm(coach) {
+    const sportSelect = document.getElementById("editCoachSport");
+    if (sportSelect) {
+      sportSelect.innerHTML = `<option value="">Select sport</option>${APP.SPORT_REGISTRY.map((sport) => `<option value="${escapeHtml(sport.name)}">${escapeHtml(sport.name)}</option>`).join("")}`;
+    }
+    const teamSelect = document.getElementById("editCoachTeam");
+    if (teamSelect) {
+      teamSelect.innerHTML = `<option value="">${state.teams.length ? "No team selected" : "No teams available"}</option>${state.teams.map((team) => `<option value="${escapeHtml(team.id)}">${escapeHtml(team.name || team.teamName || "Team")}</option>`).join("")}`;
+      teamSelect.disabled = !state.teams.length;
+    }
+    const primaryAssignment = getAssignments(coach)[0] || {};
+    setField("editCoachFirstName", coach.firstName);
+    setField("editCoachLastName", coach.lastName);
+    setField("editCoachEmail", coach.email);
+    setField("editCoachPhone", coach.phone);
+    setField("editCoachRole", coach.role);
+    setField("editCoachOtherRole", coach.otherRoleTitle);
+    setField("editCoachSport", coach.sport);
+    setField("editCoachTeam", primaryAssignment.teamId || primaryAssignment.team?.id || coach.teamId || "");
+    setField("editCoachAssignmentRole", primaryAssignment.role || primaryAssignment.roleLabel || "");
+    setField("editCoachStatus", String(coach.status || "active").toLowerCase());
+    setField("editCoachNotes", coach.notes);
+  }
+
+  async function handleEditCoachSubmit(event) {
+    event.preventDefault();
+    clearEditMessage();
+
+    const payload = {
+      firstName: getField("editCoachFirstName"),
+      lastName: getField("editCoachLastName"),
+      email: getField("editCoachEmail") || null,
+      phone: getField("editCoachPhone") || null,
+      primaryRole: getField("editCoachRole"),
+      otherRoleTitle: getField("editCoachOtherRole") || null,
+      primarySport: getField("editCoachSport"),
+      teamId: getField("editCoachTeam"),
+      activeStaffAssignment: getField("editCoachTeam")
+        ? {
+            teamId: getField("editCoachTeam"),
+            role: getField("editCoachAssignmentRole") || getField("editCoachRole"),
+            isPrimary: true,
+            status: "active"
+          }
+        : null,
+      status: getField("editCoachStatus") || "active",
+      notes: getField("editCoachNotes") || null,
+      campus: state.session?.campus,
+      updatedAt: state.coach?.updatedAt
+    };
+
+    if (!payload.firstName || !payload.lastName || !payload.primaryRole || !payload.primarySport) {
+      setEditMessage("First name, last name, role, and sport are required.", "error");
+      return;
+    }
+
+    try {
+      if (!APP.confirmReportImpact(getAssignments(state.coach).length)) return;
+      await APP.apiPatch(`/coaches/${encodeURIComponent(state.coachId)}`, payload);
+      setEditMessage("Coach updated successfully.", "success");
+      await Promise.all([loadCoach(), loadCoachAssignments()]);
+      renderCoachView();
+    } catch (error) {
+      setEditMessage(error?.message || "Failed to update coach.", "error");
+    }
+  }
+
+  function mountArchiveButton() {
+    if (!els.editCoachBtn || document.getElementById("archiveCoachBtn")) return;
+    const button = document.createElement("button");
+    button.id = "archiveCoachBtn";
+    button.className = "btn btn-soft";
+    button.type = "button";
+    button.textContent = "Archive";
+    button.addEventListener("click", async function () {
+      if (!state.coach || !APP.confirmArchive("coach", state.coach)) return;
+      await APP.apiPatch(`/coaches/${encodeURIComponent(state.coachId)}/archive`, { updatedAt: state.coach.updatedAt });
+      window.location.href = "coaches.html";
+    });
+    els.editCoachBtn.insertAdjacentElement("afterend", button);
+  }
+
   function getAssignments(coach) {
     if (!coach) return [];
-    if (Array.isArray(coach.assignments)) return coach.assignments;
-    if (Array.isArray(coach.teamAssignments)) return coach.teamAssignments;
-    if (Array.isArray(coach.staffAssignments)) return coach.staffAssignments;
-    return [];
+    const embedded =
+      Array.isArray(coach.assignments) ? coach.assignments :
+      Array.isArray(coach.teamAssignments) ? coach.teamAssignments :
+      Array.isArray(coach.staffAssignments) ? coach.staffAssignments :
+      [];
+    const merged = [...embedded, ...state.staffAssignments];
+    const seen = new Set();
+    return merged
+      .filter(function (assignment) {
+        const coachId = assignment.coachId || assignment.staffId || assignment.coach?.id || state.coachId;
+        if (String(coachId || "") !== String(state.coachId)) return false;
+        const key = `${assignment.teamId || assignment.team?.id || ""}:${coachId}:${assignment.role || assignment.roleLabel || ""}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .map(function (assignment) {
+        const team = assignment.team || resolveTeam(assignment.teamId || assignment.team?.id);
+        return { ...assignment, team };
+      });
+  }
+
+  function getCoachCompleteness(coach) {
+    const checks = [
+      coach.firstName,
+      coach.lastName,
+      coach.role,
+      coach.sport,
+      coach.email || coach.phone,
+      coach.status,
+      getAssignments(coach).length,
+      coach.notes
+    ];
+    return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  }
+
+  function completenessMarkup(score, large) {
+    const normalized = Math.max(0, Math.min(100, Number(score) || 0));
+    const wrapperClass = large ? "completeness-large" : "completeness-cell";
+    return `<div class="${wrapperClass}"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
   function renderAssignments(assignments) {
@@ -216,13 +370,13 @@
       const team = resolveTeam(teamId) || assignment.team || null;
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td>${escapeHtml(team?.name || team?.teamName || "Unknown Team")}</td>
+        <td>${escapeHtml(team?.name || team?.teamName || assignment.teamName || assignment.team?.name || "Unknown Team")}</td>
         <td>${escapeHtml(APP.getSportName(team?.sport || team?.sportSlug || "") || "—")}</td>
         <td>${escapeHtml(formatRole(assignment.role, assignment.otherRoleTitle))}</td>
         <td>${assignment.isPrimary ? "Yes" : "No"}</td>
         <td>${escapeHtml(team?.seasonLabel || team?.season || "—")}</td>
         <td>${escapeHtml(formatGenericStatus(team?.status))}</td>
-        <td>${team?.id ? `<a class="link-btn" href="team-view.html?id=${encodeURIComponent(String(team.id))}">View Team</a>` : "—"}</td>
+        <td>${team?.id ? `<a class="btn btn-campus" href="team-view.html?id=${encodeURIComponent(String(team.id))}">View Team</a>` : "—"}</td>
       `;
       fragment.appendChild(row);
     });
@@ -255,7 +409,7 @@
         <td>${escapeHtml(APP.getSportName(team?.sport || team?.sportSlug || "") || "—")}</td>
         <td>${escapeHtml(stringValue(team?.rosterCount))}</td>
         <td>${escapeHtml(stringValue(team?.staffCount))}</td>
-        <td>${team?.id ? `<a class="link-btn" href="team-view.html?id=${encodeURIComponent(String(team.id))}">Open</a>` : "—"}</td>
+        <td>${team?.id ? `<a class="btn btn-campus" href="team-view.html?id=${encodeURIComponent(String(team.id))}">Open</a>` : "—"}</td>
       `;
       fragment.appendChild(row);
     });
@@ -328,6 +482,25 @@
 
   function stringValue(value) {
     return value === null || value === undefined || value === "" ? "—" : String(value);
+  }
+
+  function setField(id, value) {
+    const node = document.getElementById(id);
+    if (node) node.value = value == null ? "" : String(value);
+  }
+
+  function getField(id) {
+    return String(document.getElementById(id)?.value || "").trim();
+  }
+
+  function setEditMessage(message, type) {
+    if (!els.coachEditMessage) return;
+    els.coachEditMessage.className = `message ${type || ""}`.trim();
+    els.coachEditMessage.textContent = message || "";
+  }
+
+  function clearEditMessage() {
+    setEditMessage("", "");
   }
 
   function setError(message) {

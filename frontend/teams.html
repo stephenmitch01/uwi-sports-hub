@@ -56,43 +56,63 @@
 <p class="muted">
           Create and manage teams, assign squad structures, and open team pages for roster and staff control.
         </p>
-<div class="pill-row">
-<span class="status-pill ok">Campus-scoped</span>
-<span class="status-pill subtle">Squad management</span>
-<span class="status-pill subtle">Team view linked</span>
-</div>
 <div class="quick-actions">
 <a class="btn btn-campus" href="dashboard.html">Dashboard</a>
 <a class="btn btn-soft" href="athletes.html">Open Athletes</a>
+<a class="btn btn-campus" href="#teamWorkflows">Add / Edit Team</a>
 </div>
-<p class="fine">
-          Teams created here are automatically assigned to
-          <strong data-campus-name></strong>.
-        </p>
 </div>
 <div class="head-right">
 <div class="mini-card">
-<div class="mini-label">Campus Scope</div>
-<div class="mini-value" data-campus-name></div>
-<div class="mini-sub">Only teams for this campus are managed here</div>
+<div class="mini-label">Total Teams</div>
+<div class="mini-value" id="totalTeamsStat">0</div>
+<div class="mini-sub">Campus team records</div>
 </div>
 <div class="mini-card">
-<div class="mini-label">Management</div>
-<div class="mini-value">Squads</div>
-<div class="mini-sub">Create, edit, and open squads for roster and staff operations</div>
+<div class="mini-label">Active Teams</div>
+<div class="mini-value" id="activeTeamsStat">0</div>
+<div class="mini-sub">Currently active squads</div>
 </div>
 <div class="mini-card">
-<div class="mini-label">Routing</div>
-<div class="mini-value">Team View</div>
-<div class="mini-sub">Each squad opens into a detailed team page</div>
+<div class="mini-label">Sports Covered</div>
+<div class="mini-value" id="teamSportsStat">0</div>
+<div class="mini-sub">Sports represented by teams</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Avg Roster Size</div>
+<div class="mini-value" id="averageRosterStat">0</div>
+<div class="mini-sub">Athletes per team</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Teams Without Coach</div>
+<div class="mini-value" id="teamsWithoutCoachStat">0</div>
+<div class="mini-sub">Need staff assignment</div>
 </div>
 </div>
 </section>
 <div aria-live="polite" class="message" id="teamsPageMessage"></div>
-<section class="card">
+<section class="insight-grid" aria-label="Team operational insights">
+<article class="insight-card alert-card">
+<div class="insight-label">Operational Alerts</div>
+<div id="teamAlerts" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Recent Activity</div>
+<div id="teamActivity" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Team Setup Quality</div>
+<div class="quality-score" id="teamQualityScore">0%</div>
+<div class="quality-track"><span id="teamQualityBar"></span></div>
+<p id="teamQualityCopy" class="fine"></p>
+</article>
+</section>
+<details class="card collapsible-section" id="teamsListPanel" open>
+<summary>Teams List</summary>
+<section>
 <div class="section-title">
 <div>
-<h2>Filters</h2>
+<h2>Teams List</h2>
 <p>Search and filter teams for this campus.</p>
 </div>
 </div>
@@ -119,8 +139,40 @@
 <label for="teamSeasonFilter">Season</label>
 <input class="input" id="teamSeasonFilter" placeholder="e.g. 2026" type="text"/>
 </div>
+<div>
+<label for="teamQualityFilter">Record Quality</label>
+<select class="select" id="teamQualityFilter">
+<option value="">All records</option>
+<option value="incomplete">Incomplete records</option>
+</select>
+</div>
+<div>
+<label>&nbsp;</label>
+<button class="btn btn-campus" id="teamSearchButton" type="button" style="width:100%;">Search</button>
+</div>
+</div>
+<div class="data-table-wrap">
+<table class="table">
+<thead>
+<tr>
+<th>Team</th>
+<th>Sport</th>
+<th>Division</th>
+<th>Season</th>
+<th>Status</th>
+<th>Campus</th>
+<th>Notes</th>
+<th>Setup Completeness</th>
+<th>Open</th>
+</tr>
+</thead>
+<tbody id="teamsTableBody"></tbody>
+</table>
 </div>
 </section>
+</details>
+<details class="card collapsible-section" id="teamWorkflows">
+<summary>Add / Edit Team</summary>
 <section class="grid grid-2">
 <section class="card">
 <div class="section-title">
@@ -213,31 +265,7 @@
 </form>
 </section>
 </section>
-<section class="card">
-<div class="section-title">
-<div>
-<h2>Teams List</h2>
-<p>All squads currently in the system for <span data-campus-name></span>.</p>
-</div>
-</div>
-<div class="data-table-wrap">
-<table class="table">
-<thead>
-<tr>
-<th>Team</th>
-<th>Sport</th>
-<th>Division</th>
-<th>Season</th>
-<th>Status</th>
-<th>Campus</th>
-<th>Notes</th>
-<th>Open</th>
-</tr>
-</thead>
-<tbody id="teamsTableBody"></tbody>
-</table>
-</div>
-</section>
+</details>
 </main>
 <footer class="footer">
 <div class="footer-left">
@@ -250,5 +278,5 @@
 </div>
 </footer>
 
-<script src="uwi-app.js"></script><script src="teams.js"></script></body>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="teams.js"></script></body>
 </html>

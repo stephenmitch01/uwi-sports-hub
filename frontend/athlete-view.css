@@ -9,11 +9,23 @@
 .hero-copy h1{font-size:38px;line-height:1.08;letter-spacing:-.7px;color:#102033;margin-top:8px}
 .hero-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
 .hero-meta .detail-item{background:#fbfcfd}
-.hero-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hero-side{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .hero-side .mini-card{min-height:92px}
+.compact-section-title{margin-top:22px}
+.compact-content-card{align-self:start}
+.compact-content-card .data-table-wrap{margin-top:10px}
+.compact-content-card .table{margin-bottom:0}
 .info-grid{align-items:start}
 #athleteStatsSection .section-title,#athletePersonalBests .section-title,#athleteStatEntry .section-title,#athleteHistory .section-title,#athleteTeams .section-title,#athleteRecords .section-title{margin-bottom:14px}
 #athleteStatsSection .data-table-wrap,#athleteHistory .data-table-wrap,#athleteRecords .data-table-wrap{margin-top:14px}
 #athleteStatEntry form{display:grid;gap:12px}
 #athleteStatEntry .form-actions{justify-content:flex-start}
-@media (max-width:1120px){.hero-main,.hero-side,.hero-meta{grid-template-columns:1fr}.hero-profile{flex-direction:column}.avatar-shell{width:112px;height:112px}.hero-copy h1{font-size:32px}}
+.summary-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.collapsible-section{padding:0;overflow:hidden}
+.collapsible-section>summary{cursor:pointer;list-style:none;padding:18px 22px;font-size:18px;font-weight:600;color:#0f2742;display:flex;justify-content:space-between;align-items:center}
+.collapsible-section>summary::-webkit-details-marker{display:none}
+.collapsible-section>summary::after{content:"Open";font-size:13px;color:#4d5870;border:1px solid rgba(15,39,66,.14);border-radius:999px;padding:5px 10px}
+.collapsible-section[open]>summary{border-bottom:1px solid rgba(15,39,66,.1)}
+.collapsible-section[open]>summary::after{content:"Close"}
+.collapsible-section>section{padding:18px 22px}
+@media (max-width:1120px){.hero-main,.hero-side,.hero-meta,.summary-cards{grid-template-columns:1fr}.hero-profile{flex-direction:column}.avatar-shell{width:112px;height:112px}.hero-copy h1{font-size:32px}}

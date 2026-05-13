@@ -60,7 +60,6 @@
 <img alt="Athlete headshot" hidden="" id="athleteHeadshot"/>
 </div>
 <div class="hero-copy">
-<div class="pill-row" id="heroPills"></div>
 <h1 id="heroName">Athlete View</h1>
 <p class="muted" id="heroSummary">
               Internal athlete profile showing identity, body details, roster information, stats, personal bests, and competition-linked records.
@@ -68,6 +67,7 @@
 <div class="hero-meta" id="heroMeta"></div>
 <div class="quick-actions">
 <a class="btn btn-campus" href="athletes.html">Back to Athletes</a>
+<button class="btn btn-campus" id="editAthleteBtn" type="button">Edit Athlete</button>
 <a class="btn btn-soft" href="competitions.html">Open Competitions</a>
 <button class="btn btn-soft" id="downloadSummaryBtn" type="button">
                 Generate Athlete Summary PDF
@@ -78,24 +78,53 @@
 <aside class="hero-side" id="heroSideCards"></aside>
 </div>
 </section>
-<section class="grid grid-2 info-grid">
+<details class="card collapsible-section hidden" id="editAthletePanel">
+<summary>Edit Athlete</summary>
+<section>
+<form id="athleteEditForm" novalidate>
+<div class="filter-grid">
+<div><label for="editAthleteFirstName">First Name</label><input class="input" id="editAthleteFirstName" type="text" /></div>
+<div><label for="editAthleteLastName">Last Name</label><input class="input" id="editAthleteLastName" type="text" /></div>
+<div><label for="editAthleteType">Athlete Type</label><select class="select" id="editAthleteType"><option value="student-athlete">Student-Athlete</option><option value="non-student representative">Non-Student Representative</option><option value="alumni representative">Alumni Representative</option><option value="other approved representative">Other Approved Representative</option></select></div>
+<div><label for="editAthleteDateOfBirth">Date of Birth</label><input class="input" id="editAthleteDateOfBirth" type="date" /></div>
+<div><label for="editAthleteGender">Sex</label><select class="select" id="editAthleteGender"><option value="">Not recorded</option><option value="male">Male</option><option value="female">Female</option></select></div>
+<div><label for="editAthleteEmail">Email</label><input class="input" id="editAthleteEmail" type="email" /></div>
+<div><label for="editAthletePhone">Phone</label><input class="input" id="editAthletePhone" type="text" /></div>
+<div><label for="editAthleteStudentId">Student ID</label><input class="input" id="editAthleteStudentId" type="text" /></div>
+<div><label for="editAthleteYear">Year of Study</label><input class="input" id="editAthleteYear" type="text" /></div>
+<div><label for="editAthleteFaculty">Faculty</label><input class="input" id="editAthleteFaculty" type="text" /></div>
+<div><label for="editAthleteProgram">Program</label><input class="input" id="editAthleteProgram" type="text" /></div>
+<div><label for="editAthleteNationality">Nationality</label><input class="input" id="editAthleteNationality" type="text" /></div>
+<div><label for="editAthleteHometown">Hometown</label><input class="input" id="editAthleteHometown" type="text" /></div>
+<div><label for="editAthleteStatus">Status</label><select class="select" id="editAthleteStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+<div><label for="editAthletePrimarySport">Primary Sport</label><select class="select" id="editAthletePrimarySport"><option value="">Not set</option></select></div>
+<div><label for="editAthletePosition">Position / Role</label><input class="input" id="editAthletePosition" type="text" /></div>
+<div><label for="editAthleteEvents">Events / Specialties</label><input class="input" id="editAthleteEvents" type="text" /></div>
+<div><label for="editAthleteHeight">Height (cm)</label><input class="input" id="editAthleteHeight" min="0" step="0.1" type="number" /></div>
+<div><label for="editAthleteWeight">Weight (kg)</label><input class="input" id="editAthleteWeight" min="0" step="0.1" type="number" /></div>
+<div><label for="editAthleteHand">Dominant Hand</label><input class="input" id="editAthleteHand" type="text" /></div>
+<div><label for="editAthleteLeg">Dominant Leg</label><input class="input" id="editAthleteLeg" type="text" /></div>
+<div><label for="editAthleteTeam">Squad / Team</label><select class="select" id="editAthleteTeam"><option value="">No squad selected</option></select></div>
+<div><label for="editAthleteRole">Squad Role</label><input class="input" id="editAthleteRole" type="text" /></div>
+<div><label for="editAthleteJersey">Jersey / Bib</label><input class="input" id="editAthleteJersey" type="text" /></div>
+<div><label for="editAthleteCaptain">Captain</label><select class="select" id="editAthleteCaptain"><option value="false">No</option><option value="true">Yes</option></select></div>
+</div>
+<div class="form-actions"><button class="btn btn-campus" type="submit">Save Athlete</button></div>
+<div class="message" id="athleteEditMessage" aria-live="polite"></div>
+</form>
+</section>
+</details>
 <section class="card" id="athleteBodyInfo">
-<!-- JS renders body info -->
-</section>
-<section class="card" id="athleteInfo">
-<!-- JS renders athlete info -->
-</section>
+<!-- JS renders body and athlete info -->
 </section>
 <section class="card" id="athleteStatsSection">
 <!-- JS renders season filter, all-time stats, detailed stat table -->
 </section>
-<section class="grid grid-2">
-<section class="card" id="athletePersonalBests">
+<section class="card compact-content-card" id="athletePersonalBests">
 <!-- JS renders PBs / best performances -->
 </section>
 <section class="card" id="athleteStatEntry">
 <!-- JS renders direct stat entry + PB entry form -->
-</section>
 </section>
 <section class="grid grid-2">
 <section class="card" id="athleteHistory">
@@ -119,6 +148,7 @@
 <a href="legal.html">Legal</a>
 </div>
 </footer>
+<script src="config.js"></script>
 <script src="uwi-app.js"></script>
 <script src="athlete-view.js"></script>
 </body>

@@ -61,7 +61,7 @@
         setSubmitting(true);
         try {
           await APP.apiPost("/support-requests", payload, { redirectOn401: true });
-          APP.showSuccess?.(supportMessageBox, `Support request submitted from ${payload.email} (${campusLabel(session)}).`);
+          APP.showSuccess?.(supportMessageBox, `Support request saved for review from ${payload.email} (${campusLabel(session)}).`);
           if (supportTopic) supportTopic.value = "";
           if (supportMessage) supportMessage.value = "";
         } catch (error) {

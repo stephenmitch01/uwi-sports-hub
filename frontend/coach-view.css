@@ -1,1 +1,19 @@
 .notes-box p{color:var(--muted);line-height:1.7}
+.collapsible-section{padding:0;overflow:hidden}
+.collapsible-section>summary{cursor:pointer;list-style:none;padding:18px 22px;font-size:18px;font-weight:600;color:#0f2742;display:flex;justify-content:space-between;align-items:center}
+.collapsible-section>summary::-webkit-details-marker{display:none}
+.collapsible-section>summary::after{content:"Open";font-size:13px;color:#4d5870;border:1px solid rgba(15,39,66,.14);border-radius:999px;padding:5px 10px}
+.collapsible-section[open]>summary{border-bottom:1px solid rgba(15,39,66,.1)}
+.collapsible-section[open]>summary::after{content:"Close"}
+.collapsible-section>section{padding:18px 22px}
+.head-right .mini-card:has(#sportsCoveredStat),
+.head-right .mini-card:has(#primaryRoleStat),
+.head-right .mini-card:has(#statusStat),
+.head-right .mini-card:has(#contactReadyStat) {
+  display: none;
+}
+
+.head-right .mini-value {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

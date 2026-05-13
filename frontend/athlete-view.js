@@ -11,9 +11,11 @@
     personalBests: [],
     history: [],
     teams: [],
+    allTeams: [],
     records: [],
     filteredSeason: "all",
-    searchTerm: ""
+    searchTerm: "",
+    editBound: false
   };
 
   const params = new URLSearchParams(window.location.search);
@@ -37,7 +39,11 @@
     athleteHistory: document.getElementById("athleteHistory"),
     athleteTeams: document.getElementById("athleteTeams"),
     athleteRecords: document.getElementById("athleteRecords"),
-    downloadSummaryBtn: document.getElementById("downloadSummaryBtn")
+    downloadSummaryBtn: document.getElementById("downloadSummaryBtn"),
+    editAthleteBtn: document.getElementById("editAthleteBtn"),
+    editAthletePanel: document.getElementById("editAthletePanel"),
+    athleteEditForm: document.getElementById("athleteEditForm"),
+    athleteEditMessage: document.getElementById("athleteEditMessage")
   };
 
   document.addEventListener("DOMContentLoaded", init);
@@ -74,14 +80,31 @@
     const athlete = await getAthlete(state.athleteId);
     state.athlete = normalizeAthlete(athlete);
 
-    const payload = await getAthletePerformanceBundle(state.athleteId);
+    const [payload, teamsPayload] = await Promise.all([
+      getAthletePerformanceBundle(state.athleteId),
+      APP.apiGet("/teams", true)
+    ]);
     state.stats = Array.isArray(payload.stats) ? payload.stats.map(normalizeStatLine) : [];
     state.personalBests = Array.isArray(payload.personalBests) ? payload.personalBests.map(normalizePB) : [];
     state.history = Array.isArray(payload.history) ? payload.history : [];
     state.teams = Array.isArray(payload.teams) ? payload.teams : [];
+    state.allTeams = normalizeArray(teamsPayload, ["teams", "data", "items"]);
     state.records = Array.isArray(payload.records) ? payload.records : [];
+    enrichAthleteTeamContext();
 
+    bindEditWorkflow();
     renderAll();
+  }
+
+  function normalizeArray(payload, keys) {
+    if (Array.isArray(payload)) return payload;
+    if (!payload || typeof payload !== "object") return [];
+    for (const key of keys) {
+      if (Array.isArray(payload[key])) return payload[key];
+      if (payload.data && Array.isArray(payload.data[key])) return payload.data[key];
+    }
+    if (Array.isArray(payload.data)) return payload.data;
+    return [];
   }
 
   async function getAthlete(id) {
@@ -123,6 +146,13 @@
 
   function normalizeAthlete(raw) {
     const athlete = raw?.athlete || raw || {};
+    const profile = athlete.profile && typeof athlete.profile === "object" ? athlete.profile : {};
+    const roster = athlete.activeRosterAssignment && typeof athlete.activeRosterAssignment === "object"
+      ? athlete.activeRosterAssignment
+      : {};
+    const heightValue = athlete.height || athlete.heightCm || profile.heightCm || "";
+    const weightValue = athlete.weight || athlete.weightKg || profile.weightKg || "";
+    const facultyProgramParts = String(athlete.facultyProgram || "").split("/").map((item) => item.trim()).filter(Boolean);
 
     return {
       id: athlete.id || state.athleteId || "",
@@ -132,30 +162,34 @@
         athlete.fullName ||
         [athlete.firstName, athlete.lastName].filter(Boolean).join(" ") ||
         "Unknown Athlete",
-      sport: athlete.sport || athlete.primarySport || "Sport not assigned",
+      sport: athlete.sport || athlete.primarySport || profile.sportSlug || "Sport not assigned",
       athleteType: athlete.athleteType || "Athlete",
       campus: athlete.campus || state.session?.campus || "",
-      teamName: athlete.teamName || athlete.team || "",
-      squadName: athlete.squadName || athlete.squad || "",
+      activeRosterAssignment: roster,
+      teamId: athlete.teamId || roster.teamId || "",
+      teamName: athlete.teamName || athlete.team || roster.teamName || "",
+      squadName: athlete.squadName || athlete.squad || roster.squadName || roster.squad || roster.division || roster.teamName || athlete.teamName || "",
       status: athlete.status || "Active",
       schoolOrClub: athlete.schoolOrClub || athlete.school || athlete.club || "",
-      age: athlete.age || "",
-      dateOfBirth: athlete.dateOfBirth || athlete.dob || "",
-      gender: athlete.gender || "",
+      dateOfBirth: athlete.dateOfBirth || athlete.dob || profile.dateOfBirth || "",
+      gender: normalizeGender(athlete.gender || profile.gender || ""),
+      age: athlete.age || calculateAge(athlete.dateOfBirth || athlete.dob || profile.dateOfBirth || ""),
       phone: athlete.phone || "",
       email: athlete.email || "",
-      handedness: athlete.handedness || athlete.dominantHand || "",
-      dominantFoot: athlete.dominantFoot || "",
-      height: athlete.height || "",
-      weight: athlete.weight || "",
-      position: athlete.position || "",
-      events: Array.isArray(athlete.events) ? athlete.events : [],
+      handedness: athlete.handedness || athlete.dominantHand || profile.dominantHand || "",
+      dominantFoot: athlete.dominantFoot || athlete.dominantLeg || profile.dominantLeg || "",
+      height: heightValue ? `${heightValue}${String(heightValue).includes("cm") ? "" : " cm"}` : "",
+      weight: weightValue ? `${weightValue}${String(weightValue).includes("kg") ? "" : " kg"}` : "",
+      position: athlete.position || profile.position || "",
+      events: Array.isArray(athlete.events)
+        ? athlete.events
+        : String(profile.eventsSpecialties || "").split(",").map((item) => item.trim()).filter(Boolean),
       yearOfStudy: athlete.yearOfStudy || "",
-      faculty: athlete.faculty || "",
-      program: athlete.program || "",
+      faculty: athlete.faculty || profile.faculty || facultyProgramParts[0] || "",
+      program: athlete.program || profile.program || facultyProgramParts[1] || "",
       studentId: athlete.studentId || "",
-      nationality: athlete.nationality || "",
-      hometown: athlete.hometown || "",
+      nationality: athlete.nationality || profile.nationality || "",
+      hometown: athlete.hometown || profile.hometown || "",
       bio: athlete.bio || "",
       imageUrl: athlete.imageUrl || athlete.headshotUrl || athlete.photoUrl || "",
       createdAt: athlete.createdAt || "",
@@ -176,8 +210,25 @@
       date: raw.date || raw.achievedDate || "",
       verified: Boolean(raw.verified),
       linkedCompetitionId: raw.linkedCompetitionId || raw.competitionId || "",
-      notes: raw.notes || ""
+      notes: raw.notes || "",
+      sport: raw.sport || raw.sportSlug || "",
+      eventType: raw.eventType || "",
+      statData: raw.statData || raw.data || {}
     };
+  }
+
+  function enrichAthleteTeamContext() {
+    if (!state.athlete) return;
+    const roster = state.athlete.activeRosterAssignment || {};
+    const association = state.teams.find((item) => {
+      const teamId = item.teamId || item.team?.id || item.activeRosterAssignment?.teamId || item.id || "";
+      return String(teamId || "") === String(state.athlete.teamId || roster.teamId || "");
+    });
+    const teamId = state.athlete.teamId || roster.teamId || association?.teamId || association?.team?.id || association?.id || "";
+    const team = state.allTeams.find((entry) => String(entry.id || "") === String(teamId || ""));
+    state.athlete.teamId = teamId || state.athlete.teamId || "";
+    state.athlete.teamName = state.athlete.teamName || association?.teamName || association?.team?.name || team?.name || team?.teamName || "";
+    state.athlete.squadName = state.athlete.squadName || association?.squadName || association?.squad || association?.division || team?.division || team?.squadName || state.athlete.teamName || team?.name || team?.teamName || "";
   }
 
   function normalizePB(raw) {
@@ -203,16 +254,158 @@
     renderHistory();
     renderTeams();
     renderRecords();
+    populateEditForm();
+  }
+
+  function bindEditWorkflow() {
+    if (state.editBound) return;
+    state.editBound = true;
+    if (els.editAthleteBtn && els.editAthletePanel) {
+      els.editAthleteBtn.addEventListener("click", function () {
+        els.editAthletePanel.classList.remove("hidden");
+        els.editAthletePanel.open = true;
+        els.editAthletePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    if (els.athleteEditForm) {
+      APP.trackUnsavedChanges(els.athleteEditForm);
+      els.athleteEditForm.addEventListener("submit", handleEditAthleteSubmit);
+    }
+    mountArchiveButton("athlete", els.editAthleteBtn, state.athleteId, () => state.athlete, "athletes.html");
+  }
+
+  function populateEditForm() {
+    if (!els.athleteEditForm || !state.athlete) return;
+    const athlete = state.athlete;
+    const sportSelect = document.getElementById("editAthletePrimarySport");
+    const teamSelect = document.getElementById("editAthleteTeam");
+    if (sportSelect) {
+      sportSelect.innerHTML = `<option value="">Not set</option>${APP.SPORT_REGISTRY.map((sport) => `<option value="${escapeHtml(sport.slug)}">${escapeHtml(sport.name)}</option>`).join("")}`;
+    }
+    if (teamSelect) {
+      teamSelect.innerHTML = `<option value="">No squad selected</option>${state.allTeams.map((team) => `<option value="${escapeHtml(team.id || "")}">${escapeHtml(team.name || team.teamName || "Team")}</option>`).join("")}`;
+    }
+
+    setField("editAthleteFirstName", athlete.firstName);
+    setField("editAthleteLastName", athlete.lastName);
+    setField("editAthleteType", athlete.athleteType);
+    setField("editAthleteDateOfBirth", toDateInputValue(athlete.dateOfBirth));
+    setField("editAthleteGender", normalizeGender(athlete.gender));
+    setField("editAthleteEmail", athlete.email);
+    setField("editAthletePhone", athlete.phone);
+    setField("editAthleteStudentId", athlete.studentId);
+    setField("editAthleteYear", athlete.yearOfStudy);
+    setField("editAthleteFaculty", athlete.faculty);
+    setField("editAthleteProgram", athlete.program);
+    setField("editAthleteNationality", athlete.nationality);
+    setField("editAthleteHometown", athlete.hometown);
+    setField("editAthleteStatus", String(athlete.status || "active").toLowerCase());
+    setField("editAthletePrimarySport", APP.normalizeSportSlug(athlete.sport || ""));
+    setField("editAthletePosition", athlete.position);
+    setField("editAthleteEvents", athlete.events.join(", "));
+    setField("editAthleteHeight", String(athlete.height || "").replace(/[^\d.]/g, ""));
+    setField("editAthleteWeight", String(athlete.weight || "").replace(/[^\d.]/g, ""));
+    setField("editAthleteHand", athlete.handedness);
+    setField("editAthleteLeg", athlete.dominantFoot);
+    const currentTeam = state.allTeams.find((team) => String(team.id || "") === String(athlete.teamId || ""))
+      || state.allTeams.find((team) => String(team.name || team.teamName || "") === String(athlete.teamName || ""));
+    setField("editAthleteTeam", currentTeam?.id || athlete.teamId || "");
+    setField("editAthleteRole", "");
+    setField("editAthleteJersey", "");
+    setField("editAthleteCaptain", "false");
+  }
+
+  async function handleEditAthleteSubmit(event) {
+    event.preventDefault();
+    const message = els.athleteEditMessage;
+    if (message) {
+      message.className = "message";
+      message.textContent = "";
+    }
+
+    const payload = {
+      firstName: getField("editAthleteFirstName"),
+      lastName: getField("editAthleteLastName"),
+      fullName: `${getField("editAthleteFirstName")} ${getField("editAthleteLastName")}`.trim(),
+      athleteType: getField("editAthleteType") || "student-athlete",
+      dateOfBirth: getField("editAthleteDateOfBirth"),
+      gender: normalizeGender(getField("editAthleteGender")),
+      age: calculateAge(getField("editAthleteDateOfBirth")),
+      email: getField("editAthleteEmail"),
+      phone: getField("editAthletePhone"),
+      studentId: getField("editAthleteStudentId"),
+      yearOfStudy: getField("editAthleteYear"),
+      faculty: getField("editAthleteFaculty"),
+      program: getField("editAthleteProgram"),
+      facultyProgram: [getField("editAthleteFaculty"), getField("editAthleteProgram")].filter(Boolean).join(" / "),
+      nationality: getField("editAthleteNationality"),
+      hometown: getField("editAthleteHometown"),
+      status: getField("editAthleteStatus") || "active",
+      campus: state.session?.campus,
+      profile: {
+        sportSlug: getField("editAthletePrimarySport"),
+        position: getField("editAthletePosition"),
+        eventsSpecialties: getField("editAthleteEvents"),
+        heightCm: toNullableNumber(getField("editAthleteHeight")),
+        weightKg: toNullableNumber(getField("editAthleteWeight")),
+        dominantHand: getField("editAthleteHand"),
+        dominantLeg: getField("editAthleteLeg"),
+        dateOfBirth: getField("editAthleteDateOfBirth"),
+        gender: normalizeGender(getField("editAthleteGender")),
+        faculty: getField("editAthleteFaculty"),
+        program: getField("editAthleteProgram"),
+        nationality: getField("editAthleteNationality"),
+        hometown: getField("editAthleteHometown")
+      },
+      activeRosterAssignment: getField("editAthleteTeam")
+        ? {
+            teamId: getField("editAthleteTeam"),
+            roleLabel: getField("editAthleteRole"),
+            jerseyNumber: getField("editAthleteJersey"),
+            isCaptain: getField("editAthleteCaptain") === "true",
+            status: "active"
+          }
+        : null,
+      updatedAt: state.athlete?.updatedAt
+    };
+
+    if (!payload.firstName || !payload.lastName) {
+      showEditMessage(message, "Enter first and last name.", "error");
+      return;
+    }
+
+    try {
+      if (!APP.confirmReportImpact((state.stats || []).length || (state.records || []).length)) return;
+      await APP.apiPatch(`/athletes/${encodeURIComponent(state.athleteId)}`, payload);
+      showEditMessage(message, "Athlete updated successfully.", "success");
+      await loadAthleteView();
+    } catch (error) {
+      showEditMessage(message, error?.message || "Failed to update athlete.", "error");
+    }
+  }
+
+  function mountArchiveButton(recordType, anchor, id, getRecord, returnUrl) {
+    if (!anchor || !id || document.getElementById(`${recordType}ArchiveBtn`)) return;
+    const button = document.createElement("button");
+    button.id = `${recordType}ArchiveBtn`;
+    button.className = "btn btn-soft";
+    button.type = "button";
+    button.textContent = "Archive";
+    button.addEventListener("click", async () => {
+      const record = getRecord();
+      if (!APP.confirmArchive(recordType, record)) return;
+      await APP.apiPatch(`/${recordType}s/${encodeURIComponent(id)}/archive`, { updatedAt: record?.updatedAt });
+      window.location.href = returnUrl;
+    });
+    anchor.insertAdjacentElement("afterend", button);
   }
 
   function renderHero() {
     if (!state.athlete) return;
 
     const athlete = state.athlete;
-    const seasonStats = getFilteredStats();
-    const pbCount = getFilteredPBs().length;
-    const currentSeason = getCurrentSeasonValue();
-    const totalCompetitions = countUniqueValues(seasonStats.map((item) => item.competitionName).filter(Boolean));
+    const profileScore = getAthleteCompleteness(athlete);
 
     if (els.heroName) {
       els.heroName.textContent = athlete.fullName;
@@ -248,27 +441,21 @@
     if (els.heroSideCards) {
       els.heroSideCards.innerHTML = `
         <div class="mini-card">
-          <div class="mini-label">Season Filter</div>
-          <div class="mini-value">${escapeHtml(state.filteredSeason === "all" ? "All-Time" : state.filteredSeason)}</div>
-          <div class="mini-sub">Current data view</div>
+          <div class="mini-label">Profile Completeness</div>
+          ${completenessMarkup(profileScore, true)}
+          <div class="mini-sub">Record quality score</div>
         </div>
 
         <div class="mini-card">
-          <div class="mini-label">Stat Lines</div>
-          <div class="mini-value">${seasonStats.length}</div>
-          <div class="mini-sub">Visible records in this view</div>
+          <div class="mini-label">Sport</div>
+          <div class="mini-value">${escapeHtml(athlete.sport || "Not recorded")}</div>
+          <div class="mini-sub">Primary sport assignment</div>
         </div>
 
         <div class="mini-card">
-          <div class="mini-label">Personal Bests</div>
-          <div class="mini-value">${pbCount}</div>
-          <div class="mini-sub">Visible best performances</div>
-        </div>
-
-        <div class="mini-card">
-          <div class="mini-label">Competitions</div>
-          <div class="mini-value">${totalCompetitions}</div>
-          <div class="mini-sub">${escapeHtml(currentSeason || "Current season")} and all-time history</div>
+          <div class="mini-label">Team</div>
+          <div class="mini-value">${escapeHtml(athlete.teamName || "Not assigned")}</div>
+          <div class="mini-sub">${escapeHtml(athlete.squadName || athlete.teamName || "Squad not assigned")}</div>
         </div>
       `;
     }
@@ -280,7 +467,10 @@
         if (els.athleteHeadshotFallback) els.athleteHeadshotFallback.hidden = true;
       } else {
         els.athleteHeadshot.hidden = true;
-        if (els.athleteHeadshotFallback) els.athleteHeadshotFallback.hidden = false;
+        if (els.athleteHeadshotFallback) {
+          els.athleteHeadshotFallback.textContent = getInitials(athlete.fullName);
+          els.athleteHeadshotFallback.hidden = false;
+        }
       }
     }
   }
@@ -290,11 +480,13 @@
 
     const athlete = state.athlete;
 
+    const eventsDisplay = athlete.events.length ? athlete.events.join(", ") : "Not recorded";
+
     els.athleteBodyInfo.innerHTML = `
       <div class="section-title">
         <div>
-          <h2 id="athleteBodyInfoHeading">Body Information</h2>
-          <p>Physical details and athlete body profile.</p>
+          <h2 id="athleteBodyInfoHeading">Body & Athlete Information</h2>
+          <p>Physical profile, roster assignment, academic details, and contact information for this athlete.</p>
         </div>
       </div>
 
@@ -303,10 +495,65 @@
         ${detailCard("Weight", athlete.weight || "Not recorded")}
         ${detailCard("Handedness", athlete.handedness || "Not recorded")}
         ${detailCard("Dominant Foot", athlete.dominantFoot || "Not recorded")}
-        ${detailCard("Gender", athlete.gender || "Not recorded")}
+        ${detailCard("Sex", formatGender(athlete.gender))}
         ${detailCard("Date of Birth", formatDate(athlete.dateOfBirth) || "Not recorded")}
+        ${detailCard("Age", athlete.age || calculateAge(athlete.dateOfBirth) || "Not recorded")}
+      </div>
+
+      <div class="section-title compact-section-title">
+        <div>
+          <h3>Athlete Information</h3>
+        </div>
+      </div>
+
+      <div class="details-grid">
+        ${detailCard("Full Name", athlete.fullName)}
+        ${detailCard("Sport", athlete.sport || "Not recorded")}
+        ${detailCard("Team", athlete.teamName || "Not assigned")}
+        ${detailCard("Squad", athlete.squadName || athlete.teamName || "Not assigned")}
+        ${detailCard("Athlete Type", athlete.athleteType || "Not recorded")}
+        ${detailCard("Status", athlete.status || "Not recorded")}
+        ${detailCard("School / Club", athlete.schoolOrClub || "Not recorded")}
+        ${detailCard("Position / Event Focus", athlete.position || eventsDisplay)}
+        ${detailCard("Email", athlete.email || "Not recorded")}
+        ${detailCard("Phone", athlete.phone || "Not recorded")}
+        ${detailCard("Student ID", athlete.studentId || "Optional / not recorded")}
+        ${detailCard("Year of Study", athlete.yearOfStudy || "Not recorded")}
+        ${detailCard("Faculty", athlete.faculty || "Not recorded")}
+        ${detailCard("Program", athlete.program || "Not recorded")}
+        ${detailCard("Nationality", athlete.nationality || "Not recorded")}
+        ${detailCard("Hometown", athlete.hometown || "Not recorded")}
+      </div>
+
+      <div class="note-box">
+        <strong>Bio / Notes:</strong><br />
+        ${escapeHtml(athlete.bio || "No additional athlete notes have been added yet.")}
       </div>
     `;
+  }
+
+  function getAthleteCompleteness(athlete) {
+    const checks = [
+      athlete.firstName,
+      athlete.lastName,
+      athlete.email || athlete.phone,
+      athlete.athleteType,
+      athlete.sport && athlete.sport !== "Sport not assigned",
+      athlete.teamName,
+      athlete.position || athlete.events.length,
+      athlete.dateOfBirth,
+      athlete.gender,
+      athlete.height,
+      athlete.weight,
+      athlete.status
+    ];
+    return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  }
+
+  function completenessMarkup(score, large) {
+    const normalized = Math.max(0, Math.min(100, Number(score) || 0));
+    const wrapperClass = large ? "completeness-large" : "completeness-cell";
+    return `<div class="${wrapperClass}"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
   function renderAthleteInfo() {
@@ -430,9 +677,29 @@
         </div>
       </div>
 
+      <div class="note-box" style="margin:14px 0;">
+        Athlete statistics shown in this platform reflect records from 2026 onwards.
+      </div>
+
+      ${state.stats.some((item) => APP.normalizeSportSlug(item.sport || item.sportSlug) === "cricket")
+        ? `<div class="quick-actions" style="margin:14px 0;"><a class="btn btn-campus" href="athlete-cricket-stats.html?athleteId=${encodeURIComponent(state.athleteId)}">Open Detailed Cricket Stats</a></div>`
+        : ""}
+      ${state.stats.some((item) => APP.normalizeSportSlug(item.sport || item.sportSlug) === "football")
+        ? `<div class="quick-actions" style="margin:14px 0;"><a class="btn btn-campus" href="athlete-football-stats.html?athleteId=${encodeURIComponent(state.athleteId)}">Open Detailed Football Stats</a></div>`
+        : ""}
+      ${state.stats.some((item) => APP.normalizeSportSlug(item.sport || item.sportSlug) === "basketball")
+        ? `<div class="quick-actions" style="margin:14px 0;"><a class="btn btn-campus" href="athlete-basketball-stats.html?athleteId=${encodeURIComponent(state.athleteId)}">Open Detailed Basketball Stats</a></div>`
+        : ""}
+      ${state.stats.some((item) => APP.normalizeSportSlug(item.sport || item.sportSlug) === "track-and-field")
+        ? `<div class="quick-actions" style="margin:14px 0;"><a class="btn btn-campus" href="athlete-track-field-stats.html?athleteId=${encodeURIComponent(state.athleteId)}">Open Detailed Track and Field Stats</a></div>`
+        : ""}
+
       ${
         filteredStats.length
           ? `
+            <details class="nested-detail" style="margin-top:16px;">
+              <summary>View Raw Stat Log (${filteredStats.length})</summary>
+              <p class="muted" style="margin:8px 0 12px;">Use this log for audit-level review. Aggregated sport pages are the cleaner default view for repeated match data.</p>
             <div class="data-table-wrap">
               <table class="table">
                 <thead>
@@ -465,6 +732,7 @@
                 </tbody>
               </table>
             </div>
+            </details>
           `
           : `<div class="empty-state">No stat lines match the current filter. Stats entered on this page or from competitions will appear here.</div>`
       }
@@ -612,7 +880,7 @@
 
           <div>
             <label for="entryCompetitionId">Competition ID (optional)</label>
-            <input class="input" id="entryCompetitionId" name="entryCompetitionId" type="text" placeholder="Optional backend competition id" />
+            <input class="input" id="entryCompetitionId" name="entryCompetitionId" type="text" placeholder="Optional competition ID" />
           </div>
         </div>
 
@@ -678,14 +946,15 @@
   function renderTeams() {
     if (!els.athleteTeams) return;
 
-    const items = state.teams.length
-      ? state.teams.map((item) => `
+    const normalizedTeams = getResolvedTeamAssociations();
+    const items = normalizedTeams.length
+      ? normalizedTeams.map((item) => `
           <div class="stack-item">
             <div class="stack-item-title">${escapeHtml(item.name || item.teamName || "Unnamed Team")}</div>
             <div class="stack-item-sub">
-              ${escapeHtml(item.role || item.status || "Athlete")} •
-              ${escapeHtml(item.season || "Season not recorded")} •
-              ${escapeHtml(item.squadName || item.squad || "No squad specified")}
+              ${escapeHtml(item.role || item.roleLabel || item.status || "Athlete")} •
+              ${escapeHtml(item.season || item.seasonLabel || state.athlete?.season || "Season not recorded")} •
+              ${escapeHtml(item.squadName || item.squad || item.division || state.athlete?.squadName || item.teamName || item.name || state.athlete?.teamName || "No squad specified")}
             </div>
           </div>
         `).join("")
@@ -693,7 +962,7 @@
         <div class="stack-item">
           <div class="stack-item-title">${escapeHtml(state.athlete?.teamName || "No team assigned")}</div>
           <div class="stack-item-sub">
-            ${escapeHtml(state.athlete?.squadName || "No squad specified")}
+            ${escapeHtml(state.athlete?.squadName || state.athlete?.teamName || "No squad specified")}
           </div>
         </div>
       `;
@@ -710,6 +979,35 @@
         ${items}
       </div>
     `;
+  }
+
+  function getResolvedTeamAssociations() {
+    const raw = state.teams.length ? state.teams : [];
+    const associations = raw.map((item) => {
+      const teamId = item.teamId || item.id || item.team?.id || item.activeRosterAssignment?.teamId || "";
+      const team = state.allTeams.find((entry) => String(entry.id || "") === String(teamId || ""));
+      return {
+        ...item,
+        ...team,
+        name: item.name || item.teamName || item.team?.name || team?.name || team?.teamName || state.athlete?.teamName || "",
+        teamName: item.teamName || item.name || item.team?.teamName || team?.teamName || team?.name || state.athlete?.teamName || "",
+        season: item.season || item.seasonLabel || team?.seasonLabel || team?.season || "",
+        squadName: item.squadName || item.squad || item.division || team?.division || team?.name || team?.teamName || state.athlete?.squadName || state.athlete?.teamName || ""
+      };
+    });
+    if (associations.length) return associations;
+    if (state.athlete?.teamName || state.athlete?.teamId) {
+      const team = state.allTeams.find((entry) => String(entry.id || "") === String(state.athlete.teamId || ""))
+        || state.allTeams.find((entry) => String(entry.name || entry.teamName || "") === String(state.athlete.teamName || ""));
+      return [{
+        id: team?.id || state.athlete.teamId || "",
+        name: state.athlete.teamName || team?.name || team?.teamName || "Unnamed Team",
+        season: team?.seasonLabel || team?.season || "",
+        squadName: state.athlete.squadName || team?.division || state.athlete.teamName || team?.name || team?.teamName || "",
+        role: state.athlete.position || "Athlete"
+      }];
+    }
+    return [];
   }
 
   function renderRecords() {
@@ -911,7 +1209,7 @@
   }
 
   function getFilteredPBs() {
-    let items = state.personalBests.slice();
+    let items = mergeDerivedPersonalBests();
 
     if (state.filteredSeason !== "all") {
       items = items.filter((item) => String(item.season || "").trim() === state.filteredSeason);
@@ -937,6 +1235,193 @@
     });
   }
 
+  function mergeDerivedPersonalBests() {
+    const isCricket = APP.normalizeSportSlug(state.athlete?.sport || state.athlete?.primarySport || "") === "cricket";
+    const combined = isCricket
+      ? state.personalBests.filter((item) => /bat|bowl|score|wicket|run/i.test(`${item.eventName || ""} ${item.notes || ""}`))
+      : [...state.personalBests];
+    const seen = new Set(combined.map((item) => `${item.eventName}:${item.performance}:${item.competitionName}`));
+    derivePersonalBestsFromStats().forEach((item) => {
+      const key = `${item.eventName}:${item.performance}:${item.competitionName}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      combined.push(item);
+    });
+    return combined;
+  }
+
+  function derivePersonalBestsFromStats() {
+    const sportSlug = APP.normalizeSportSlug(state.athlete?.sport || state.athlete?.primarySport || "");
+    if (sportSlug === "cricket") {
+      return deriveCricketPersonalBests();
+    }
+    if (sportSlug === "football") {
+      return deriveFootballPersonalBests();
+    }
+    if (sportSlug === "track-and-field") {
+      return deriveTrackFieldPersonalBests();
+    }
+    const bestByMetric = new Map();
+    state.stats.forEach((line) => {
+      const metric = line.statName || line.eventName || line.category || "Best Performance";
+      const value = Number(line.statValue);
+      if (!Number.isFinite(value)) return;
+      const existing = bestByMetric.get(metric);
+      if (existing && Number(existing.statValue) >= value) return;
+      bestByMetric.set(metric, line);
+    });
+    return Array.from(bestByMetric.values()).map((line) => ({
+      id: `derived-${line.id}`,
+      eventName: line.statName || line.eventName || line.category || "Best Performance",
+      performance: formatValueWithUnit(line.statValue, line.unit),
+      unit: "",
+      season: line.season || "Unknown",
+      competitionName: line.competitionName || "Recorded stat line",
+      date: line.date || "",
+      notes: line.notes || "Derived from linked performance data."
+    }));
+  }
+
+  function deriveCricketPersonalBests() {
+    const batting = state.stats.filter((line) => line.sport === "cricket" || line.sportSlug === "cricket").filter((line) => line.eventType === "batting");
+    const bowling = state.stats.filter((line) => line.sport === "cricket" || line.sportSlug === "cricket").filter((line) => line.eventType === "bowling" || line.eventType === "dismissal-bowling");
+    const rows = [];
+    const highestScore = batting.slice().sort((a, b) => Number(b.statValue || 0) - Number(a.statValue || 0))[0];
+    if (highestScore && Number(highestScore.statValue || 0) > 0) {
+      rows.push(toDerivedCricketPb("Highest Score", `${highestScore.statValue} runs`, highestScore));
+    }
+    const bestBowling = bowling
+      .filter((line) => line.eventType === "bowling")
+      .slice()
+      .sort((a, b) => {
+        const wicketsDelta = Number(b.statData?.wickets || b.statValue || 0) - Number(a.statData?.wickets || a.statValue || 0);
+        if (wicketsDelta) return wicketsDelta;
+        return Number(a.statData?.runs || a.statData?.runsConceded || 999) - Number(b.statData?.runs || b.statData?.runsConceded || 999);
+      })[0];
+    if (bestBowling && Number(bestBowling.statData?.wickets || bestBowling.statValue || 0) > 0) {
+      rows.push(toDerivedCricketPb("Best Bowling Figures", `${bestBowling.statData?.wickets || bestBowling.statValue}/${bestBowling.statData?.runs || bestBowling.statData?.runsConceded || 0}`, bestBowling));
+    }
+    const runsBySeason = aggregateBySeason(batting, (line) => Number(line.statValue || 0));
+    const topRunSeason = runsBySeason[0];
+    if (topRunSeason) rows.push(toDerivedCricketPb("Highest Scoring Season", `${topRunSeason.value} runs`, topRunSeason.source, topRunSeason.season));
+    const wicketsBySeason = aggregateBySeason(bowling, (line) => Number(line.statData?.wickets || line.statValue || 0));
+    const topWicketSeason = wicketsBySeason[0];
+    if (topWicketSeason) rows.push(toDerivedCricketPb("Most Wickets in a Season", `${topWicketSeason.value} wickets`, topWicketSeason.source, topWicketSeason.season));
+    return rows;
+  }
+
+  function deriveFootballPersonalBests() {
+    const matches = state.stats
+      .filter((line) => APP.normalizeSportSlug(line.sport || line.sportSlug) === "football")
+      .filter((line) => line.eventType === "match");
+    const rows = [];
+    const bestGoals = bestFootballMatch(matches, "goals");
+    if (bestGoals) rows.push(toDerivedFootballPb("Most Goals in a Match", `${bestGoals.value} goals`, bestGoals.source));
+    const bestAssists = bestFootballMatch(matches, "assists");
+    if (bestAssists) rows.push(toDerivedFootballPb("Most Assists in a Match", `${bestAssists.value} assists`, bestAssists.source));
+    const bestSaves = bestFootballMatch(matches, "saves");
+    if (bestSaves) rows.push(toDerivedFootballPb("Most Saves in a Match", `${bestSaves.value} saves`, bestSaves.source));
+
+    const goalsBySeason = aggregateBySeason(matches, (line) => Number(line.statData?.goals || 0));
+    if (goalsBySeason[0]) rows.push(toDerivedFootballPb("Highest Scoring Season", `${goalsBySeason[0].value} goals`, goalsBySeason[0].source, goalsBySeason[0].season));
+    const assistsBySeason = aggregateBySeason(matches, (line) => Number(line.statData?.assists || 0));
+    if (assistsBySeason[0]) rows.push(toDerivedFootballPb("Highest Assisting Season", `${assistsBySeason[0].value} assists`, assistsBySeason[0].source, assistsBySeason[0].season));
+    const savesBySeason = aggregateBySeason(matches, (line) => Number(line.statData?.saves || 0));
+    if (savesBySeason[0]) rows.push(toDerivedFootballPb("Highest Saves Season", `${savesBySeason[0].value} saves`, savesBySeason[0].source, savesBySeason[0].season));
+    return rows;
+  }
+
+  function bestFootballMatch(matches, key) {
+    return matches
+      .map((line) => ({ source: line, value: Number(line.statData?.[key] || 0) }))
+      .filter((item) => item.value > 0)
+      .sort((a, b) => b.value - a.value)[0] || null;
+  }
+
+  function aggregateBySeason(lines, valueFn) {
+    const map = new Map();
+    lines.forEach((line) => {
+      const season = String(line.season || "Unknown");
+      const current = map.get(season) || { season, value: 0, source: line };
+      current.value += valueFn(line);
+      current.source = line;
+      map.set(season, current);
+    });
+    return Array.from(map.values()).filter((item) => item.value > 0).sort((a, b) => b.value - a.value);
+  }
+
+  function toDerivedCricketPb(eventName, performance, source, seasonOverride) {
+    return {
+      id: `derived-cricket-${eventName}-${source?.id || seasonOverride || ""}`,
+      eventName,
+      performance,
+      unit: "",
+      season: seasonOverride || source?.season || "Unknown",
+      competitionName: source?.competitionName || "Recorded scorecard",
+      date: source?.date || "",
+      notes: "Derived from linked batting and bowling scorecard data."
+    };
+  }
+
+  function toDerivedFootballPb(eventName, performance, source, seasonOverride) {
+    return {
+      id: `derived-football-${eventName}-${source?.id || seasonOverride || ""}`,
+      eventName,
+      performance,
+      unit: "",
+      season: seasonOverride || source?.season || "Unknown",
+      competitionName: source?.competitionName || "Recorded match",
+      date: source?.date || "",
+      notes: "Derived from linked football match-sheet data."
+    };
+  }
+
+  function deriveTrackFieldPersonalBests() {
+    const rows = state.stats.filter((line) => APP.normalizeSportSlug(line.sport || line.sportSlug) === "track-and-field");
+    const trackRows = rows.filter((line) => {
+      const type = line.statData?.resultType || line.eventType;
+      return type === "track" || type === "relay";
+    });
+    const fieldRows = rows.filter((line) => {
+      const type = line.statData?.resultType || line.eventType;
+      return type === "field" || ["horizontal-jump", "vertical-jump", "throw"].includes(type);
+    });
+    const output = [];
+    const bestTrackByEvent = bestByEvent(trackRows, (line) => Number(line.statData?.timeNumber || 0), "asc");
+    bestTrackByEvent.forEach((item) => output.push(toDerivedTrackFieldPb(`Best ${item.eventName}`, item.source.statData?.time || item.source.statValue, item.source)));
+    const bestFieldByEvent = bestByEvent(fieldRows, (line) => Number(line.statData?.bestNumber || 0), "desc");
+    bestFieldByEvent.forEach((item) => output.push(toDerivedTrackFieldPb(`Best ${item.eventName}`, item.source.statData?.best || item.source.statValue, item.source)));
+    const pointsBySeason = aggregateBySeason(rows, (line) => Number(line.statData?.points || 0));
+    if (pointsBySeason[0]) output.push(toDerivedTrackFieldPb("Highest Points Season", `${pointsBySeason[0].value} points`, pointsBySeason[0].source, pointsBySeason[0].season));
+    return output;
+  }
+
+  function bestByEvent(rows, valueFn, direction) {
+    const map = new Map();
+    rows.forEach((line) => {
+      const value = valueFn(line);
+      if (!Number.isFinite(value) || value <= 0) return;
+      const eventName = line.statData?.eventName || line.statName || line.eventName || "Event";
+      const current = map.get(eventName);
+      const better = !current || (direction === "asc" ? value < current.value : value > current.value);
+      if (better) map.set(eventName, { eventName, value, source: line });
+    });
+    return Array.from(map.values());
+  }
+
+  function toDerivedTrackFieldPb(eventName, performance, source, seasonOverride) {
+    return {
+      id: `derived-track-field-${eventName}-${source?.id || seasonOverride || ""}`,
+      eventName,
+      performance: performance || "Recorded mark",
+      unit: "",
+      season: seasonOverride || source?.season || "Unknown",
+      competitionName: source?.competitionName || "Recorded result sheet",
+      date: source?.date || "",
+      notes: "Derived from linked track and field result-sheet data."
+    };
+  }
+
   function getAvailableSeasons() {
     const seasons = new Set();
 
@@ -944,7 +1429,7 @@
       if (item.season) seasons.add(String(item.season));
     });
 
-    state.personalBests.forEach((item) => {
+    mergeDerivedPersonalBests().forEach((item) => {
       if (item.season) seasons.add(String(item.season));
     });
 
@@ -969,6 +1454,15 @@
     `;
   }
 
+  function getInitials(name) {
+    const parts = String(name || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    const initials = parts.slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join("");
+    return initials || "ATH";
+  }
+
   function formatCampus(value) {
     return String(value || "")
       .replace(/-/g, " ")
@@ -982,9 +1476,63 @@
     return parsed.toLocaleDateString();
   }
 
+  function toDateInputValue(value) {
+    if (!value) return "";
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return String(value).slice(0, 10);
+    return parsed.toISOString().slice(0, 10);
+  }
+
+  function calculateAge(dateOfBirth) {
+    if (!dateOfBirth) return "";
+    const birthDate = new Date(dateOfBirth);
+    if (Number.isNaN(birthDate.getTime())) return "";
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDelta = today.getMonth() - birthDate.getMonth();
+    if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < birthDate.getDate())) {
+      age -= 1;
+    }
+    return age >= 0 && age < 120 ? String(age) : "";
+  }
+
+  function normalizeGender(value) {
+    const raw = String(value || "").trim().toLowerCase();
+    if (raw === "m" || raw === "male") return "male";
+    if (raw === "f" || raw === "female") return "female";
+    return "";
+  }
+
+  function formatGender(value) {
+    const normalized = normalizeGender(value);
+    if (normalized === "male") return "Male";
+    if (normalized === "female") return "Female";
+    return "Not recorded";
+  }
+
   function formatValueWithUnit(value, unit) {
     const base = value == null ? "" : String(value);
     return unit ? `${base} ${unit}`.trim() : base;
+  }
+
+  function setField(id, value) {
+    const node = document.getElementById(id);
+    if (node) node.value = value == null ? "" : String(value);
+  }
+
+  function getField(id) {
+    return String(document.getElementById(id)?.value || "").trim();
+  }
+
+  function toNullableNumber(value) {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : null;
+  }
+
+  function showEditMessage(node, text, type) {
+    if (!node) return;
+    node.className = `message ${type || ""}`.trim();
+    node.textContent = text || "";
   }
 
   function escapeHtml(value) {

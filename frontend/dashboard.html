@@ -60,7 +60,6 @@
         </p>
 <div class="pill-row">
 <span class="status-pill" id="rolePill">Role</span>
-<span class="status-pill subtle" id="campusPill">Campus</span>
 </div>
 <div class="quick-actions">
 <a class="btn btn-primary" href="athletes.html">Manage Athletes</a>
@@ -70,24 +69,34 @@
 </div>
 <div class="mini-grid">
 <div class="mini-card">
-<div class="mini-label">Session</div>
-<div class="mini-value" id="sessionStatusStat">—</div>
-<div class="mini-sub">Current backend-authenticated state</div>
+<div class="mini-label">Athletes</div>
+<div class="mini-value" id="athleteCountStat">0</div>
+<div class="mini-sub" id="athleteCoverageStat">Roster coverage</div>
 </div>
 <div class="mini-card">
-<div class="mini-label">Campus</div>
-<div class="mini-value" id="campusStat">—</div>
-<div class="mini-sub">Data access is scoped to this campus</div>
+<div class="mini-label">Coaches &amp; Staff</div>
+<div class="mini-value" id="coachCountStat">0</div>
+<div class="mini-sub" id="coachCoverageStat">Team assignment coverage</div>
 </div>
 <div class="mini-card">
-<div class="mini-label">Role</div>
-<div class="mini-value" id="roleStat">—</div>
-<div class="mini-sub">Current platform role</div>
+<div class="mini-label">Teams</div>
+<div class="mini-value" id="teamCountStat">0</div>
+<div class="mini-sub" id="teamCoverageStat">Active team records</div>
 </div>
 <div class="mini-card">
-<div class="mini-label">Ready For</div>
-<div class="mini-value">Build</div>
-<div class="mini-sub">This shell is ready for real page integration</div>
+<div class="mini-label">Competitions</div>
+<div class="mini-value" id="competitionCountStat">0</div>
+<div class="mini-sub" id="competitionCoverageStat">Competition records</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Sports Covered</div>
+<div class="mini-value compact-value" id="sportsCoveredValue">--</div>
+<div class="mini-sub">Sports represented in records</div>
+</div>
+<div class="mini-card">
+<div class="mini-label">Record Activity</div>
+<div class="mini-value compact-value" id="recordActivityValue">--</div>
+<div class="mini-sub">Latest record update</div>
 </div>
 </div>
 </section>
@@ -95,8 +104,8 @@
 <div class="section-head">
 <h2>Platform Overview</h2>
 <p>
-          This is the signed-in control center for your campus account. All data-driven pages
-          should follow this same protected layout and session pattern.
+          This is the signed-in control center for your campus account. Use it to manage
+          athletes, coaches, teams, competitions, reports, and support activity for your campus.
         </p>
 </div>
 <div class="feature-grid">
@@ -122,29 +131,6 @@
 </article>
 </div>
 </section>
-<section class="section-card">
-<div class="section-head">
-<h2>Signed-In User</h2>
-</div>
-<div class="details-grid">
-<div class="detail-item">
-<span class="detail-label">Name</span>
-<strong id="userNameValue">—</strong>
-</div>
-<div class="detail-item">
-<span class="detail-label">Email</span>
-<strong id="userEmailValue">—</strong>
-</div>
-<div class="detail-item">
-<span class="detail-label">Role</span>
-<strong id="userRoleValue">—</strong>
-</div>
-<div class="detail-item">
-<span class="detail-label">Campus</span>
-<strong id="userCampusValue">—</strong>
-</div>
-</div>
-</section>
 </main>
 <footer class="footer">
 <div class="footer-left">
@@ -157,6 +143,7 @@
 </div>
 </footer>
 
+<script src="config.js"></script>
 <script src="uwi-app.js"></script>
 <script src="dashboard.js"></script>
 </body>

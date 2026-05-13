@@ -2,10 +2,11 @@
   "use strict";
 
   const APP = window.UWISportsHub;
-    const state = {
+  const state = {
     session: null,
     competitions: [],
-    loadError: ""
+    loadError: "",
+    registrySearchApplied: false
   };
 
   const els = {
@@ -14,7 +15,19 @@
     searchInput: document.getElementById("competitionSearch"),
     sportFilter: document.getElementById("competitionSport"),
     campusFilter: document.getElementById("competitionCampus"),
-    formatFilter: document.getElementById("competitionFormat")
+    formatFilter: document.getElementById("competitionFormat"),
+    qualityFilter: document.getElementById("competitionQuality"),
+    searchButton: document.getElementById("competitionSearchButton"),
+    totalCompetitionsStat: document.getElementById("totalCompetitionsStat"),
+    activeCompetitionsStat: document.getElementById("activeCompetitionsStat"),
+    competitionSportsStat: document.getElementById("competitionSportsStat"),
+    completedCompetitionsStat: document.getElementById("completedCompetitionsStat"),
+    competitionsMissingResultsStat: document.getElementById("competitionsMissingResultsStat"),
+    competitionAlerts: document.getElementById("competitionAlerts"),
+    competitionActivity: document.getElementById("competitionActivity"),
+    competitionQualityScore: document.getElementById("competitionQualityScore"),
+    competitionQualityBar: document.getElementById("competitionQualityBar"),
+    competitionQualityCopy: document.getElementById("competitionQualityCopy")
   };
 
   document.addEventListener("DOMContentLoaded", init);
@@ -27,9 +40,13 @@
     }
 
     populateFilters();
+    ensureArchivedQualityOption(els.qualityFilter);
     renderCompetitionsPageShell();
+    bindInsightActions();
     bindCompetitionFilters();
     await loadCompetitions();
+    renderHeroStats();
+    renderOperationalSummary();
     renderCompetitionsTable();
   }
 
@@ -63,7 +80,7 @@
       <div class="section-title">
         <div>
           <h2>Create Competition</h2>
-          <p>Add a competition, then open it to build units, participants, results, and stat lines.</p>
+          <p>Add a competition, then open it to manage units, participants, results, and stat lines.</p>
         </div>
       </div>
 
@@ -81,11 +98,6 @@
               (sport) => `<option value="${escapeHtml(sport.slug)}">${escapeHtml(sport.name)}</option>`
             ).join("")}
           </select>
-        </div>
-
-        <div>
-          <label for="createCompetitionCampusLabel">Campus Owner</label>
-          <input id="createCompetitionCampusLabel" class="input" type="text" value="${escapeHtml(getCampusName(state.session?.campus || ""))}" readonly />
         </div>
 
         <div>
@@ -126,8 +138,8 @@
           </select>
         </div>
 
-        <div style="display:flex;align-items:flex-end;">
-          <button type="submit" class="btn btn-campus" style="width:100%;">Create Competition</button>
+        <div class="competition-create-action">
+          <button type="submit" class="btn btn-campus">Create Competition</button>
         </div>
       </form>
 
@@ -162,7 +174,18 @@
         messageEl.textContent = "Enter a title and sport.";
         messageEl.classList.add("error");
         return;
-      }      try {
+      }
+      const candidate = { title, name: title, sportSlug, startDate };
+      const duplicate = APP.findSimilarRecord(state.competitions, candidate, { type: "competition", threshold: 0.78 });
+      if (duplicate) {
+        const action = APP.promptDuplicateAction(duplicate, "competition");
+        if (action === "cancel") return;
+        if (action === "view" || action === "edit-existing") {
+          window.location.href = `competition-view.html?competitionId=${encodeURIComponent(duplicate.id)}`;
+          return;
+        }
+      }
+      try {
         const data = await APP.apiPost("/competitions", {
           title,
           sportSlug,
@@ -174,7 +197,7 @@
           status: status || "DRAFT"
         }, { redirectOn401: true });
 
-        const createdCompetition = data?.competition || data?.data?.competition || data?.data || null;
+        const createdCompetition = data?.competition || data?.data?.competition || data?.data || data || null;
 
         messageEl.textContent = "Competition created successfully.";
         messageEl.classList.add("success");
@@ -182,6 +205,7 @@
         form.reset();
 
         await loadCompetitions();
+        renderOperationalSummary();
         renderCompetitionsTable();
 
         if (createdCompetition?.id) {
@@ -196,21 +220,41 @@
   }
 
   function bindCompetitionFilters() {
-    [els.searchInput, els.sportFilter, els.campusFilter, els.formatFilter].forEach((node) => {
+    [els.searchInput, els.sportFilter, els.campusFilter, els.formatFilter, els.qualityFilter].forEach((node) => {
       if (!node) return;
-      node.addEventListener("input", renderCompetitionsTable);
-      node.addEventListener("change", renderCompetitionsTable);
+      node.addEventListener("input", handleFilterChange);
+      node.addEventListener("change", handleFilterChange);
     });
+    if (els.searchButton) els.searchButton.addEventListener("click", applyRegistrySearch);
+    mountRecentSearches("competitions");
+  }
+
+  function handleFilterChange() {
+    const panel = document.getElementById("competitionsListPanel");
+    if (hasActiveRegistryFilter() && panel) panel.open = true;
+    state.registrySearchApplied = false;
+  }
+
+  function applyRegistrySearch() {
+    const panel = document.getElementById("competitionsListPanel");
+    if (panel) panel.open = true;
+    state.registrySearchApplied = true;
+    saveCurrentSearch("competitions");
+    mountRecentSearches("competitions");
+    renderCompetitionsTable();
   }
 
   async function loadCompetitions() {    try {
-      const data = await APP.apiGet("/competitions", true);
+      const data = await APP.apiGet("/competitions?includeArchived=true", true);
       state.competitions =
+        Array.isArray(data) ? data :
         Array.isArray(data?.competitions) ? data.competitions :
         Array.isArray(data?.data?.competitions) ? data.data.competitions :
         Array.isArray(data?.data) ? data.data :
         [];
       state.loadError = "";
+      renderHeroStats();
+      renderOperationalSummary();
     } catch (error) {
       console.error("Load competitions error:", error);
       state.competitions = [];
@@ -221,17 +265,31 @@
   function renderCompetitionsTable() {
     if (!els.competitionsTableBody) return;
 
+    if (!state.registrySearchApplied) {
+      els.competitionsTableBody.innerHTML = `
+        <tr>
+          <td colspan="7">
+            <div class="empty-state">
+              <h3>Search competition records.</h3>
+              <p>Click Search to show all competitions, or choose filters for a focused list.</p>
+            </div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
     const competitions = getFilteredCompetitions();
 
     if (!competitions.length) {
       const title = state.loadError ? "Competition records are unavailable right now." : "Records will appear here once added.";
       const copy = state.loadError
         ? escapeHtml(state.loadError)
-        : "Create a competition to begin building units, participants, results, and statistics.";
+        : "Create a competition to manage units, participants, results, and statistics.";
 
       els.competitionsTableBody.innerHTML = `
         <tr>
-          <td colspan="6">
+          <td colspan="7">
             <div class="empty-state">
               <h3>${title}</h3>
               <p>${copy}</p>
@@ -255,8 +313,9 @@
             <td>${escapeHtml(campusName)}</td>
             <td>${escapeHtml(formatLabel)}</td>
             <td>${escapeHtml(competition.seasonLabel || "—")}</td>
+            <td>${completenessMarkup(getCompetitionQuality(competition))}</td>
             <td>
-              <a class="btn btn-soft" href="competition-view.html?competitionId=${encodeURIComponent(competition.id)}">Open</a>
+              <a class="btn btn-campus" href="competition-view.html?competitionId=${encodeURIComponent(competition.id)}">Open</a>
             </td>
           </tr>
         `;
@@ -264,11 +323,63 @@
       .join("");
   }
 
+  function renderHeroStats() {
+    const sessionCampus = normalizeCampusFilter(state.session?.campus);
+    const rows = state.competitions.filter((competition) => normalizeCampusFilter(competition.campusOwner || competition.campus || "") === sessionCampus && !APP.isArchivedRecord(competition));
+    if (els.totalCompetitionsStat) els.totalCompetitionsStat.textContent = String(rows.length);
+    if (els.activeCompetitionsStat) els.activeCompetitionsStat.textContent = String(rows.filter((competition) => String(competition.status || "").toLowerCase() === "active").length);
+    if (els.competitionSportsStat) els.competitionSportsStat.textContent = String(new Set(rows.map((competition) => competition.sportSlug || competition.sport).filter(Boolean)).size);
+    if (els.completedCompetitionsStat) els.completedCompetitionsStat.textContent = String(rows.filter((competition) => String(competition.status || "").toLowerCase() === "completed").length);
+    if (els.competitionsMissingResultsStat) els.competitionsMissingResultsStat.textContent = String(rows.filter((competition) => !hasCompetitionResults(competition)).length);
+  }
+
+  function renderOperationalSummary() {
+    const sessionCampus = normalizeCampusFilter(state.session?.campus);
+    const rows = state.competitions.filter((competition) => normalizeCampusFilter(competition.campusOwner || competition.campus || "") === sessionCampus && !APP.isArchivedRecord(competition));
+    const missingResults = rows.filter((competition) => !hasCompetitionResults(competition));
+    const missingDates = rows.filter((competition) => !competition.startDate && !competition.endDate);
+    const missingFormat = rows.filter((competition) => !(competition.formatSlug || competition.format));
+    const quality = rows.length
+      ? Math.round(rows.reduce((sum, competition) => sum + getCompetitionQuality(competition), 0) / rows.length)
+      : 0;
+
+    renderInsightList(els.competitionAlerts, [
+      { label: "Missing result data", value: missingResults.length, target: "competitionsListPanel", filter: "incomplete" },
+      { label: "Missing dates", value: missingDates.length, target: "competitionsListPanel", filter: "incomplete" },
+      { label: "Missing format", value: missingFormat.length, target: "competitionsListPanel", filter: "incomplete" }
+    ], "No competition alerts right now.");
+
+    renderActivityList(els.competitionActivity, getRecentRecords(rows, "competition"));
+    renderQuality(els.competitionQualityScore, els.competitionQualityBar, els.competitionQualityCopy, quality, `${rows.filter((competition) => getCompetitionQuality(competition) < 100).length} competition record${rows.length === 1 ? "" : "s"} below 100% completion.`);
+  }
+
+  function getCompetitionQuality(competition) {
+    const checks = [
+      competition.title,
+      competition.sportSlug || competition.sport,
+      competition.formatSlug || competition.format,
+      competition.seasonLabel,
+      competition.startDate || competition.endDate,
+      competition.status,
+      hasCompetitionResults(competition)
+    ];
+    return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  }
+
+  function hasCompetitionResults(competition) {
+    return Boolean(
+      Number(competition.resultsCount || competition.resultCount || 0) > 0 ||
+      (Array.isArray(competition.results) && competition.results.length) ||
+      (Array.isArray(competition.matches) && competition.matches.some((match) => match.result || match.status === "COMPLETED"))
+    );
+  }
+
   function getFilteredCompetitions() {
     const searchValue = String(els.searchInput?.value || "").trim().toLowerCase();
     const sportValue = String(els.sportFilter?.value || "").trim().toLowerCase();
     const campusValue = String(els.campusFilter?.value || "").trim().toLowerCase();
     const formatValue = String(els.formatFilter?.value || "").trim().toLowerCase();
+    const qualityValue = String(els.qualityFilter?.value || "").trim().toLowerCase();
 
     return state.competitions.filter((competition) => {
       const title = String(competition.title || "").toLowerCase();
@@ -288,9 +399,20 @@
       const sessionCampus = normalizeCampusFilter(state.session?.campus);
       const matchesCampus = campusOwner === sessionCampus;
       const matchesFormat = !formatValue || formatSlug === normalizeFormatFilter(formatValue);
+      const archived = APP.isArchivedRecord(competition);
+      const matchesQuality = qualityValue === "archived" ? archived : qualityValue !== "incomplete" || getCompetitionQuality(competition) < 100;
 
-      return matchesSearch && matchesSport && matchesCampus && matchesFormat;
+      return (qualityValue === "archived" || !archived) && matchesSearch && matchesSport && matchesCampus && matchesFormat && matchesQuality;
     });
+  }
+
+  function hasActiveRegistryFilter() {
+    return Boolean(
+      String(els.searchInput?.value || "").trim() ||
+      String(els.sportFilter?.value || "").trim() ||
+      String(els.formatFilter?.value || "").trim() ||
+      String(els.qualityFilter?.value || "").trim()
+    );
   }
 
   function getSportName(slug) {
@@ -357,6 +479,108 @@
 
   function escapeHtml(value) {
     return UWISportsHub.escapeHtml(value);
+  }
+
+  function renderInsightList(node, rows, emptyText) {
+    if (!node) return;
+    const activeRows = rows.filter((row) => Number(row.value) > 0);
+    if (!activeRows.length) {
+      node.innerHTML = `<div class="insight-item"><span>${escapeHtml(emptyText)}</span><span class="insight-meta">Clear</span></div>`;
+      return;
+    }
+    node.innerHTML = activeRows.map((row) => `
+      <button class="insight-item insight-action" type="button" data-target="${escapeHtml(row.target || "")}" data-filter="${escapeHtml(row.filter || "")}">
+        <span>${escapeHtml(row.label)}</span>
+        <strong>${escapeHtml(String(row.value))}</strong>
+      </button>
+    `).join("");
+  }
+
+  function bindInsightActions() {
+    document.addEventListener("click", (event) => {
+      const action = event.target.closest(".insight-action[data-target]");
+      if (!action) return;
+      const target = document.getElementById(action.getAttribute("data-target"));
+      if (!target) return;
+      if (action.getAttribute("data-filter") === "incomplete" && els.qualityFilter) {
+        els.qualityFilter.value = "incomplete";
+        state.registrySearchApplied = true;
+        renderCompetitionsTable();
+      }
+      if (target.tagName.toLowerCase() === "details") target.open = true;
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function renderActivityList(node, records) {
+    if (!node) return;
+    if (!records.length) {
+      node.innerHTML = `<div class="insight-item"><span>No recent records yet.</span><span class="insight-meta">--</span></div>`;
+      return;
+    }
+    node.innerHTML = records.map((record) => `
+      <div class="insight-item">
+        <span>${escapeHtml(record.label)}</span>
+        <span class="insight-meta">${escapeHtml(record.type)}</span>
+      </div>
+    `).join("");
+  }
+
+  function getRecentRecords(records, type) {
+    return records
+      .slice()
+      .sort((a, b) => getRecordTime(b) - getRecordTime(a))
+      .slice(0, 3)
+      .map((record) => ({ label: record.title || "Competition", type }));
+  }
+
+  function getRecordTime(record) {
+    return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || record.startDate || "") || 0;
+  }
+
+  function renderQuality(scoreNode, barNode, copyNode, score, copy) {
+    if (scoreNode) scoreNode.textContent = `${score}%`;
+    if (barNode) barNode.style.width = `${Math.max(0, Math.min(100, score))}%`;
+    if (copyNode) copyNode.textContent = copy;
+  }
+
+  function completenessMarkup(score) {
+    const normalized = Math.max(0, Math.min(100, Number(score) || 0));
+    return `<div class="completeness-cell"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
+  }
+
+  function ensureArchivedQualityOption(select) {
+    if (!select || select.querySelector("option[value='archived']")) return;
+    select.insertAdjacentHTML("beforeend", `<option value="archived">Archived records</option>`);
+  }
+
+  function saveCurrentSearch(scope) {
+    if (!APP.saveRecentSearch) return;
+    const values = {
+      q: els.searchInput?.value || "",
+      sport: els.sportFilter?.value || "",
+      format: els.formatFilter?.value || "",
+      quality: els.qualityFilter?.value || ""
+    };
+    const label = [values.q, values.sport ? getSportName(values.sport) : "", values.format, values.quality].filter(Boolean).join(" / ") || "All competitions";
+    APP.saveRecentSearch(scope, label, values);
+  }
+
+  function mountRecentSearches(scope) {
+    if (!APP.renderRecentSearches || !els.searchButton?.parentElement) return;
+    document.querySelector(`[data-recent-searches='${scope}']`)?.remove();
+    els.searchButton.parentElement.insertAdjacentHTML("afterend", APP.renderRecentSearches(scope));
+    document.querySelectorAll("[data-recent-searches='competitions'] [data-recent-search-index]").forEach((button) => {
+      button.addEventListener("click", function () {
+        const item = APP.readRecentSearches(scope)[Number(this.dataset.recentSearchIndex)];
+        if (!item) return;
+        if (els.searchInput) els.searchInput.value = item.values.q || "";
+        if (els.sportFilter) els.sportFilter.value = item.values.sport || "";
+        if (els.formatFilter) els.formatFilter.value = item.values.format || "";
+        if (els.qualityFilter) els.qualityFilter.value = item.values.quality || "";
+        applyRegistrySearch();
+      });
+    });
   }
 
 })();
