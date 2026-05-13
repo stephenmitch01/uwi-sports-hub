@@ -174,9 +174,9 @@
   }
 
   function buildPossessionSequence() {
-    const start = els.possessionStart.value === "opponent" ? "A" : "H";
-    const other = start === "H" ? "A" : "H";
-    return Array.from({ length: 18 }, (_, index) => (index % 2 === 0 ? start : other)).join(" ");
+    const start = els.possessionStart.value === "opponent" ? opponentName() : getUwiTeamName();
+    const other = els.possessionStart.value === "opponent" ? getUwiTeamName() : opponentName();
+    return Array.from({ length: 18 }, (_, index) => (index % 2 === 0 ? start : other)).join(" -> ");
   }
 
   async function handleSubmit(event) {
