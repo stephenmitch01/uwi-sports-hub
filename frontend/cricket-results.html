@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cricket Results | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="competition-view.css" rel="stylesheet"/>
+<link href="cricket-results.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page cricket-results-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head"><div><h1>Cricket Results</h1><p class="muted">Browse saved UWI cricket scorecards across competitions.</p><div class="quick-actions"><a class="btn btn-campus" href="competitions.html">Back to Competitions</a></div></div></section>
+<section class="card">
+<div class="result-tabs" id="competitionTabs"></div>
+<div class="filter-grid">
+<div><label for="seasonFilter">Season</label><select class="select" id="seasonFilter"><option value="">All seasons</option></select></div>
+<div><label for="outcomeFilter">Outcome</label><select class="select" id="outcomeFilter"><option value="">All outcomes</option><option value="win">Wins</option><option value="loss">Losses</option><option value="tie">Ties</option><option value="other">Other results</option></select></div>
+<div><label for="opponentFilter">Opponent</label><input class="input" id="opponentFilter" type="search" placeholder="Search opponent"/></div>
+<div><label for="formatFilter">Innings</label><select class="select" id="formatFilter"><option value="">Any innings count</option><option value="1">1 innings</option><option value="2">2 innings</option><option value="3">3 innings</option><option value="4">4 innings</option></select></div>
+<div style="display:flex;align-items:flex-end;"><button class="btn btn-campus" id="resultsSearchButton" type="button">Search</button></div>
+</div>
+</section>
+<section class="card"><div class="section-title"><div><h2>Results Archive</h2><p id="resultCount">Saved scorecards will appear here.</p></div></div><div class="result-grid" id="resultsGrid"></div></section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="cricket-results.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Leaderboards | UWI Sports Hub</title>
+<link rel="stylesheet" href="uwi-core-base.css" />
+<link rel="stylesheet" href="uwi-signed-base.css" />
+<link rel="stylesheet" href="leaderboards.css" />
+</head>
+<body>
+<div class="top-bar" id="topBar">
+  <div class="top-left">
+    <span>UWI Sports Hub</span>
+    <span class="top-divider">•</span>
+    <span data-shell-context></span>
+  </div>
+  <div class="top-right">
+    <span data-session-email></span>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </div>
+</div>
+<header class="signed-navbar" id="shellNav">
+  <div class="signed-navbar-inner">
+    <div class="brand-wrap">
+      <a class="brand" href="dashboard.html">
+        <img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png" />
+        <div class="brand-text">
+          <strong>UWI Sports Hub</strong>
+          <span>University Sports Records Platform</span>
+        </div>
+      </a>
+      <div class="signed-campus-pill" data-campus-name></div>
+    </div>
+    <button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="signed-nav-links" id="signedNavLinks">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="athletes.html">Athletes</a>
+      <a href="coaches.html">Coaches</a>
+      <a href="teams.html">Teams</a>
+      <a href="competitions.html">Competitions</a>
+      <a href="reports.html">Reports</a>
+      <a href="support.html">Support</a>
+      <button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+    </nav>
+  </div>
+</header>
+<main class="page">
+  <div aria-live="polite" class="message" id="pageMessage"></div>
+  <section class="card head">
+    <div>
+      <h1 id="leaderboardHeading">Leaderboards</h1>
+      <p class="muted" id="leaderboardSubtitle">Sortable player rankings from records captured from 2026 onwards.</p>
+      <div class="quick-actions">
+        <a class="btn btn-campus" id="backLink" href="dashboard.html">Back</a>
+      </div>
+    </div>
+    <div class="head-right">
+      <div class="mini-card">
+        <div class="mini-label">Players</div>
+        <div class="mini-value" id="playerCountStat">0</div>
+        <div class="mini-sub">With linked stats.</div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-label">Records</div>
+        <div class="mini-value" id="recordCountStat">0</div>
+        <div class="mini-sub">Source stat lines.</div>
+      </div>
+    </div>
+  </section>
+  <section class="card">
+    <div class="section-title">
+      <div>
+        <h2>Player Rankings</h2>
+        <p id="leaderboardNote">Use the metric controls to sort the leaderboard.</p>
+      </div>
+      <div class="leaderboard-controls">
+        <label class="filter-control" for="competitionFilter">
+          <span>Competition</span>
+          <select class="select" id="competitionFilter">
+            <option value="">All competitions</option>
+          </select>
+        </label>
+        <div class="quick-actions" id="metricControls"></div>
+      </div>
+    </div>
+    <div id="leaderboardContent"></div>
+  </section>
+</main>
+<footer class="footer">
+  <div class="footer-left">
+    <strong>UWI Sports Hub</strong>
+    <span>Internal university sports platform</span>
+  </div>
+  <div class="footer-right">
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </div>
+</footer>
+<script src="config.js"></script>
+<script src="uwi-app.js"></script>
+<script src="leaderboards.js"></script>
+</body>
+</html>

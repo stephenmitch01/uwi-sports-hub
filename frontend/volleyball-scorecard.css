@@ -1,0 +1,24 @@
+.volleyball-scorecard-page{max-width:1500px}
+.volleyball-lineup-section{margin-top:18px;padding:16px;border:1px solid rgba(15,39,66,.14);border-radius:8px;background:#fbfdff}
+.volleyball-lineup-grid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px}
+.volleyball-sheet{margin-top:18px;border:2px solid #111;border-radius:8px;overflow:hidden;background:#fff}
+.volleyball-sheet-head{padding:16px;background:#f7f7f7;border-bottom:2px solid #111}
+.volleyball-sheet-head h2{margin:0;text-align:center;font-size:32px;color:#111}
+.volleyball-meta-grid{display:grid;grid-template-columns:repeat(6,minmax(140px,1fr));gap:10px;margin-top:14px}
+.volleyball-set-grid{display:grid;grid-template-columns:1.2fr repeat(5,110px) 140px;gap:10px;align-items:end;margin-top:14px}
+.volleyball-score-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.volleyball-table-wrap{overflow-x:auto}
+.volleyball-score-table{width:100%;min-width:1320px;border-collapse:collapse}
+.volleyball-score-table th{background:#111;color:#fff;text-align:left;font-size:12px;font-weight:600;padding:8px;border:1px solid #333}
+.volleyball-score-table td{padding:6px;border:1px solid rgba(0,0,0,.18)}
+.volleyball-score-table tr:nth-child(odd) td{background:#f1f1f1}
+.volleyball-score-table .input,.volleyball-score-table .select{min-height:34px;padding:7px 8px;border-radius:6px;font-size:13px}
+.volleyball-score-table th:nth-child(1),.volleyball-score-table td:nth-child(1){width:74px}
+.volleyball-score-table th:nth-child(2),.volleyball-score-table td:nth-child(2){min-width:220px}
+.volleyball-score-table th:nth-child(n+3),.volleyball-score-table td:nth-child(n+3){width:92px}
+.volleyball-rally-grid{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:10px;padding:14px 16px;background:#fbfdff;border-top:2px solid #111}
+.volleyball-notes-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(0,0,0,.16)}
+.volleyball-summary-grid{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px;padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(0,0,0,.16)}
+.derived{background:#eef4f8;color:#0f2742;font-weight:600}
+.volleyball-view-score{font-size:28px;font-weight:600;color:#0f2742}
+@media(max-width:1000px){.volleyball-lineup-grid,.volleyball-meta-grid,.volleyball-set-grid,.volleyball-rally-grid,.volleyball-notes-grid,.volleyball-summary-grid{grid-template-columns:1fr}.volleyball-score-pair{grid-template-columns:1fr 1fr}}

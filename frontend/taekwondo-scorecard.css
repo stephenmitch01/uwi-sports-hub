@@ -1,0 +1,142 @@
+.taekwondo-page .head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.taekwondo-page .head-right {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, 1fr));
+  gap: 12px;
+  min-width: min(420px, 100%);
+}
+
+.taekwondo-page .mini-card,
+.tkd-total-strip > div {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px;
+}
+
+.taekwondo-page .mini-label,
+.tkd-total-strip span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 550;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.taekwondo-page .mini-value,
+.tkd-total-strip strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.taekwondo-page .mini-sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.tkd-sheet {
+  margin-top: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  background: #fff;
+}
+
+.tkd-sheet-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.tkd-total-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.tkd-judge-list {
+  display: grid;
+  gap: 14px;
+}
+
+.tkd-judge {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.tkd-judge-head,
+.tkd-score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+  align-items: end;
+}
+
+.tkd-judge-head {
+  background: #f7f9fc;
+  border-bottom: 1px solid var(--border);
+}
+
+.tkd-score-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.tkd-score-section {
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.tkd-score-section h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.tkd-result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.tkd-result-table th,
+.tkd-result-table td {
+  border: 1px solid var(--border);
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tkd-result-table th {
+  background: #f7f9fc;
+  font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .taekwondo-page .head,
+  .tkd-sheet-title {
+    flex-direction: column;
+  }
+
+  .tkd-total-strip,
+  .taekwondo-page .head-right,
+  .tkd-judge-head,
+  .tkd-score-grid {
+    grid-template-columns: 1fr;
+  }
+}

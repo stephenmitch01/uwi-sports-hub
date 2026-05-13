@@ -1,0 +1,21 @@
+.basketball-scorecard-page{max-width:1500px}
+.basketball-roster-section{margin-top:18px;padding:16px;border:1px solid rgba(15,39,66,.14);border-radius:8px;background:#fbfdff}
+.basketball-roster-grid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px}
+.basketball-sheet{margin-top:18px;border:2px solid #222;border-radius:8px;overflow:hidden;background:#fff}
+.basketball-sheet-head{padding:16px;background:#f8f8f8;border-bottom:2px solid #222}
+.basketball-sheet-head h2{margin:0;text-align:center;font-size:32px;color:#111;font-weight:600}
+.basketball-meta-grid{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:10px;margin-top:14px}
+.basketball-score-grid{display:grid;grid-template-columns:1.2fr repeat(5,120px);gap:10px;align-items:end;margin-top:14px}
+.basketball-score-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.basketball-table-wrap{overflow-x:auto}
+.basketball-score-table{width:100%;min-width:1380px;border-collapse:collapse}
+.basketball-score-table th{background:#111;color:#fff;text-align:left;font-size:12px;font-weight:600;padding:8px;border:1px solid #333}
+.basketball-score-table td{padding:6px;border:1px solid rgba(0,0,0,.18)}
+.basketball-score-table .input,.basketball-score-table .select{min-height:34px;padding:7px 8px;border-radius:6px;font-size:13px}
+.basketball-score-table th:nth-child(1),.basketball-score-table td:nth-child(1){width:70px}
+.basketball-score-table th:nth-child(2),.basketball-score-table td:nth-child(2){min-width:220px}
+.basketball-admin-grid{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:10px;padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(0,0,0,.16)}
+.basketball-summary-grid{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:10px;padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(0,0,0,.16)}
+.derived{background:#eef4f8;color:#0f2742;font-weight:600}
+.basketball-view-score{font-size:28px;font-weight:600;color:#0f2742}
+@media(max-width:1000px){.basketball-roster-grid,.basketball-meta-grid,.basketball-score-grid,.basketball-admin-grid,.basketball-summary-grid{grid-template-columns:1fr}.basketball-score-pair{grid-template-columns:1fr 1fr}}

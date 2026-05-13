@@ -1,0 +1,9 @@
+.leaderboard-table-wrap{margin-top:14px;overflow-x:auto}
+.leaderboard-table a{color:#0f2742;font-weight:600;text-decoration:none}
+.leaderboard-table a:hover{text-decoration:underline}
+.metric-active{border-color:rgba(15,39,66,.38)}
+.leaderboard-order-btn{background:#0f2742;color:#fff;border:1px solid #0f2742}
+.leaderboard-order-btn:hover{background:#14385d;color:#fff}
+.leaderboard-controls{display:flex;align-items:end;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.filter-control{display:grid;gap:6px;min-width:220px}
+.filter-control span{font-size:.78rem;font-weight:550;color:#526070;text-transform:uppercase;letter-spacing:.04em}

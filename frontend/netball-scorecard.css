@@ -1,0 +1,24 @@
+.netball-scorecard-page{max-width:1500px}
+.netball-lineup-section{margin-top:18px;padding:16px;border:1px solid rgba(15,39,66,.14);border-radius:8px;background:#fbfdff}
+.netball-squad-grid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px}
+.netball-starting-grid{display:grid;grid-template-columns:repeat(7,minmax(130px,1fr));gap:10px}
+.netball-sheet{margin-top:18px;border:1px solid rgba(15,39,66,.18);border-radius:8px;overflow:hidden;background:#fff}
+.netball-sheet-head{display:grid;gap:12px;padding:16px;background:#fff8e2;border-bottom:1px solid rgba(15,39,66,.12)}
+.netball-sheet-head h2{margin:0;color:#0f2742}
+.netball-period-grid{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:10px;align-items:end}
+.netball-period-grid .score-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.netball-table-wrap{overflow-x:auto}
+.netball-score-table{width:100%;min-width:1580px;border-collapse:collapse}
+.netball-score-table th{background:#0f2742;color:#fff;text-align:left;font-size:12px;font-weight:600;padding:8px;border-bottom:1px solid rgba(15,39,66,.12)}
+.netball-score-table td{padding:6px;border-bottom:1px solid rgba(15,39,66,.08)}
+.netball-score-table .input,.netball-score-table .select{min-height:34px;padding:7px 8px;border-radius:6px;font-size:13px}
+.netball-score-table th:nth-child(1),.netball-score-table td:nth-child(1){width:64px}
+.netball-score-table th:nth-child(2),.netball-score-table td:nth-child(2){min-width:220px}
+.netball-substitutions{padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(15,39,66,.08)}
+.netball-sub-grid{display:grid;grid-template-columns:100px 1fr 1fr 120px 1fr;gap:10px;align-items:end;margin-bottom:10px}
+.netball-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(15,39,66,.08)}
+.derived{background:#eef4f8;color:#0f2742;font-weight:600}
+.netball-view-score{font-size:28px;font-weight:600;color:#0f2742}
+.netball-position-list{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:10px;margin-bottom:16px}
+.netball-position-list div,.netball-summary-grid div{border:1px solid rgba(15,39,66,.12);border-radius:8px;padding:10px;background:#fbfdff}
+@media(max-width:1000px){.netball-squad-grid,.netball-starting-grid,.netball-period-grid,.netball-sub-grid,.netball-summary-grid,.netball-position-list{grid-template-columns:1fr}.netball-period-grid .score-pair{grid-template-columns:1fr 1fr}}

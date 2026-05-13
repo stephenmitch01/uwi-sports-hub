@@ -1,0 +1,17 @@
+.swimming-results-page{max-width:1500px}
+.swim-sheet{margin-top:18px;border:1px solid rgba(15,39,66,.18);border-radius:8px;overflow:hidden;background:#fff}
+.swim-toolbar{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid rgba(15,39,66,.18)}
+.swim-toolbar div{padding:12px;text-align:center;background:#f5f7fb;border-right:1px solid rgba(15,39,66,.18);font-weight:600}
+.swim-toolbar div:last-child{border-right:0}
+.swim-event-bar{padding:12px 16px;background:#c8c5ff;color:#0f2742;font-weight:600;border-bottom:1px solid rgba(15,39,66,.18)}
+.swim-meta-grid{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:10px;padding:16px;border-bottom:1px solid rgba(15,39,66,.14);background:#fbfdff}
+.swim-table-wrap{overflow-x:auto}
+.swim-results-table{width:100%;min-width:1160px;border-collapse:collapse}
+.swim-results-table th{background:#f1f3f6;color:#0f2742;text-align:left;font-size:13px;font-weight:600;padding:8px;border:1px solid rgba(15,39,66,.24)}
+.swim-results-table td{padding:6px;border:1px solid rgba(15,39,66,.2)}
+.swim-results-table th:first-child,.swim-results-table td:first-child{width:70px;text-align:center;background:#fff3df}
+.swim-results-table .input,.swim-results-table .select{min-height:34px;padding:7px 8px;border-radius:6px;font-size:13px}
+.swim-checkbox-cell{text-align:center}
+.swim-view-time{font-size:28px;font-weight:600;color:#0f2742}
+.swim-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px;padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(15,39,66,.14)}
+@media(max-width:1000px){.swim-toolbar,.swim-meta-grid,.swim-summary-grid{grid-template-columns:1fr}}

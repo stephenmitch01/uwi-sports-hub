@@ -1,0 +1,23 @@
+.cricket-scorecard-page{max-width:1500px}
+.cricket-xi-section{margin-top:18px;padding:16px;border:1px solid rgba(15,39,66,.14);border-radius:8px;background:#fbfdff}
+.starting-xi-grid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px}
+.cricket-entry-section{margin-top:18px;border:1px solid rgba(15,39,66,.14);border-radius:8px;overflow:hidden;background:#fff}
+.cricket-entry-head{display:flex;justify-content:space-between;gap:18px;align-items:end;padding:16px;background:#e7f3fb;border-bottom:1px solid rgba(15,39,66,.12)}
+.cricket-entry-head h2{margin:0;color:#0f2742}
+.cricket-entry-controls{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:10px;min-width:min(720px,100%)}
+.scorecard-table-wrap{overflow-x:auto}
+.scorecard-table{width:100%;min-width:1120px;border-collapse:collapse}
+.batting-table{min-width:1320px}
+.scorecard-table th{background:#d8edf9;color:#0f2742;text-align:left;font-size:12px;font-weight:600;padding:8px;border-bottom:1px solid rgba(15,39,66,.12)}
+.scorecard-table td{padding:6px;border-bottom:1px solid rgba(15,39,66,.08)}
+.scorecard-table .input,.scorecard-table .select{min-height:34px;padding:7px 8px;border-radius:6px;font-size:13px}
+.scorecard-table th:nth-child(n+4),.scorecard-table td:nth-child(n+4){width:78px}
+.scorecard-totals{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(15,39,66,.08);border-bottom:1px solid rgba(15,39,66,.08)}
+.scorecard-notes{padding:14px 16px}
+.scorecard-notes .textarea{min-height:86px}
+.declare-row{padding:0 16px 14px;background:#fbfdff;color:#0f2742;font-weight:600}
+.declare-row input{margin-right:8px}
+.derived{background:#eef4f8;color:#0f2742;font-weight:600}
+.muted-control{opacity:.55}
+.muted-control .input,.muted-control .select{background:#f3f5f7}
+@media(max-width:1000px){.cricket-entry-head{display:grid}.cricket-entry-controls,.scorecard-totals,.starting-xi-grid{grid-template-columns:1fr}}

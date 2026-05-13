@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>View Track and Field Results | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="track-field-results.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page track-field-results-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head"><div><h1 id="resultsTitle">Track and Field Results</h1><p class="muted" id="resultsMeta">Saved official results.</p><div class="quick-actions"><a class="btn btn-campus" id="backLink" href="competitions.html">Back to Competition</a></div></div><div class="head-right"><aside class="scorecard-result-panel"><span>Top UWI Result</span><strong class="tf-view-mark" id="topUwiText">-</strong><p id="summaryText"></p></aside></div></section>
+<section class="card" id="resultsBody"></section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="track-field-results-view.js"></script>
+</body>
+</html>

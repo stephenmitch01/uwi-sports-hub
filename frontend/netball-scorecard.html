@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Netball Match Sheet | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="netball-scorecard.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page netball-scorecard-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="scorecardHeading">Netball Match Sheet Entry</h1>
+<p class="muted" id="scorecardSubtitle">Select the UWI squad, set the starting 7, then enter quarter scores and player statistics.</p>
+<div class="quick-actions"><a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a></div>
+</div>
+<div class="head-right">
+<div class="mini-card"><div class="mini-label">Sport</div><div class="mini-value">Netball</div><div class="mini-sub">Match sheet workflow</div></div>
+<div class="mini-card"><div class="mini-label">Player Links</div><div class="mini-value">Squad</div><div class="mini-sub">UWI rows connect to athlete records</div></div>
+</div>
+</section>
+<section class="card">
+<form id="netballScorecardForm" novalidate>
+<div class="filter-grid">
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="opponentName">Opponent</label><input class="input" id="opponentName" type="text" placeholder="Opponent team name"/></div>
+<div><label for="scorecardTitle">Match / Score Sheet Title</label><input class="input" id="scorecardTitle" type="text"/></div>
+<div><label for="scorecardDate">Date</label><input class="input" id="scorecardDate" type="date"/></div>
+<div><label for="scorecardVenue">Venue</label><input class="input" id="scorecardVenue" type="text"/></div>
+<div><label for="scorecardResult">Result</label><input class="input derived" id="scorecardResult" type="text" readonly/></div>
+</div>
+<section class="netball-lineup-section">
+<div class="section-title"><div><h2>UWI Match Squad</h2><p>Select up to 12 UWI players. Starting 7 and stat rows use this squad.</p></div></div>
+<div class="netball-squad-grid" id="squadGrid"></div>
+</section>
+<section class="netball-lineup-section">
+<div class="section-title"><div><h2>Starting 7</h2><p>Assign starting positions for the first centre pass.</p></div></div>
+<div class="netball-starting-grid" id="startingGrid"></div>
+</section>
+<section class="netball-sheet">
+<div class="netball-sheet-head">
+<div><h2>Match Score</h2><p>Quarter totals drive the final score and result.</p></div>
+<div class="netball-period-grid">
+<div><label>Q1</label><div class="score-pair"><input class="input" id="uwiQ1" type="number" min="0" placeholder="UWI"/><input class="input" id="oppQ1" type="number" min="0" placeholder="Opp"/></div></div>
+<div><label>Q2</label><div class="score-pair"><input class="input" id="uwiQ2" type="number" min="0" placeholder="UWI"/><input class="input" id="oppQ2" type="number" min="0" placeholder="Opp"/></div></div>
+<div><label>Q3</label><div class="score-pair"><input class="input" id="uwiQ3" type="number" min="0" placeholder="UWI"/><input class="input" id="oppQ3" type="number" min="0" placeholder="Opp"/></div></div>
+<div><label>Q4</label><div class="score-pair"><input class="input" id="uwiQ4" type="number" min="0" placeholder="UWI"/><input class="input" id="oppQ4" type="number" min="0" placeholder="Opp"/></div></div>
+<div><label>OT</label><div class="score-pair"><input class="input" id="uwiOT" type="number" min="0" placeholder="UWI"/><input class="input" id="oppOT" type="number" min="0" placeholder="Opp"/></div></div>
+<div><label>Total</label><div class="score-pair"><input class="input derived" id="uwiTotal" readonly/><input class="input derived" id="oppTotal" readonly/></div></div>
+</div>
+</div>
+<div class="netball-table-wrap">
+<table class="netball-score-table">
+<thead><tr><th>#</th><th>Player</th><th>Position</th><th>G</th><th>GA</th><th>Shot %</th><th>Goal Assists</th><th>Feeds</th><th>CPR</th><th>Intercepts</th><th>Deflections</th><th>Rebounds</th><th>Gains</th><th>Turnovers</th><th>Penalties</th><th>Minutes</th></tr></thead>
+<tbody id="playerRows"></tbody>
+</table>
+</div>
+<div class="netball-substitutions">
+<div class="section-title section-title-sm"><div><h3>Substitutions and Positional Changes</h3><p>Record player movement by quarter or time.</p></div></div>
+<div id="subRows"></div>
+</div>
+<div class="netball-summary-grid">
+<div><label for="shootingPct">Team Shooting %</label><input class="input derived" id="shootingPct" readonly/></div>
+<div><label for="teamFeeds">Team Feeds</label><input class="input derived" id="teamFeeds" readonly/></div>
+<div><label for="teamGains">Team Gains</label><input class="input derived" id="teamGains" readonly/></div>
+<div><label for="teamPenalties">Team Penalties</label><input class="input derived" id="teamPenalties" readonly/></div>
+</div>
+</section>
+<div class="form-actions"><button class="btn btn-campus" type="submit">Save Netball Match Sheet</button><span class="message" id="scorecardMessage"></span></div>
+</form>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="netball-scorecard.js"></script>
+</body>
+</html>

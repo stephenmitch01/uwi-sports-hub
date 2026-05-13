@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Audit Logs | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="audit-logs.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar">
+  <div class="top-left">
+    <span>UWI Sports Hub</span>
+    <span class="top-divider">•</span>
+    <span data-shell-context></span>
+  </div>
+  <div class="top-right">
+    <span data-session-email></span>
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </div>
+</div>
+
+<header class="signed-navbar" id="shellNav">
+  <div class="signed-navbar-inner">
+    <div class="brand-wrap">
+      <a class="brand" href="dashboard.html">
+        <img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/>
+        <div class="brand-text">
+          <strong>UWI Sports Hub</strong>
+          <span>University Sports Records Platform</span>
+        </div>
+      </a>
+      <div class="signed-campus-pill" data-campus-name></div>
+    </div>
+    <button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="signed-nav-links" id="signedNavLinks">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="athletes.html">Athletes</a>
+      <a href="coaches.html">Coaches</a>
+      <a href="teams.html">Teams</a>
+      <a href="competitions.html">Competitions</a>
+      <a href="reports.html">Reports</a>
+      <a class="active" href="audit-logs.html">Audit Logs</a>
+      <a href="support.html">Support</a>
+      <button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <section class="card head">
+    <div>
+      <h1>Audit Logs</h1>
+      <p class="muted">Review account activity, record changes, score sheet submissions, archived records, and support requests.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">
+      <div>
+        <h2>Filter activity</h2>
+        <p>Choose filters, then search. No records are changed from this page.</p>
+      </div>
+    </div>
+
+    <div class="audit-filter-grid">
+      <div>
+        <label for="auditAction">Action</label>
+        <select class="select" id="auditAction">
+          <option value="">All actions</option>
+          <option value="create">Create</option>
+          <option value="update">Update</option>
+          <option value="archive">Archive</option>
+          <option value="create_account">Create account</option>
+        </select>
+      </div>
+      <div>
+        <label for="auditEntityType">Record type</label>
+        <select class="select" id="auditEntityType">
+          <option value="">All record types</option>
+          <option value="athlete">Athlete</option>
+          <option value="coach">Coach</option>
+          <option value="team">Team</option>
+          <option value="competition">Competition</option>
+          <option value="teamRosterAssignment">Team roster assignment</option>
+          <option value="teamStaffAssignment">Team staff assignment</option>
+          <option value="competitionStatLine">Score sheet / result line</option>
+          <option value="athleteStatLine">Athlete stat line</option>
+          <option value="athletePersonalBest">Athlete personal best</option>
+          <option value="supportRequest">Support request</option>
+          <option value="userProfile">User account</option>
+        </select>
+      </div>
+      <div>
+        <label for="auditEntityId">Record ID</label>
+        <input class="input" id="auditEntityId" placeholder="Optional exact ID" type="text"/>
+      </div>
+      <div>
+        <label for="auditLimit">Limit</label>
+        <select class="select" id="auditLimit">
+          <option value="50">50 records</option>
+          <option value="100">100 records</option>
+          <option value="200" selected>200 records</option>
+          <option value="500">500 records</option>
+        </select>
+      </div>
+      <button class="btn btn-campus audit-search-button" id="auditSearchButton" type="button">Search</button>
+    </div>
+
+    <div id="auditMessage" class="form-message" aria-live="polite"></div>
+  </section>
+
+  <section class="card">
+    <div class="section-title">
+      <div>
+        <h2>Activity results</h2>
+        <p id="auditResultSummary">Search to load audit records.</p>
+      </div>
+    </div>
+    <div class="table-scroll" id="auditTableWrap"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-left">
+    <strong>UWI Sports Hub</strong>
+    <span>Internal university sports platform</span>
+  </div>
+  <div class="footer-right">
+    <a href="about.html">About</a>
+    <a href="legal.html">Legal</a>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="uwi-app.js"></script>
+<script src="audit-logs.js"></script>
+</body>
+</html>

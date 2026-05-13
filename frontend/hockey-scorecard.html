@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hockey Score Sheet | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="hockey-scorecard.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page hockey-scorecard-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="scorecardHeading">Hockey Score Sheet Entry</h1>
+<p class="muted" id="scorecardSubtitle">Select the UWI match roster first. Scoring and penalty rows then link directly to athlete records.</p>
+<div class="quick-actions"><a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a></div>
+</div>
+<div class="head-right">
+<div class="mini-card"><div class="mini-label">Sport</div><div class="mini-value">Hockey</div><div class="mini-sub">Score sheet workflow</div></div>
+<div class="mini-card"><div class="mini-label">Player Links</div><div class="mini-value">Roster</div><div class="mini-sub">UWI rows connect to athlete records</div></div>
+</div>
+</section>
+<section class="card">
+<form id="hockeyScorecardForm" novalidate>
+<div class="filter-grid">
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="opponentName">Visit / Opponent</label><input class="input" id="opponentName" type="text" placeholder="Opponent team"/></div>
+<div><label for="scorecardTitle">Match Title</label><input class="input" id="scorecardTitle" type="text" placeholder="e.g. League Match 1"/></div>
+<div><label for="scorecardDate">Date</label><input class="input" id="scorecardDate" type="date"/></div>
+<div><label for="leagueName">League</label><input class="input" id="leagueName" type="text"/></div>
+<div><label for="arenaName">Arena</label><input class="input" id="arenaName" type="text"/></div>
+</div>
+<section class="hockey-lineup-section">
+<div class="section-title"><div><h2>UWI Match Roster</h2><p>Select up to 18 players. Scoring and penalty dropdowns are limited to this roster.</p></div></div>
+<div class="hockey-lineup-grid" id="rosterGrid"></div>
+</section>
+<section class="hockey-sheet">
+<div class="hockey-sheet-head">
+<h2>Hockey Score Sheet</h2>
+<div class="hockey-meta-grid">
+<div><label for="homeTeamLabel">Home</label><input class="input" id="homeTeamLabel" type="text"/></div>
+<div><label for="visitTeamLabel">Visit</label><input class="input derived" id="visitTeamLabel" readonly/></div>
+<div><label for="matchResult">Result</label><input class="input derived" id="matchResult" readonly/></div>
+<div><label for="homeFinal">Home Final</label><input class="input derived" id="homeFinal" readonly/></div>
+<div><label for="visitFinal">Visit Final</label><input class="input derived" id="visitFinal" readonly/></div>
+</div>
+<div class="hockey-score-grid">
+<div><label>Period Scores</label><div class="hockey-score-pair"><input class="input derived" id="homePeriodLabel" readonly/><input class="input derived" id="visitPeriodLabel" readonly/></div></div>
+<div><label>1st</label><div class="hockey-score-pair"><input class="input" id="homeP1" type="number" min="0"/><input class="input" id="visitP1" type="number" min="0"/></div></div>
+<div><label>2nd</label><div class="hockey-score-pair"><input class="input" id="homeP2" type="number" min="0"/><input class="input" id="visitP2" type="number" min="0"/></div></div>
+<div><label>3rd</label><div class="hockey-score-pair"><input class="input" id="homeP3" type="number" min="0"/><input class="input" id="visitP3" type="number" min="0"/></div></div>
+<div><label>OT / Shootout</label><div class="hockey-score-pair"><input class="input" id="homeOT" type="number" min="0"/><input class="input" id="visitOT" type="number" min="0"/></div></div>
+</div>
+</div>
+<div class="hockey-board">
+<section class="hockey-panel">
+<h3>Home Scoring</h3>
+<div class="hockey-table-wrap"><table class="hockey-score-table"><thead><tr><th>#</th><th>Player</th><th>Period</th><th>G</th><th>A1</th><th>A2</th></tr></thead><tbody id="homeScoringRows"></tbody></table></div>
+</section>
+<section class="hockey-panel">
+<h3>Visit Scoring</h3>
+<div class="hockey-table-wrap"><table class="hockey-score-table"><thead><tr><th>#</th><th>Player</th><th>Period</th><th>G</th><th>A1</th><th>A2</th></tr></thead><tbody id="visitScoringRows"></tbody></table></div>
+</section>
+<section class="hockey-panel">
+<h3>Home Penalties</h3>
+<div class="hockey-penalty-grid" id="homePenaltyRows"></div>
+</section>
+<section class="hockey-panel">
+<h3>Visit Penalties</h3>
+<div class="hockey-penalty-grid" id="visitPenaltyRows"></div>
+</section>
+</div>
+<div class="hockey-summary-grid">
+<div><label for="teamGoals">UWI Goals</label><input class="input derived" id="teamGoals" readonly/></div>
+<div><label for="teamAssists">UWI Assists</label><input class="input derived" id="teamAssists" readonly/></div>
+<div><label for="teamPenalties">UWI Penalties</label><input class="input derived" id="teamPenalties" readonly/></div>
+<div><label for="penaltyMinutes">Penalty Minutes</label><input class="input derived" id="penaltyMinutes" readonly/></div>
+<div><label for="goalieSaves">Goalie Saves</label><input class="input" id="goalieSaves" type="number" min="0"/></div>
+</div>
+</section>
+<div class="form-actions"><button class="btn btn-campus" type="submit">Save Hockey Score Sheet</button><span class="message" id="scorecardMessage"></span></div>
+</form>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="hockey-scorecard.js"></script>
+</body>
+</html>

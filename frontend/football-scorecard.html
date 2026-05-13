@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Football Score Sheet | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="football-scorecard.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page football-scorecard-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="scorecardHeading">Football Score Sheet Entry</h1>
+<p class="muted" id="scorecardSubtitle">Select the UWI squad first. Player stat rows then link directly to athlete records.</p>
+<div class="quick-actions"><a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a></div>
+</div>
+<div class="head-right">
+<div class="mini-card"><div class="mini-label">Sport</div><div class="mini-value">Football</div><div class="mini-sub">Match sheet workflow</div></div>
+<div class="mini-card"><div class="mini-label">Player Links</div><div class="mini-value">Squad</div><div class="mini-sub">UWI rows connect to athlete records</div></div>
+</div>
+</section>
+<section class="card">
+<form id="footballScorecardForm" novalidate>
+<div class="filter-grid">
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="opponentName">Opponent</label><input class="input" id="opponentName" type="text" placeholder="Opponent team name"/></div>
+<div><label for="scorecardTitle">Match / Score Sheet Title</label><input class="input" id="scorecardTitle" type="text" placeholder="e.g. League Match 1"/></div>
+<div><label for="scorecardDate">Date</label><input class="input" id="scorecardDate" type="date"/></div>
+<div><label for="scorecardLocation">Location</label><input class="input" id="scorecardLocation" type="text"/></div>
+<div><label for="scorecardResult">Result</label><input class="input derived" id="scorecardResult" type="text" readonly/></div>
+</div>
+<section class="football-lineup-section">
+<div class="section-title"><div><h2>UWI Match Squad</h2><p>Select up to 18 UWI players. Score sheet dropdowns are limited to this squad.</p></div></div>
+<div class="football-lineup-grid" id="squadGrid"></div>
+</section>
+<section class="football-sheet">
+<div class="football-sheet-head">
+<div><h2>Match Score</h2><p>Enter scores by half and overtime. Totals and result are derived.</p></div>
+<div class="football-period-grid">
+<div><label for="homeTeamLabel">Home Team</label><input class="input" id="homeTeamLabel" type="text"/></div>
+<div><label>1st Half</label><div class="score-pair"><input class="input" id="homeH1" type="number" min="0" placeholder="UWI"/><input class="input" id="awayH1" type="number" min="0" placeholder="Opp"/></div></div>
+<div><label>2nd Half</label><div class="score-pair"><input class="input" id="homeH2" type="number" min="0" placeholder="UWI"/><input class="input" id="awayH2" type="number" min="0" placeholder="Opp"/></div></div>
+<div><label>Overtime</label><div class="score-pair"><input class="input" id="homeOT" type="number" min="0" placeholder="UWI"/><input class="input" id="awayOT" type="number" min="0" placeholder="Opp"/></div></div>
+<div><label>Total</label><div class="score-pair"><input class="input derived" id="homeTotal" type="number" readonly/><input class="input derived" id="awayTotal" type="number" readonly/></div></div>
+</div>
+</div>
+<div class="football-table-wrap">
+<table class="football-score-table">
+<thead><tr><th>#</th><th>Player</th><th>Shots</th><th>Shots OT</th><th>Assists</th><th>Goals Scored</th><th>Goals Conceded</th><th>Saves</th><th>Fouls</th><th>Offside</th><th>Yellow</th><th>Red</th><th>Minutes</th></tr></thead>
+<tbody id="playerRows"></tbody>
+</table>
+</div>
+<div class="football-events">
+<div class="section-title section-title-sm"><div><h3>Goal Events</h3><p>Use this to link goals and assists to the exact UWI players involved.</p></div></div>
+<div id="goalEvents"></div>
+</div>
+<div class="football-summary-grid">
+<div><label for="teamShots">Team Shots</label><input class="input derived" id="teamShots" type="number" readonly/></div>
+<div><label for="teamAssists">Team Assists</label><input class="input derived" id="teamAssists" type="number" readonly/></div>
+<div><label for="teamSaves">Team Saves</label><input class="input derived" id="teamSaves" type="number" readonly/></div>
+<div><label for="teamCards">Team Cards</label><input class="input derived" id="teamCards" type="text" readonly/></div>
+</div>
+<div class="football-events">
+<div class="section-title section-title-sm"><div><h3>Team Match Details</h3><p>Capture the match summary stats shown in football result reports.</p></div></div>
+<div class="football-match-stats-grid">
+<div class="match-stat-head"></div><div class="match-stat-head">UWI</div><div class="match-stat-head">Opponent</div>
+<label>Possession %</label><input class="input" id="uwiPossession" type="number" min="0" max="100"/><input class="input" id="oppPossession" type="number" min="0" max="100"/>
+<label>Shots</label><input class="input" id="uwiShots" type="number" min="0"/><input class="input" id="oppShots" type="number" min="0"/>
+<label>Shots on Target</label><input class="input" id="uwiShotsOnTarget" type="number" min="0"/><input class="input" id="oppShotsOnTarget" type="number" min="0"/>
+<label>Fouls</label><input class="input" id="uwiFouls" type="number" min="0"/><input class="input" id="oppFouls" type="number" min="0"/>
+<label>Offsides</label><input class="input" id="uwiOffsides" type="number" min="0"/><input class="input" id="oppOffsides" type="number" min="0"/>
+<label>Corner Kicks</label><input class="input" id="uwiCorners" type="number" min="0"/><input class="input" id="oppCorners" type="number" min="0"/>
+<label>Free Kicks</label><input class="input" id="uwiFreeKicks" type="number" min="0"/><input class="input" id="oppFreeKicks" type="number" min="0"/>
+<label>Passes Completed %</label><input class="input" id="uwiPassesCompleted" type="number" min="0" max="100"/><input class="input" id="oppPassesCompleted" type="number" min="0" max="100"/>
+<label>Crosses</label><input class="input" id="uwiCrosses" type="number" min="0"/><input class="input" id="oppCrosses" type="number" min="0"/>
+<label>Interceptions</label><input class="input" id="uwiInterceptions" type="number" min="0"/><input class="input" id="oppInterceptions" type="number" min="0"/>
+<label>Tackles</label><input class="input" id="uwiTackles" type="number" min="0"/><input class="input" id="oppTackles" type="number" min="0"/>
+<label>Saves</label><input class="input derived" id="uwiSaves" type="number" readonly/><input class="input" id="oppSaves" type="number" min="0"/>
+</div>
+</div>
+</section>
+<div class="form-actions"><button class="btn btn-campus" type="submit">Save Football Score Sheet</button><span class="message" id="scorecardMessage"></span></div>
+</form>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="football-scorecard.js"></script>
+</body>
+</html>

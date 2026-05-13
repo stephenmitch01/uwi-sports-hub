@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Taekwondo Judge Score Sheet | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="taekwondo-scorecard.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">-</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page taekwondo-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="scorecardHeading">Taekwondo Judge Score Sheet</h1>
+<p class="muted">Record poomsae judging with accuracy deductions, presentation scores, and final average score.</p>
+<div class="quick-actions"><a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a></div>
+</div>
+<div class="head-right"><div class="mini-card"><div class="mini-label">Event Type</div><div class="mini-value">Poomsae</div><div class="mini-sub">Judge score sheet</div></div><div class="mini-card"><div class="mini-label">Total</div><div class="mini-value">10.0</div><div class="mini-sub">Accuracy 4.0 + presentation 6.0</div></div></div>
+</section>
+<section class="card">
+<form id="taekwondoScorecardForm" novalidate>
+<div class="filter-grid">
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="athleteSelect">UWI Athlete</label><select class="select" id="athleteSelect" data-player-select><option value="">Select athlete</option></select></div>
+<div><label for="scorecardTitle">Event Title</label><input class="input" id="scorecardTitle" type="text"/></div>
+<div><label for="scorecardDate">Date</label><input class="input" id="scorecardDate" type="date"/></div>
+<div><label for="courtNumber">Court</label><input class="input" id="courtNumber" type="text"/></div>
+<div><label for="divisionName">Division</label><input class="input" id="divisionName" type="text" placeholder="Senior Female Individual"/></div>
+<div><label for="poomsaeName">Poomsae</label><input class="input" id="poomsaeName" type="text" placeholder="Taegeuk / Koryo / Keumgang"/></div>
+<div><label for="roundName">Round</label><input class="input" id="roundName" type="text" placeholder="Final"/></div>
+<div><label for="rankValue">Rank</label><input class="input" id="rankValue" type="number" min="1"/></div>
+<div><label for="resultText">Result</label><input class="input derived" id="resultText" readonly/></div>
+</div>
+<section class="tkd-sheet">
+<div class="tkd-sheet-title">
+<div><h2>Judge Scores</h2><p>Accuracy starts at 4.0 and deductions are subtracted. Presentation has three 2.0-point categories.</p></div>
+<div class="tkd-total-strip">
+<div><span>Average</span><strong id="averageScore">0.00</strong></div>
+<div><span>Best Judge</span><strong id="bestJudgeScore">0.00</strong></div>
+<div><span>Judges</span><strong id="judgeCount">0</strong></div>
+<div><span>Final</span><strong id="finalScore">0.00</strong></div>
+</div>
+</div>
+<div class="tkd-judge-list" id="judgeList"></div>
+</section>
+<div class="form-actions"><button class="btn btn-campus" type="submit">Save Taekwondo Score Sheet</button><span class="message" id="scorecardMessage"></span></div>
+</form>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="taekwondo-scorecard.js"></script>
+</body>
+</html>

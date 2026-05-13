@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chess Score Sheet | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="chess-scorecard.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">-</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page chess-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="scorecardHeading">Chess Score Sheet Entry</h1>
+<p class="muted">Record board details, colors, result, opening, and the complete move score.</p>
+<div class="quick-actions"><a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a></div>
+</div>
+<div class="head-right"><div class="mini-card"><div class="mini-label">Sport</div><div class="mini-value">Chess</div><div class="mini-sub">Board score sheet</div></div><div class="mini-card"><div class="mini-label">Result</div><div class="mini-value" id="heroResult">-</div><div class="mini-sub">Derived from selection</div></div></div>
+</section>
+<section class="card">
+<form id="chessScorecardForm" novalidate>
+<div class="filter-grid">
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="uwiPlayerSelect">UWI Player</label><select class="select" id="uwiPlayerSelect" data-player-select><option value="">Select player</option></select></div>
+<div><label for="uwiColor">UWI Color</label><select class="select" id="uwiColor"><option value="white">White</option><option value="black">Black</option></select></div>
+<div><label for="opponentName">Opponent</label><input class="input" id="opponentName" type="text"/></div>
+<div><label for="scorecardTitle">Event</label><input class="input" id="scorecardTitle" type="text"/></div>
+<div><label for="scorecardDate">Date</label><input class="input" id="scorecardDate" type="date"/></div>
+<div><label for="roundName">Round</label><input class="input" id="roundName" type="text"/></div>
+<div><label for="boardNumber">Board</label><input class="input" id="boardNumber" type="text"/></div>
+<div><label for="sectionName">Section</label><input class="input" id="sectionName" type="text"/></div>
+<div><label for="openingName">Opening</label><input class="input" id="openingName" type="text" placeholder="Sicilian Defense"/></div>
+<div><label for="timeControl">Time Control</label><input class="input" id="timeControl" type="text" placeholder="90+30"/></div>
+<div><label for="pairingNumber">Pairing No.</label><input class="input" id="pairingNumber" type="text"/></div>
+<div><label for="uwiRanking">UWI Ranking / Rating</label><input class="input" id="uwiRanking" type="text"/></div>
+<div><label for="opponentRanking">Opponent Ranking / Rating</label><input class="input" id="opponentRanking" type="text"/></div>
+<div><label for="gameResult">Result</label><select class="select" id="gameResult"><option value="">Select result</option><option value="white">White won</option><option value="black">Black won</option><option value="draw">Draw</option><option value="forfeit-win">UWI won by forfeit</option><option value="forfeit-loss">UWI lost by forfeit</option></select></div>
+<div><label for="durationText">Duration</label><input class="input" id="durationText" type="text" placeholder="3h 12m"/></div>
+</div>
+<section class="chess-sheet">
+<div class="chess-sheet-title">
+<div><h2>Move Record</h2><p>Enter algebraic notation for each move. Leave unused rows blank.</p></div>
+<div class="chess-total-strip">
+<div><span>UWI Score</span><strong id="uwiScoreText">0</strong></div>
+<div><span>Result</span><strong id="resultText">-</strong></div>
+<div><span>Moves</span><strong id="moveCountText">0</strong></div>
+<div><span>Color</span><strong id="colorText">White</strong></div>
+</div>
+</div>
+<div class="move-grid" id="moveGrid"></div>
+</section>
+<div class="chess-meta-grid">
+<div><label for="arbiterName">Arbiter / Signature</label><input class="input" id="arbiterName" type="text"/></div>
+<div><label for="playerSignature">Player Signature</label><input class="input" id="playerSignature" type="text"/></div>
+<div><label for="matchNotes">Notes</label><input class="input" id="matchNotes" type="text"/></div>
+</div>
+<div class="form-actions"><button class="btn btn-campus" type="submit">Save Chess Score Sheet</button><span class="message" id="scorecardMessage"></span></div>
+</form>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="chess-scorecard.js"></script>
+</body>
+</html>

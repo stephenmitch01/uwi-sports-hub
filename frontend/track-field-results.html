@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Track and Field Results Entry | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="track-field-results.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page track-field-results-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="resultsHeading">Track and Field Results Entry</h1>
+<p class="muted" id="resultsSubtitle">Select the event type, then enter official results with UWI athlete rows linked directly to profiles.</p>
+<div class="quick-actions"><a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a></div>
+</div>
+<div class="head-right"><div class="mini-card"><div class="mini-label">Workflow</div><div class="mini-value">Track / Field</div><div class="mini-sub">Choose sheet type first</div></div><div class="mini-card"><div class="mini-label">Athlete Links</div><div class="mini-value">Dropdown</div><div class="mini-sub">UWI rows connect to stats</div></div></div>
+</section>
+<section class="card">
+<form id="trackFieldResultsForm" novalidate>
+<div class="filter-grid">
+<div><label for="resultKind">Results Type</label><select class="select" id="resultKind"><option value="track">Track Event Results</option><option value="field">Field Event Results</option></select></div>
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="meetTitle">Meet / Competition</label><input class="input" id="meetTitle" type="text"/></div>
+<div><label for="eventDate">Date</label><input class="input" id="eventDate" type="date"/></div>
+<div><label for="eventName">Event</label><input class="input" id="eventName" type="text" placeholder="e.g. 100m, 4x100m Relay, Long Jump, Shot Put"/></div>
+<div><label for="eventNumber">Event No.</label><input class="input" id="eventNumber" type="text"/></div>
+<div><label for="division">Division</label><input class="input" id="division" type="text" placeholder="Open, Men, Women, U20"/></div>
+<div><label for="roundType">Round</label><select class="select" id="roundType"><option value="Final">Final</option><option value="Heat">Heat</option><option value="Semi Final">Semi Final</option><option value="Timed Final">Timed Final</option><option value="Qualifying">Qualifying</option></select></div>
+</div>
+<section class="tf-sheet" id="trackSheet">
+<div class="tf-title-row"><strong>Track Result</strong><span id="trackEventLabel">Track Event</span></div>
+<div class="tf-meta-grid">
+<div><label for="heatNumber">Heat No.</label><input class="input" id="heatNumber" type="text"/></div>
+<div><label for="semiFinalNumber">Semi Final No.</label><input class="input" id="semiFinalNumber" type="text"/></div>
+<div><label for="recordNotes">Record(s)</label><input class="input" id="recordNotes" type="text" placeholder="CR, NR, PB, SB"/></div>
+<div><label for="windDirection">Wind Direction</label><select class="select" id="windDirection"><option value="">Not applicable</option><option value="following">Following (+)</option><option value="against">Against (-)</option></select></div>
+<div><label for="windValue">Wind Velocity (m/s)</label><input class="input" id="windValue" type="number" step="0.01"/></div>
+</div>
+<div class="tf-table-wrap">
+<table class="tf-results-table">
+<thead><tr><th>Place</th><th>No.</th><th>Name</th><th>Club</th><th>Lane</th><th>Time</th><th>A/B</th><th>Points</th><th>Status</th></tr></thead>
+<tbody id="trackRows"></tbody>
+</table>
+</div>
+</section>
+<section class="tf-sheet is-hidden" id="fieldSheet">
+<div class="tf-title-row"><strong>Field Event Results</strong><span id="fieldEventLabel">Field Event</span></div>
+<div class="tf-meta-grid">
+<div><label for="fieldEventType">Field Event Type</label><select class="select" id="fieldEventType"><option value="horizontal-jump">Horizontal Jump</option><option value="vertical-jump">Vertical Jump</option><option value="throw">Throw</option></select></div>
+<div><label for="fieldStandard">Standard / Bar Start</label><input class="input" id="fieldStandard" type="text" placeholder="Optional"/></div>
+<div><label for="fieldWind">Wind (jumps)</label><input class="input" id="fieldWind" type="number" step="0.01"/></div>
+<div><label for="fieldNotes">Remarks</label><input class="input" id="fieldNotes" type="text"/></div>
+</div>
+<div class="tf-table-wrap">
+<table class="tf-results-table field-table">
+<thead><tr><th>Rank</th><th>Bib #</th><th>Name</th><th>Club</th><th>1</th><th>2</th><th>3</th><th>Best</th><th>Rank</th><th>4</th><th>5</th><th>6</th><th>Best</th><th>Final Rank</th><th>Points</th></tr></thead>
+<tbody id="fieldRows"></tbody>
+</table>
+</div>
+<div class="tf-note">Use numbers for legal marks, X for foul, - for pass, and NM for no mark. Best marks and ranks are derived automatically.</div>
+</section>
+<div class="tf-summary-grid">
+<div><label for="uwiEntries">UWI Entries</label><input class="input" id="uwiEntries" readonly/></div>
+<div><label for="completedEntries">Completed Results</label><input class="input" id="completedEntries" readonly/></div>
+<div><label for="topUwiResult">Top UWI Result</label><input class="input" id="topUwiResult" readonly/></div>
+<div><label for="winnerResult">Winning Result</label><input class="input" id="winnerResult" readonly/></div>
+</div>
+<div class="form-actions"><button class="btn btn-campus" type="submit">Save Track and Field Results</button><span class="message" id="resultsMessage"></span></div>
+</form>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="track-field-results.js"></script>
+</body>
+</html>

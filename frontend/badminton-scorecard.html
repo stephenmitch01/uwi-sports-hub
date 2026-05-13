@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Badminton Match Sheet | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="badminton-scorecard.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page badminton-scorecard-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="scorecardHeading">Badminton Match Sheet Entry</h1>
+<p class="muted" id="scorecardSubtitle">Enter a singles or doubles rubber with game scores linked to UWI athlete records.</p>
+<div class="quick-actions"><a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a></div>
+</div>
+<div class="head-right"><div class="mini-card"><div class="mini-label">Sport</div><div class="mini-value">Badminton</div><div class="mini-sub">Singles and doubles</div></div><div class="mini-card"><div class="mini-label">Format</div><div class="mini-value">Best of 3</div><div class="mini-sub">Games to 21, win by 2</div></div></div>
+</section>
+<section class="card">
+<form id="badmintonScorecardForm" novalidate>
+<div class="filter-grid">
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="matchType">Match Type</label><select class="select" id="matchType"><option value="singles">Singles</option><option value="doubles">Doubles</option></select></div>
+<div><label for="discipline">Discipline</label><select class="select" id="discipline"><option value="MS">Men's Singles</option><option value="WS">Women's Singles</option><option value="MD">Men's Doubles</option><option value="WD">Women's Doubles</option><option value="XD">Mixed Doubles</option></select></div>
+<div><label for="scorecardTitle">Match / Tie Title</label><input class="input" id="scorecardTitle" type="text"/></div>
+<div><label for="scorecardDate">Date</label><input class="input" id="scorecardDate" type="date"/></div>
+<div><label for="courtNumber">Court No.</label><input class="input" id="courtNumber" type="text"/></div>
+<div><label for="matchNumber">Match No.</label><input class="input" id="matchNumber" type="text"/></div>
+<div><label for="matchStatus">Status</label><select class="select" id="matchStatus"><option value="completed">Completed</option><option value="walkover">Walkover</option><option value="retired">Retired</option><option value="defaulted">Defaulted</option></select></div>
+<div><label for="scorecardResult">Result</label><input class="input derived" id="scorecardResult" readonly/></div>
+</div>
+<section class="badminton-sheet">
+<div class="badminton-sheet-head">
+<div><h2>Players</h2><p>UWI players are selected from the team roster. Opponent names are typed manually.</p></div>
+<div class="badminton-player-grid">
+<div><label for="uwiPlayer1AthleteId">UWI Player 1</label><select class="select" id="uwiPlayer1AthleteId" data-player-select></select></div>
+<div id="uwiPlayer2Wrap"><label for="uwiPlayer2AthleteId">UWI Player 2</label><select class="select" id="uwiPlayer2AthleteId" data-player-select></select></div>
+<div><label for="opponentPlayer1">Opponent Player 1</label><input class="input" id="opponentPlayer1" type="text"/></div>
+<div id="opponentPlayer2Wrap"><label for="opponentPlayer2">Opponent Player 2</label><input class="input" id="opponentPlayer2" type="text"/></div>
+</div>
+</div>
+<div class="badminton-score-panel">
+<div class="badminton-side-name" id="uwiSideLabel">UWI</div>
+<div class="badminton-game-grid">
+<div class="badminton-game-label">Game</div><div>1</div><div>2</div><div>3</div><div>Games</div>
+<div class="badminton-game-label">UWI</div><input class="input" id="uwiGame1" type="number" min="0" max="40"/><input class="input" id="uwiGame2" type="number" min="0" max="40"/><input class="input" id="uwiGame3" type="number" min="0" max="40"/><input class="input derived" id="uwiGamesWon" readonly/>
+<div class="badminton-game-label">Opponent</div><input class="input" id="oppGame1" type="number" min="0" max="40"/><input class="input" id="oppGame2" type="number" min="0" max="40"/><input class="input" id="oppGame3" type="number" min="0" max="40"/><input class="input derived" id="oppGamesWon" readonly/>
+</div>
+<div class="badminton-side-name" id="opponentSideLabel">Opponent</div>
+</div>
+<div class="badminton-meta-grid">
+<div><label for="umpireName">Umpire</label><input class="input" id="umpireName" type="text"/></div>
+<div><label for="serviceJudge">Service Judge</label><input class="input" id="serviceJudge" type="text"/></div>
+<div><label for="startTime">Start Time</label><input class="input" id="startTime" type="time"/></div>
+<div><label for="finishTime">Finish Time</label><input class="input" id="finishTime" type="time"/></div>
+<div><label for="durationMinutes">Duration (mins)</label><input class="input derived" id="durationMinutes" readonly/></div>
+<div><label for="matchNotes">Notes</label><input class="input" id="matchNotes" type="text"/></div>
+</div>
+<div class="badminton-summary-grid">
+<div><label for="pointsFor">Points For</label><input class="input derived" id="pointsFor" readonly/></div>
+<div><label for="pointsAgainst">Points Against</label><input class="input derived" id="pointsAgainst" readonly/></div>
+<div><label for="pointDifferential">Point Differential</label><input class="input derived" id="pointDifferential" readonly/></div>
+<div><label for="winnerText">Winner</label><input class="input derived" id="winnerText" readonly/></div>
+</div>
+</section>
+<div class="form-actions"><button class="btn btn-campus" type="submit">Save Badminton Match Sheet</button><span class="message" id="scorecardMessage"></span></div>
+</form>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="badminton-scorecard.js"></script>
+</body>
+</html>

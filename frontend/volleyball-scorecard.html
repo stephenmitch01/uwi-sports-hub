@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Volleyball Scoresheet | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="volleyball-scorecard.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page volleyball-scorecard-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="scorecardHeading">Volleyball Scoresheet Entry</h1>
+<p class="muted" id="scorecardSubtitle">Select the UWI roster first. Serve order and player stat rows then link directly to athlete records.</p>
+<div class="quick-actions"><a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a></div>
+</div>
+<div class="head-right">
+<div class="mini-card"><div class="mini-label">Sport</div><div class="mini-value">Volleyball</div><div class="mini-sub">Scoresheet workflow</div></div>
+<div class="mini-card"><div class="mini-label">Player Links</div><div class="mini-value">Roster</div><div class="mini-sub">UWI rows connect to athlete records</div></div>
+</div>
+</section>
+<section class="card">
+<form id="volleyballScorecardForm" novalidate>
+<div class="filter-grid">
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="opponentName">Visitor / Opponent</label><input class="input" id="opponentName" type="text" placeholder="Opponent club"/></div>
+<div><label for="scorecardTitle">Match Title</label><input class="input" id="scorecardTitle" type="text" placeholder="e.g. Varsity Match 1"/></div>
+<div><label for="scorecardDate">Date</label><input class="input" id="scorecardDate" type="date"/></div>
+<div><label for="scorecardSite">Site</label><input class="input" id="scorecardSite" type="text"/></div>
+<div><label for="scorecardLevel">Level</label><input class="input" id="scorecardLevel" type="text" placeholder="Varsity / Men / Women"/></div>
+</div>
+<section class="volleyball-lineup-section">
+<div class="section-title"><div><h2>UWI Match Roster</h2><p>Select up to 14 UWI players. Serve-order and stat dropdowns are limited to this roster.</p></div></div>
+<div class="volleyball-lineup-grid" id="rosterGrid"></div>
+</section>
+<section class="volleyball-sheet">
+<div class="volleyball-sheet-head">
+<h2>Volleyball Scoresheet</h2>
+<div class="volleyball-meta-grid">
+<div><label for="homeClubLabel">Home Club</label><input class="input" id="homeClubLabel" type="text"/></div>
+<div><label for="startTime">Start Time</label><input class="input" id="startTime" type="time"/></div>
+<div><label for="endTime">End Time</label><input class="input" id="endTime" type="time"/></div>
+<div><label for="firstServe">First Serve</label><select class="select" id="firstServe"><option value="uwi">UWI</option><option value="opponent">Opponent</option></select></div>
+<div><label for="matchResult">Result</label><input class="input derived" id="matchResult" type="text" readonly/></div>
+<div><label for="setCount">Sets Played</label><input class="input derived" id="setCount" type="number" readonly/></div>
+</div>
+<div class="volleyball-set-grid">
+<div><label>Teams</label><div class="volleyball-score-pair"><input class="input derived" id="homeSetLabel" readonly/><input class="input derived" id="awaySetLabel" readonly/></div></div>
+<div><label>Set 1</label><div class="volleyball-score-pair"><input class="input" id="uwiSet1" type="number" min="0"/><input class="input" id="oppSet1" type="number" min="0"/></div></div>
+<div><label>Set 2</label><div class="volleyball-score-pair"><input class="input" id="uwiSet2" type="number" min="0"/><input class="input" id="oppSet2" type="number" min="0"/></div></div>
+<div><label>Set 3</label><div class="volleyball-score-pair"><input class="input" id="uwiSet3" type="number" min="0"/><input class="input" id="oppSet3" type="number" min="0"/></div></div>
+<div><label>Set 4</label><div class="volleyball-score-pair"><input class="input" id="uwiSet4" type="number" min="0"/><input class="input" id="oppSet4" type="number" min="0"/></div></div>
+<div><label>Set 5</label><div class="volleyball-score-pair"><input class="input" id="uwiSet5" type="number" min="0"/><input class="input" id="oppSet5" type="number" min="0"/></div></div>
+<div><label>Final Sets</label><div class="volleyball-score-pair"><input class="input derived" id="uwiSetsWon" readonly/><input class="input derived" id="oppSetsWon" readonly/></div></div>
+</div>
+</div>
+<div class="volleyball-table-wrap">
+<table class="volleyball-score-table">
+<thead><tr><th>Serve Order</th><th>Player</th><th>Player No.</th><th>Kills</th><th>Aces</th><th>Blocks</th><th>Assists</th><th>Digs</th><th>Serve Rec.</th><th>Errors</th><th>Subs</th><th>Time-outs</th><th>Captain</th><th>Libero</th></tr></thead>
+<tbody id="playerRows"></tbody>
+</table>
+</div>
+<div class="volleyball-rally-grid">
+<div><label for="uwiTimeouts">UWI Time-outs</label><input class="input" id="uwiTimeouts" type="number" min="0"/></div>
+<div><label for="oppTimeouts">Opponent Time-outs</label><input class="input" id="oppTimeouts" type="number" min="0"/></div>
+<div><label for="uwiSubs">UWI Subs</label><input class="input" id="uwiSubs" type="number" min="0"/></div>
+<div><label for="oppSubs">Opponent Subs</label><input class="input" id="oppSubs" type="number" min="0"/></div>
+<div><label for="penaltyPoints">Penalty Points</label><input class="input" id="penaltyPoints" type="number" min="0"/></div>
+<div><label for="replays">Replays / Re-serves</label><input class="input" id="replays" type="number" min="0"/></div>
+</div>
+<div class="volleyball-summary-grid">
+<div><label for="teamKills">Team Kills</label><input class="input derived" id="teamKills" readonly/></div>
+<div><label for="teamAces">Team Aces</label><input class="input derived" id="teamAces" readonly/></div>
+<div><label for="teamBlocks">Team Blocks</label><input class="input derived" id="teamBlocks" readonly/></div>
+<div><label for="teamAssists">Team Assists</label><input class="input derived" id="teamAssists" readonly/></div>
+<div><label for="teamDigs">Team Digs</label><input class="input derived" id="teamDigs" readonly/></div>
+</div>
+<div class="volleyball-notes-grid">
+<div><label for="comments">Comments</label><textarea class="textarea" id="comments"></textarea></div>
+<div><label for="officialNotes">Official Notes</label><textarea class="textarea" id="officialNotes" placeholder="Loss of rally, penalties, libero notes, substitutions"></textarea></div>
+</div>
+</section>
+<div class="form-actions"><button class="btn btn-campus" type="submit">Save Volleyball Scoresheet</button><span class="message" id="scorecardMessage"></span></div>
+</form>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="volleyball-scorecard.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+.hockey-scorecard-page{max-width:1500px}
+.hockey-lineup-section{margin-top:18px;padding:16px;border:1px solid rgba(15,39,66,.14);border-radius:8px;background:#fbfdff}
+.hockey-lineup-grid{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px}
+.hockey-sheet{margin-top:18px;border:2px solid #222;border-radius:8px;overflow:hidden;background:#fff}
+.hockey-sheet-head{padding:16px;background:#f8f8f8;border-bottom:2px solid #222}
+.hockey-sheet-head h2{margin:0;text-align:center;font-size:34px;color:#111;font-weight:600}
+.hockey-meta-grid{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:10px;margin-top:14px}
+.hockey-score-grid{display:grid;grid-template-columns:1.2fr repeat(4,120px);gap:10px;align-items:end;margin-top:14px}
+.hockey-score-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.hockey-board{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:16px}
+.hockey-panel{border:1px solid rgba(0,0,0,.22);border-radius:8px;overflow:hidden;background:#fff}
+.hockey-panel h3{margin:0;padding:10px 12px;background:#f3f3f3;border-bottom:1px solid rgba(0,0,0,.2);text-align:center;font-weight:600}
+.hockey-table-wrap{overflow-x:auto}
+.hockey-score-table{width:100%;min-width:720px;border-collapse:collapse}
+.hockey-score-table th{background:#fff;color:#111;text-align:left;font-size:12px;font-weight:600;padding:8px;border:1px solid rgba(0,0,0,.24)}
+.hockey-score-table td{padding:6px;border:1px solid rgba(0,0,0,.18)}
+.hockey-score-table .input,.hockey-score-table .select{min-height:34px;padding:7px 8px;border-radius:6px;font-size:13px}
+.hockey-score-table th:nth-child(1),.hockey-score-table td:nth-child(1){width:72px}
+.hockey-score-table th:nth-child(2),.hockey-score-table td:nth-child(2){min-width:220px}
+.hockey-penalty-grid{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px;padding:12px}
+.hockey-summary-grid{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px;padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(0,0,0,.16)}
+.derived{background:#eef4f8;color:#0f2742;font-weight:600}
+.hockey-view-score{font-size:28px;font-weight:600;color:#0f2742}
+@media(max-width:1000px){.hockey-lineup-grid,.hockey-meta-grid,.hockey-score-grid,.hockey-board,.hockey-penalty-grid,.hockey-summary-grid{grid-template-columns:1fr}.hockey-score-pair{grid-template-columns:1fr 1fr}}

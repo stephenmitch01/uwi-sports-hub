@@ -1,0 +1,22 @@
+.track-field-results-page{max-width:1500px}
+.tf-sheet{margin-top:18px;border:1px solid rgba(15,39,66,.18);border-radius:8px;overflow:hidden;background:#fff}
+.tf-sheet.is-hidden{display:none}
+.tf-title-row{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:14px 16px;background:#f1f3f6;border-bottom:1px solid rgba(15,39,66,.18);text-transform:uppercase;letter-spacing:.04em;color:#0f2742}
+.tf-title-row strong{font-size:22px;font-weight:600}
+.tf-title-row span{color:#4d5870;text-transform:none;letter-spacing:0}
+.tf-meta-grid{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:10px;padding:16px;background:#fbfdff;border-bottom:1px solid rgba(15,39,66,.14)}
+.tf-table-wrap{overflow-x:auto}
+.tf-results-table{width:100%;min-width:1180px;border-collapse:collapse}
+.tf-results-table th{background:#f7f8fb;color:#0f2742;text-align:left;font-size:13px;font-weight:600;padding:8px;border:1px solid rgba(15,39,66,.24)}
+.tf-results-table td{padding:6px;border:1px solid rgba(15,39,66,.2);vertical-align:middle}
+.tf-results-table th:first-child,.tf-results-table td:first-child{width:76px;text-align:center;background:#fff8e2}
+.tf-results-table .input,.tf-results-table .select{min-height:34px;padding:7px 8px;border-radius:6px;font-size:13px}
+.field-table{min-width:1500px}
+.field-table th:nth-child(n+5),.field-table td:nth-child(n+5){min-width:82px;text-align:center}
+.tf-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px;margin-top:16px;padding:14px 16px;background:#fbfdff;border:1px solid rgba(15,39,66,.14);border-radius:8px}
+.tf-note{padding:12px 16px;color:#4d5870;background:#fbfdff;border-top:1px solid rgba(15,39,66,.12);font-size:13px;line-height:1.55}
+.tf-view-mark{font-size:28px;font-weight:600;color:#0f2742}
+.tf-result-meta{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px;margin:12px 0 16px}
+.tf-result-meta div{background:#fbfdff;border:1px solid rgba(15,39,66,.12);border-radius:8px;padding:12px}
+.tf-result-meta strong{display:block;color:#0f2742;margin-bottom:4px}
+@media(max-width:1000px){.tf-meta-grid,.tf-summary-grid,.tf-result-meta{grid-template-columns:1fr}.tf-title-row{align-items:flex-start;flex-direction:column}}
