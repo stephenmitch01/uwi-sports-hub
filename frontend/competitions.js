@@ -350,7 +350,7 @@
     ], "No competition alerts right now.");
 
     renderActivityList(els.competitionActivity, getRecentRecords(rows, "competition"));
-    renderQuality(els.competitionQualityScore, els.competitionQualityBar, els.competitionQualityCopy, quality, `${rows.filter((competition) => getCompetitionQuality(competition) < 100).length} competition record${rows.length === 1 ? "" : "s"} below 100% completion.`);
+    renderQuality(els.competitionQualityScore, els.competitionQualityBar, els.competitionQualityCopy, quality, `${rows.filter((competition) => getCompetitionQuality(competition) < 100).length} competition setup${rows.length === 1 ? "" : "s"} below 100% completion.`);
   }
 
   function getCompetitionQuality(competition) {

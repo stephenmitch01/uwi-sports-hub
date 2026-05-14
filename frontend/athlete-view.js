@@ -443,7 +443,7 @@
         <div class="mini-card">
           <div class="mini-label">Profile Completeness</div>
           ${completenessMarkup(profileScore, true)}
-          <div class="mini-sub">Record quality score</div>
+          <div class="mini-sub">Profile completeness</div>
         </div>
 
         <div class="mini-card">

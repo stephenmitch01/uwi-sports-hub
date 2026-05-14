@@ -271,27 +271,42 @@ async function listAthletesWithRoster(req, res) {
   ]);
 
   const teamById = new Map(visibleRows(req, teams).map((team) => [String(team.id), team]));
-  const assignmentByAthleteId = new Map();
-  dedupeAssignments(visibleRows(req, assignments), (assignment) => `${assignment.teamId}:${assignment.athleteId}:${assignment.role || assignment.roleLabel || ""}`).forEach((assignment) => {
+  const assignmentsByAthleteId = new Map();
+  dedupeAssignments(visibleRows(req, assignments), (assignment) => `${assignment.teamId}:${assignment.athleteId}`).forEach((assignment) => {
     const athleteId = String(assignment.athleteId || assignment.athlete?.id || "");
-    if (!athleteId || assignmentByAthleteId.has(athleteId)) return;
+    if (!athleteId) return;
     const team = teamById.get(String(assignment.teamId || ""));
-    assignmentByAthleteId.set(athleteId, cleanObject({
+    const enrichedAssignment = cleanObject({
       ...assignment,
       team,
-      teamName: team?.name || team?.teamName || assignment.teamName || ""
-    }));
+      teamName: team?.name || team?.teamName || assignment.teamName || "",
+      sportSlug: team?.sportSlug || team?.sport || assignment.sportSlug || assignment.sport || ""
+    });
+    if (!assignmentsByAthleteId.has(athleteId)) assignmentsByAthleteId.set(athleteId, []);
+    assignmentsByAthleteId.get(athleteId).push(enrichedAssignment);
   });
 
   const rows = visibleRows(req, athletes).map((athlete) => {
-    const assignment = assignmentByAthleteId.get(String(athlete.id));
-    if (!assignment) return athlete;
+    const athleteAssignments = assignmentsByAthleteId.get(String(athlete.id)) || [];
+    if (!athleteAssignments.length) return athlete;
+    const assignment = athleteAssignments[0];
+    const sports = Array.from(new Set([
+      athlete.sportSlug,
+      athlete.primarySportSlug,
+      athlete.sport,
+      ...(Array.isArray(athlete.sports) ? athlete.sports : []),
+      ...athleteAssignments.map((item) => item.sportSlug || item.sport || item.team?.sportSlug || item.team?.sport)
+    ].filter(Boolean)));
     return cleanObject({
       ...athlete,
+      rosterAssignments: athleteAssignments,
+      teamAssignments: athleteAssignments,
+      teams: athleteAssignments.map((item) => item.team).filter(Boolean),
+      sports,
       activeRosterAssignment: assignment,
       teamId: athlete.teamId || assignment.teamId,
       teamName: athlete.teamName || assignment.teamName,
-      sportSlug: athlete.sportSlug || athlete.primarySportSlug || athlete.sport || assignment.team?.sportSlug || assignment.team?.sport
+      sportSlug: athlete.sportSlug || athlete.primarySportSlug || athlete.sport || sports[0] || assignment.team?.sportSlug || assignment.team?.sport
     });
   });
 
@@ -345,6 +360,28 @@ async function listCoachesWithAssignments(req, res) {
   res.json(rows);
 }
 
+async function listAthleteTeamAssignments(req, res) {
+  const campus = currentCampus(req);
+  const [assignments, teams] = await Promise.all([
+    prisma.teamRosterAssignment.findMany({
+      where: scopedWhere(req, { athleteId: req.params.id }),
+      orderBy: { updatedAt: "desc" }
+    }),
+    prisma.team.findMany({ where: { campus } })
+  ]);
+  const teamById = new Map(visibleRows(req, teams).map((team) => [String(team.id), team]));
+  const rows = dedupeAssignments(visibleRows(req, assignments), (assignment) => `${assignment.teamId}:${assignment.athleteId}`).map((assignment) => {
+    const team = teamById.get(String(assignment.teamId || ""));
+    return cleanObject({
+      ...assignment,
+      team,
+      teamName: team?.name || team?.teamName || assignment.teamName || "",
+      sportSlug: team?.sportSlug || team?.sport || assignment.sportSlug || assignment.sport || ""
+    });
+  });
+  res.json(rows);
+}
+
 async function getEntity(req, res, model) {
   const record = await prisma[model].findFirst({ where: scopedWhere(req, { id: req.params.id }) });
   if (!record) return sendError(res, 404, "Record not found");
@@ -354,12 +391,11 @@ async function getEntity(req, res, model) {
 async function syncAthleteRosterAssignment(req, athleteId, body) {
   const campus = getRecordCampus(req, body);
   const teamId = body.teamId || body.activeRosterAssignment?.teamId || null;
+  if (!teamId) return;
   const existing = await prisma.teamRosterAssignment.findFirst({
-    where: { campus, athleteId: String(athleteId) },
+    where: { campus, athleteId: String(athleteId), teamId: String(teamId) },
     orderBy: { updatedAt: "desc" }
   });
-
-  if (!teamId) return;
 
   const assignmentData = {
     ...(existing?.data || {}),
@@ -1721,7 +1757,7 @@ app.post(
 );
 
 app.get("/athletes/:id/history", (_req, res) => res.json([]));
-app.get("/athletes/:id/teams", asyncRoute((req, res) => listEntity(req, res, "teamRosterAssignment", { athleteId: req.params.id })));
+app.get("/athletes/:id/teams", asyncRoute(listAthleteTeamAssignments));
 app.get("/athletes/:id/records", (_req, res) => res.json([]));
 
 app.get(

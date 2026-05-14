@@ -226,7 +226,7 @@
     ], "No team alerts right now.");
 
     renderActivityList(els.teamActivity, getRecentRecords(teams, "team"));
-    renderQuality(els.teamQualityScore, els.teamQualityBar, els.teamQualityCopy, quality, `${teams.filter((team) => getTeamQuality(team) < 100).length} team setup record${teams.length === 1 ? "" : "s"} below 100% completion.`);
+    renderQuality(els.teamQualityScore, els.teamQualityBar, els.teamQualityCopy, quality, `${teams.filter((team) => getTeamQuality(team) < 100).length} team setup${teams.length === 1 ? "" : "s"} below 100% completion.`);
   }
 
   function getTeamQuality(team) {
@@ -459,8 +459,7 @@
 
   function getTeamAthletes(teamId) {
     return state.athletes.filter(function (athlete) {
-      const rosterTeamId = athlete.activeRosterAssignment?.teamId || athlete.teamId || athlete.team?.id || "";
-      return String(rosterTeamId) === String(teamId);
+      return APP.athleteHasTeam(athlete, teamId);
     });
   }
 

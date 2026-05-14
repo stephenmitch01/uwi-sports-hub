@@ -373,7 +373,7 @@
     ], "No coach alerts right now.");
 
     renderActivityList(els.coachActivity, getRecentRecords(coaches, "coach"));
-    renderQuality(els.coachQualityScore, els.coachQualityBar, els.coachQualityCopy, quality, `${coaches.filter((coach) => getCoachQuality(coach) < 100).length} coach record${coaches.length === 1 ? "" : "s"} below 100% completion.`);
+    renderQuality(els.coachQualityScore, els.coachQualityBar, els.coachQualityCopy, quality, `${coaches.filter((coach) => getCoachQuality(coach) < 100).length} coach profile${coaches.length === 1 ? "" : "s"} below 100% completion.`);
   }
 
   function getCoachQuality(coach) {

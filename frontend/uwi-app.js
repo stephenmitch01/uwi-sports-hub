@@ -969,6 +969,37 @@
     });
   }
 
+  function getAthleteSports(athlete) {
+    return Array.from(new Set([
+      athlete?.profile?.sportSlug,
+      athlete?.sportSlug,
+      athlete?.sport,
+      athlete?.primarySport,
+      ...(Array.isArray(athlete?.sports) ? athlete.sports : []),
+      ...(Array.isArray(athlete?.rosterAssignments) ? athlete.rosterAssignments : []),
+      ...(Array.isArray(athlete?.teamAssignments) ? athlete.teamAssignments : [])
+    ].map((value) => {
+      if (value && typeof value === "object") return value.sportSlug || value.sport || value.team?.sportSlug || value.team?.sport;
+      return value;
+    }).map(normalizeSportSlug).filter(Boolean)));
+  }
+
+  function athleteHasSport(athlete, sportSlug) {
+    const normalized = normalizeSportSlug(sportSlug);
+    return !normalized || getAthleteSports(athlete).includes(normalized);
+  }
+
+  function athleteHasTeam(athlete, teamId) {
+    const target = String(teamId || "");
+    if (!target) return false;
+    if (String(athlete?.teamId || athlete?.activeRosterAssignment?.teamId || athlete?.team?.id || "") === target) return true;
+    const assignments = [
+      ...(Array.isArray(athlete?.rosterAssignments) ? athlete.rosterAssignments : []),
+      ...(Array.isArray(athlete?.teamAssignments) ? athlete.teamAssignments : [])
+    ];
+    return assignments.some((assignment) => String(assignment?.teamId || assignment?.team?.id || "") === target);
+  }
+
   function confirmScorecardValues(form, sportSlug) {
     if (!form) return true;
     const values = Array.from(form.querySelectorAll("input[type='number']")).map((input) => {
@@ -1043,6 +1074,9 @@
     readRecentSearches,
     renderRecentSearches,
     quickAddAthleteForTeam,
+    getAthleteSports,
+    athleteHasSport,
+    athleteHasTeam,
     confirmScorecardValues,
     getSportName,
     showMessage,

@@ -763,7 +763,7 @@
         const matchesStatus = !statusValue || normalizeStatus(athlete.status) === statusValue;
         const matchesAthleteType = !athleteTypeValue || String(athlete.athleteType || "").toLowerCase() === athleteTypeValue;
         const matchesGender = !genderValue || normalizeGender(athlete.gender || profile.gender || "") === genderValue;
-        const matchesSport = !sportFilterValue || String(profile.sportSlug || "").toLowerCase() === sportFilterValue;
+        const matchesSport = !sportFilterValue || getAthleteSports(athlete).includes(sportFilterValue);
         const archived = APP.isArchivedRecord(athlete);
         const matchesQuality = qualityValue === "archived" ? archived : qualityValue !== "incomplete" || getAthleteQuality(athlete) < 100;
 
@@ -845,9 +845,22 @@
   function normalizeAthleteRecord(athlete) {
     if (!athlete || typeof athlete !== "object") return {};
     const profile = athlete.profile && typeof athlete.profile === "object" ? athlete.profile : {};
+    const rosterAssignments = Array.isArray(athlete.rosterAssignments)
+      ? athlete.rosterAssignments
+      : Array.isArray(athlete.teamAssignments)
+        ? athlete.teamAssignments
+        : [];
     const roster = athlete.activeRosterAssignment && typeof athlete.activeRosterAssignment === "object"
       ? athlete.activeRosterAssignment
-      : null;
+      : rosterAssignments[0] || null;
+    const sports = Array.from(new Set([
+      profile.sportSlug,
+      athlete.primarySport,
+      athlete.sport,
+      athlete.sportSlug,
+      ...(Array.isArray(athlete.sports) ? athlete.sports : []),
+      ...rosterAssignments.map((assignment) => assignment.sportSlug || assignment.sport || assignment.team?.sportSlug || assignment.team?.sport)
+    ].map((value) => APP.normalizeSportSlug(value)).filter(Boolean)));
 
     return {
       ...athlete,
@@ -867,9 +880,12 @@
       status: athlete.status || "active",
       campus: normalizeCampus(athlete.campus || athlete.campusSlug || state.session?.campus),
       imageUrl: athlete.imageUrl || athlete.headshotUrl || "",
+      sports,
+      rosterAssignments,
+      teamAssignments: rosterAssignments,
       profile: {
         ...profile,
-        sportSlug: APP.normalizeSportSlug(profile.sportSlug || athlete.primarySport || athlete.sport || ""),
+        sportSlug: APP.normalizeSportSlug(profile.sportSlug || athlete.primarySport || athlete.sport || sports[0] || ""),
         position: profile.position || "",
         eventsSpecialties: profile.eventsSpecialties || "",
         heightCm: profile.heightCm ?? null,
@@ -889,6 +905,17 @@
           }
         : null
     };
+  }
+
+  function getAthleteSports(athlete) {
+    return Array.from(new Set([
+      athlete?.profile?.sportSlug,
+      athlete?.sportSlug,
+      athlete?.sport,
+      athlete?.primarySport,
+      ...(Array.isArray(athlete?.sports) ? athlete.sports : []),
+      ...(Array.isArray(athlete?.rosterAssignments) ? athlete.rosterAssignments : []).map((assignment) => assignment.sportSlug || assignment.sport || assignment.team?.sportSlug || assignment.team?.sport)
+    ].map((value) => APP.normalizeSportSlug(value)).filter(Boolean)));
   }
 
   async function apiGet(path, tolerateFailure = false) {

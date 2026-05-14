@@ -199,8 +199,8 @@
 
   function getRosterAthletes() {
     const teamId = els.teamSelect.value;
-    if (!teamId) return state.athletes.filter((athlete) => APP.normalizeSportSlug(athlete.sportSlug || athlete.sport || athlete.profile?.sportSlug) === "chess");
-    return state.athletes.filter((athlete) => String(athlete.teamId || athlete.activeRosterAssignment?.teamId || "") === String(teamId));
+    if (!teamId) return state.athletes.filter((athlete) => APP.athleteHasSport(athlete, "chess"));
+    return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
   function getUwiTeamName() {

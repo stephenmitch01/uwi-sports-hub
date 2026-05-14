@@ -157,7 +157,7 @@
       null;
 
     state.roster = dedupeBy(normalizeRosterArray(rosterData), (item) => `${item.teamId || state.teamId}:${item.athleteId || item.athlete?.id || ""}`);
-    state.staff = dedupeBy(normalizeStaffArray(staffData), (item) => `${item.teamId || state.teamId}:${item.coachId || item.staffId || item.coach?.id || ""}:${item.role || item.roleLabel || ""}`);
+    state.staff = collapseStaffAssignments(normalizeStaffArray(staffData));
     state.competitions = normalizeCompetitionsArray(competitionsData);
     state.results = normalizeResultsArray(resultsData);
 
@@ -534,11 +534,14 @@
       const coachId = assignment.coachId || assignment.staffId || assignment.coach?.id || "";
       const coach = resolveCoach(coachId) || assignment.coach || null;
       const coachName = buildCoachName(coach) || "Unknown Staff";
+      const roles = Array.isArray(assignment.roles) && assignment.roles.length
+        ? assignment.roles.map((role) => formatRole(role, assignment.otherRoleTitle)).join(", ")
+        : formatRole(assignment.role || assignment.roleLabel || assignment.assignmentRole, assignment.otherRoleTitle);
 
       return `
         <tr>
           <td>${coachId ? `<a class="roster-name-link" href="coach-view.html?id=${encodeURIComponent(String(coachId))}">${escapeHtml(coachName)}</a>` : escapeHtml(coachName)}</td>
-          <td>${escapeHtml(formatRole(assignment.role || assignment.roleLabel || assignment.assignmentRole, assignment.otherRoleTitle))}</td>
+          <td>${escapeHtml(roles)}</td>
           <td>${assignment.isPrimary ? "Yes" : "No"}</td>
           <td>${escapeHtml(formatGenericStatus(assignment.status || "active"))}</td>
         </tr>
@@ -1424,6 +1427,29 @@
     if (Array.isArray(payload?.data?.coaches)) return payload.data.coaches;
     if (Array.isArray(payload?.data)) return payload.data;
     return [];
+  }
+
+  function collapseStaffAssignments(assignments) {
+    const map = new Map();
+    assignments.forEach(function (assignment) {
+      const coachId = String(assignment.coachId || assignment.staffId || assignment.coach?.id || "");
+      const key = `${assignment.teamId || state.teamId}:${coachId}`;
+      if (!coachId || !key) return;
+      const role = assignment.role || assignment.roleLabel || assignment.assignmentRole || "";
+      if (!map.has(key)) {
+        map.set(key, {
+          ...assignment,
+          roles: role ? [role] : [],
+          isPrimary: Boolean(assignment.isPrimary)
+        });
+        return;
+      }
+      const current = map.get(key);
+      if (role && !current.roles.includes(role)) current.roles.push(role);
+      current.isPrimary = Boolean(current.isPrimary || assignment.isPrimary);
+      current.status = current.status === "active" || assignment.status === "active" ? "active" : current.status || assignment.status;
+    });
+    return Array.from(map.values());
   }
 
   function resolveAthlete(athleteId) {
