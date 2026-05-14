@@ -118,6 +118,7 @@
       ensureArchivedQualityOption(els.athleteQualityFilter);
       bindFilters();
       bindWorkflowLinks();
+      bindWorkflowClose();
       bindInsightActions();
       bindCreateForm();
       bindEditForm();
@@ -190,6 +191,14 @@
           panel.open = true;
         }
       });
+    });
+  }
+
+  function bindWorkflowClose() {
+    const panel = document.getElementById("athleteWorkflows");
+    if (!panel) return;
+    panel.addEventListener("toggle", () => {
+      if (!panel.open) panel.hidden = true;
     });
   }
 

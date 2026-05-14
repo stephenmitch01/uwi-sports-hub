@@ -62,6 +62,7 @@
     bindEvents();
     bindInsightActions();
     bindWorkflowLinks();
+    bindWorkflowClose();
     populateSportSelects();
     ensureArchivedQualityOption(els.teamQualityFilter);
     clearMessage();
@@ -137,6 +138,14 @@
           panel.open = true;
         }
       });
+    });
+  }
+
+  function bindWorkflowClose() {
+    const panel = document.getElementById("teamWorkflows");
+    if (!panel) return;
+    panel.addEventListener("toggle", function () {
+      if (!panel.open) panel.hidden = true;
     });
   }
 

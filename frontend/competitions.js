@@ -43,6 +43,7 @@
     ensureArchivedQualityOption(els.qualityFilter);
     renderCompetitionsPageShell();
     bindCreatePanelLink();
+    bindCreatePanelClose();
     bindInsightActions();
     bindCompetitionFilters();
     await loadCompetitions();
@@ -60,6 +61,14 @@
           panel.open = true;
         }
       });
+    });
+  }
+
+  function bindCreatePanelClose() {
+    const panel = document.getElementById("competitionCreatePanel");
+    if (!panel) return;
+    panel.addEventListener("toggle", () => {
+      if (!panel.open) panel.hidden = true;
     });
   }
 

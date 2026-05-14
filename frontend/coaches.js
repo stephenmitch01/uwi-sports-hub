@@ -152,6 +152,21 @@
     });
     if (els.coachSearchButton) els.coachSearchButton.addEventListener("click", applyRegistrySearch);
     mountRecentSearches("coaches");
+    bindWorkflowClose();
+  }
+
+  function bindWorkflowClose() {
+    const workflows = document.getElementById("coachWorkflows");
+    [els.createCoachSection, els.assignmentSection].forEach(function (panel) {
+      if (!panel) return;
+      panel.addEventListener("toggle", function () {
+        if (panel.open) return;
+        panel.hidden = true;
+        if (workflows && els.createCoachSection.hidden && els.assignmentSection.hidden) {
+          workflows.hidden = true;
+        }
+      });
+    });
   }
 
   function handleFilterChange() {
