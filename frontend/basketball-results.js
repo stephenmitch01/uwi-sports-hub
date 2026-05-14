@@ -64,10 +64,10 @@
     const leaders = topPerformers(data);
     return `<article class="result-card">
       <div class="result-card-top"><span>Result</span><small>${escapeHtml(competition?.title || competition?.name || "Competition")}</small></div>
-      <div class="result-card-title">${escapeHtml(data.uwiTeamName || "UWI")} ${escapeHtml(formatScore(data))} ${escapeHtml(data.opponentName || "Opponent")}</div>
-      <div class="result-team-row"><span>${escapeHtml(data.uwiTeamName || "UWI")}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
+      <div class="result-card-title">${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))} ${escapeHtml(formatScore(data))} ${escapeHtml(data.opponentName || "Opponent")}</div>
+      <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
       <div class="result-team-row"><span>${escapeHtml(data.opponentName || "Opponent")}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
-      <p class="result-text">${escapeHtml(data.result || "Result recorded")}</p>
+      <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
       ${leaders ? `<p class="result-text">${leaders}</p>` : `<p class="muted">No player leaders recorded.</p>`}
       <div class="result-card-actions"><a href="basketball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a><a href="competition-view.html?id=${encodeURIComponent(line.competitionId)}">Competition</a></div>
     </article>`;
@@ -111,6 +111,8 @@
     return "other";
   }
   function formatScore(data) { const score = data.score || {}; return `${score.uwi?.total ?? 0}-${score.opponent?.total ?? 0}`; }
+  function compactUwiResultLabel(value) { const text = String(value || "").trim(); if (!text) return ""; return text.replace(/\bUWI\s+Blackbirds(?:\s+[A-Za-z& -]+?)?\s+Team\b/gi, "Blackbirds").replace(/\bUWI\s+Blackbirds\b/gi, "Blackbirds"); }
+  function compactUwiTeamLabel(value, fallback = "Blackbirds") { const text = compactUwiResultLabel(value); return text || fallback; }
   function normalizeArray(payload) { if (Array.isArray(payload)) return payload; if (Array.isArray(payload?.data)) return payload.data; return []; }
   function saveCurrentSearch() {
     if (!APP.saveRecentSearch) return;

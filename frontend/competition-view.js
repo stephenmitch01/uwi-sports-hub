@@ -425,7 +425,7 @@
       return;
     }
 
-    const cards = scorecards.slice(0, 10).map((line) => isFootball ? renderFootballResultCard(line) : isVolleyball ? renderVolleyballResultCard(line) : isHockey ? renderHockeyResultCard(line) : isBasketball ? renderBasketballResultCard(line) : isSwimming ? renderSwimmingResultCard(line) : isTrackField ? renderTrackFieldResultCard(line) : isNetball ? renderNetballResultCard(line) : isBadminton ? renderBadmintonResultCard(line) : isTableTennis ? renderTableTennisResultCard(line) : isTennis ? renderTennisResultCard(line) : isTaekwondo ? renderTaekwondoResultCard(line) : isChess ? renderChessResultCard(line) : renderResultCard(line)).join("");
+    const cards = scorecards.slice(0, 4).map((line) => isFootball ? renderFootballResultCard(line) : isVolleyball ? renderVolleyballResultCard(line) : isHockey ? renderHockeyResultCard(line) : isBasketball ? renderBasketballResultCard(line) : isSwimming ? renderSwimmingResultCard(line) : isTrackField ? renderTrackFieldResultCard(line) : isNetball ? renderNetballResultCard(line) : isBadminton ? renderBadmintonResultCard(line) : isTableTennis ? renderTableTennisResultCard(line) : isTennis ? renderTennisResultCard(line) : isTaekwondo ? renderTaekwondoResultCard(line) : isChess ? renderChessResultCard(line) : renderResultCard(line)).join("");
     els.competitionRecentResults.innerHTML = `
       <div class="section-title">
         <div>
@@ -2351,6 +2351,19 @@
     return [];
   }
 
+  function compactUwiResultLabel(value) {
+    const text = String(value || "").trim();
+    if (!text) return "";
+    return text
+      .replace(/\bUWI\s+Blackbirds(?:\s+[A-Za-z& -]+?)?\s+Team\b/gi, "Blackbirds")
+      .replace(/\bUWI\s+Blackbirds\b/gi, "Blackbirds");
+  }
+
+  function compactUwiTeamLabel(value, fallback = "Blackbirds") {
+    const text = compactUwiResultLabel(value);
+    return text || fallback;
+  }
+
   function renderResultCard(line) {
     const data = line.statData || {};
     const innings = Array.isArray(data.innings) ? data.innings : [];
@@ -2364,16 +2377,16 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row">
-          <span>${escapeHtml(first.team || data.uwiTeamName || "UWI")}</span>
+          <span>${escapeHtml(compactUwiTeamLabel(first.team || data.uwiTeamName))}</span>
           <strong>${formatInningsScore(first)}</strong>
         </div>
         <div class="result-team-row">
-          <span>${escapeHtml(second.team || data.opponentName || "Opponent")}</span>
+          <span>${escapeHtml(compactUwiTeamLabel(second.team || data.opponentName, "Opponent"))}</span>
           <strong>${formatInningsScore(second)}</strong>
         </div>
-        <p class="result-text">${escapeHtml(data.result || "Result recorded")}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="cricket-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Scorecard</a>
           <a href="cricket-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Scorecard</a>
@@ -2397,9 +2410,9 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row">
-          <span>${escapeHtml(data.uwiTeamName || "UWI")}</span>
+          <span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span>
           <strong>${escapeHtml(score.uwi?.total ?? 0)}</strong>
         </div>
         <div class="result-team-row">
@@ -2407,7 +2420,7 @@
           <strong>${escapeHtml(score.opponent?.total ?? 0)}</strong>
         </div>
         <p class="result-text">${scorerLine}</p>
-        <p class="result-text">${escapeHtml(data.result || "Result recorded")}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="football-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Details</a>
           <a href="football-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
@@ -2427,16 +2440,16 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row">
-          <span>${escapeHtml(data.uwiTeamName || "UWI")}</span>
+          <span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span>
           <strong>${escapeHtml(data.finalSets?.uwi ?? 0)}</strong>
         </div>
         <div class="result-team-row">
           <span>${escapeHtml(data.opponentName || "Opponent")}</span>
           <strong>${escapeHtml(data.finalSets?.opponent ?? 0)}</strong>
         </div>
-        <p class="result-text">${escapeHtml(data.result || sets.map((set) => `${set.uwiScore}-${set.opponentScore}`).join(", ") || "Result recorded")}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || sets.map((set) => `${set.uwiScore}-${set.opponentScore}`).join(", ") || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="volleyball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Scoresheet</a>
           <a href="volleyball-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Scoresheet</a>
@@ -2456,10 +2469,10 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
-        <div class="result-team-row"><span>${escapeHtml(data.uwiTeamName || "UWI")}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
+        <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
         <div class="result-team-row"><span>${escapeHtml(data.opponentName || "Opponent")}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
-        <p class="result-text">${escapeHtml(data.result || "Result recorded")}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="hockey-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
           <a href="hockey-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
@@ -2479,10 +2492,10 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
-        <div class="result-team-row"><span>${escapeHtml(data.uwiTeamName || "UWI")}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
+        <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
         <div class="result-team-row"><span>${escapeHtml(data.opponentName || "Opponent")}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
-        <p class="result-text">${escapeHtml(data.result || "Result recorded")}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="basketball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
           <a href="basketball-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
@@ -2505,8 +2518,8 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
-        <div class="result-team-row"><span>${escapeHtml(topUwi?.name || data.uwiTeamName || "UWI")}</span><strong>${escapeHtml(topUwi?.finalTime || data.summary?.winningTime || "—")}</strong></div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
+        <div class="result-team-row"><span>${escapeHtml(topUwi?.name || compactUwiTeamLabel(data.uwiTeamName, "UWI"))}</span><strong>${escapeHtml(topUwi?.finalTime || data.summary?.winningTime || "—")}</strong></div>
         <div class="result-team-row"><span>UWI Entries</span><strong>${escapeHtml(data.summary?.uwiEntries ?? lanes.filter((lane) => lane.entryType === "uwi").length)}</strong></div>
         <p class="result-text">${escapeHtml([data.round, data.course, data.ageGroup].filter(Boolean).join(" • ") || "Results recorded")}</p>
         <div class="result-card-actions">
@@ -2532,8 +2545,8 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
-        <div class="result-team-row"><span>${escapeHtml(topUwi?.name || data.uwiTeamName || "UWI")}</span><strong>${escapeHtml(topMark || "—")}</strong></div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
+        <div class="result-team-row"><span>${escapeHtml(topUwi?.name || compactUwiTeamLabel(data.uwiTeamName, "UWI"))}</span><strong>${escapeHtml(topMark || "—")}</strong></div>
         <div class="result-team-row"><span>UWI Entries</span><strong>${escapeHtml(data.summary?.uwiEntries ?? entries.filter((entry) => entry.entryType === "uwi").length)}</strong></div>
         <p class="result-text">${escapeHtml(data.summary?.winningResult || [data.division, data.round].filter(Boolean).join(" • ") || "Results recorded")}</p>
         <div class="result-card-actions">
@@ -2555,10 +2568,10 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
-        <div class="result-team-row"><span>${escapeHtml(data.uwiTeamName || "UWI")}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
+        <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
         <div class="result-team-row"><span>${escapeHtml(data.opponentName || "Opponent")}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
-        <p class="result-text">${escapeHtml(data.result || "Result recorded")}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="netball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Sheet</a>
           <a href="netball-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Match Sheet</a>
@@ -2573,7 +2586,7 @@
     const games = Array.isArray(data.games) ? data.games : [];
     const title = line.eventName || data.title || state.competition?.title || "Badminton match";
     const meta = [state.competition?.title || state.competition?.name || "Competition", data.discipline, data.court ? `Court ${data.court}` : ""].filter(Boolean).join("  â€¢  ");
-    const uwiSide = (data.uwiPlayers || []).map((player) => player.name).filter(Boolean).join(" / ") || data.uwiTeamName || "UWI";
+    const uwiSide = (data.uwiPlayers || []).map((player) => player.name).filter(Boolean).join(" / ") || compactUwiTeamLabel(data.uwiTeamName);
     const opponentSide = (data.opponentPlayers || []).map((player) => player.name).filter(Boolean).join(" / ") || "Opponent";
     const gameLine = games.length
       ? games.map((game) => `${game.uwi || 0}-${game.opponent || 0}`).join(", ")
@@ -2584,10 +2597,10 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
-        <div class="result-team-row"><span>${escapeHtml(uwiSide)}</span><strong>${escapeHtml(summary.uwiGamesWon ?? 0)}</strong></div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
+        <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(uwiSide))}</span><strong>${escapeHtml(summary.uwiGamesWon ?? 0)}</strong></div>
         <div class="result-team-row"><span>${escapeHtml(opponentSide)}</span><strong>${escapeHtml(summary.opponentGamesWon ?? 0)}</strong></div>
-        <p class="result-text">${escapeHtml(data.result || gameLine)}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || gameLine))}</p>
         <div class="result-card-actions">
           <a href="badminton-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Sheet</a>
           <a href="badminton-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Match Sheet</a>
@@ -2607,10 +2620,10 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
-        <div class="result-team-row"><span>${escapeHtml(data.uwiTeamName || "UWI")}</span><strong>${escapeHtml(summary.uwiRubbers ?? 0)}</strong></div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
+        <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(summary.uwiRubbers ?? 0)}</strong></div>
         <div class="result-team-row"><span>${escapeHtml(data.opponentTeamName || "Opponent")}</span><strong>${escapeHtml(summary.opponentRubbers ?? 0)}</strong></div>
-        <p class="result-text">${escapeHtml(data.result || `${summary.pointsFor ?? 0}-${summary.pointsAgainst ?? 0} points`)}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || `${summary.pointsFor ?? 0}-${summary.pointsAgainst ?? 0} points`))}</p>
         <div class="result-card-actions">
           <a href="table-tennis-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
           <a href="table-tennis-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
@@ -2630,10 +2643,10 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
-        <div class="result-team-row"><span>${escapeHtml(data.uwiTeamName || "UWI")}</span><strong>${escapeHtml(summary.uwiMatches ?? 0)}</strong></div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
+        <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(summary.uwiMatches ?? 0)}</strong></div>
         <div class="result-team-row"><span>${escapeHtml(data.opponentTeamName || "Opponent")}</span><strong>${escapeHtml(summary.opponentMatches ?? 0)}</strong></div>
-        <p class="result-text">${escapeHtml(data.result || `${summary.gamesFor ?? 0}-${summary.gamesAgainst ?? 0} games`)}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || `${summary.gamesFor ?? 0}-${summary.gamesAgainst ?? 0} games`))}</p>
         <div class="result-card-actions">
           <a href="tennis-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
           <a href="tennis-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
@@ -2653,10 +2666,10 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row"><span>${escapeHtml(data.athlete?.name || "UWI athlete")}</span><strong>${escapeHtml(summary.finalScore != null ? Number(summary.finalScore).toFixed(2) : "-")}</strong></div>
         <div class="result-team-row"><span>Rank</span><strong>${escapeHtml(summary.rank || data.rank || "-")}</strong></div>
-        <p class="result-text">${escapeHtml(summary.result || data.result || "Score recorded")}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(summary.result || data.result || "Score recorded"))}</p>
         <div class="result-card-actions">
           <a href="taekwondo-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
           <a href="taekwondo-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
@@ -2676,10 +2689,10 @@
           <span>Result</span>
           <small>${escapeHtml(meta)}</small>
         </div>
-        <div class="result-card-title">${escapeHtml(title)}</div>
+        <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row"><span>${escapeHtml(data.uwiPlayer?.name || "UWI player")}</span><strong>${escapeHtml(summary.uwiScore ?? "-")}</strong></div>
         <div class="result-team-row"><span>${escapeHtml(data.opponent?.name || "Opponent")}</span><strong>${escapeHtml(summary.opponentScore ?? "-")}</strong></div>
-        <p class="result-text">${escapeHtml(summary.resultLabel || data.result || data.opening || "Game recorded")}</p>
+        <p class="result-text">${escapeHtml(compactUwiResultLabel(summary.resultLabel || data.result || data.opening || "Game recorded"))}</p>
         <div class="result-card-actions">
           <a href="chess-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
           <a href="chess-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
