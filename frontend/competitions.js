@@ -55,7 +55,10 @@
     document.querySelectorAll('a[href="#competitionCreatePanel"]').forEach((link) => {
       link.addEventListener("click", () => {
         const panel = document.getElementById("competitionCreatePanel");
-        if (panel) panel.open = true;
+        if (panel) {
+          panel.hidden = false;
+          panel.open = true;
+        }
       });
     });
   }

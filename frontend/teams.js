@@ -104,13 +104,6 @@
       els.editForm.addEventListener("submit", handleEditTeam);
     }
 
-    document.querySelectorAll('a[href="#teamWorkflows"]').forEach((link) => {
-      link.addEventListener("click", function () {
-        const panel = document.getElementById("teamWorkflows");
-        if (panel) panel.open = true;
-      });
-    });
-
     [els.teamSearch, els.teamSport, els.teamStatus, els.teamSeasonFilter, els.teamQualityFilter].forEach(function (node) {
       if (!node) return;
       node.addEventListener("input", handleFilterChange);
@@ -139,7 +132,10 @@
     document.querySelectorAll("a[href='#teamWorkflows']").forEach(function (link) {
       link.addEventListener("click", function () {
         const panel = document.getElementById("teamWorkflows");
-        if (panel) panel.open = true;
+        if (panel) {
+          panel.hidden = false;
+          panel.open = true;
+        }
       });
     });
   }

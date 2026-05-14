@@ -124,12 +124,18 @@
     });
 
     els.focusCreateCoachBtn.addEventListener("click", function () {
+      const workflows = document.getElementById("coachWorkflows");
+      if (workflows) workflows.hidden = false;
+      els.createCoachSection.hidden = false;
       els.createCoachSection.open = true;
       els.createCoachSection.scrollIntoView({ behavior: "smooth", block: "start" });
       els.firstName.focus();
     });
 
     els.focusAssignmentsBtn.addEventListener("click", function () {
+      const workflows = document.getElementById("coachWorkflows");
+      if (workflows) workflows.hidden = false;
+      els.assignmentSection.hidden = false;
       els.assignmentSection.open = true;
       els.assignmentSection.scrollIntoView({ behavior: "smooth", block: "start" });
       els.assignmentCoachId.focus();
