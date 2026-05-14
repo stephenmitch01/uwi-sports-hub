@@ -42,12 +42,22 @@
     populateFilters();
     ensureArchivedQualityOption(els.qualityFilter);
     renderCompetitionsPageShell();
+    bindCreatePanelLink();
     bindInsightActions();
     bindCompetitionFilters();
     await loadCompetitions();
     renderHeroStats();
     renderOperationalSummary();
     renderCompetitionsTable();
+  }
+
+  function bindCreatePanelLink() {
+    document.querySelectorAll('a[href="#competitionCreatePanel"]').forEach((link) => {
+      link.addEventListener("click", () => {
+        const panel = document.getElementById("competitionCreatePanel");
+        if (panel) panel.open = true;
+      });
+    });
   }
 
   function populateFilters() {

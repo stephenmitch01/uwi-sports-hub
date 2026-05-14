@@ -101,101 +101,6 @@
 </div>
 </section>
 <div aria-live="polite" class="message" id="registryMessage"></div>
-<section class="insight-grid" aria-label="Coach operational insights">
-<article class="insight-card alert-card">
-<div class="insight-label">Operational Alerts</div>
-<div id="coachAlerts" class="insight-list"></div>
-</article>
-<article class="insight-card">
-<div class="insight-label">Recent Activity</div>
-<div id="coachActivity" class="insight-list"></div>
-</article>
-<article class="insight-card">
-<div class="insight-label">Profile Completeness</div>
-<div class="quality-score" id="coachQualityScore">0%</div>
-<div class="quality-track"><span id="coachQualityBar"></span></div>
-<p id="coachQualityCopy" class="fine"></p>
-</article>
-</section>
-<details class="card collapsible-section" id="coachRegistryPanel" open>
-<summary>Coach Registry</summary>
-<section>
-<div class="section-title">
-<div>
-<h2>Coach Registry</h2>
-<p>Search and filter coaches and support staff for <span data-campus-name></span>.</p>
-</div>
-</div>
-<div class="filter-grid">
-<div>
-<label for="searchInput">Search</label>
-<input class="input" id="searchInput" placeholder="Search name, email, phone, role, team, or sport" type="text"/>
-</div>
-<div>
-<label for="filterRole">Role</label>
-<select class="select" id="filterRole">
-<option value="">All roles</option>
-<option value="head_coach">Head Coach</option>
-<option value="assistant_coach">Assistant Coach</option>
-<option value="strength_conditioning_coach">Strength &amp; Conditioning Coach</option>
-<option value="physio">Physio</option>
-<option value="manager">Manager</option>
-<option value="analyst">Analyst</option>
-<option value="team_staff">Team Staff</option>
-<option value="other">Other</option>
-</select>
-</div>
-<div>
-<label for="filterSport">Sport</label>
-<select class="select" id="filterSport">
-<option value="">All sports</option>
-</select>
-</div>
-<div>
-<label for="filterStatus">Status</label>
-<select class="select" id="filterStatus">
-<option value="">All statuses</option>
-<option value="active">Active</option>
-<option value="inactive">Inactive</option>
-<option value="on_leave">On Leave</option>
-</select>
-</div>
-<div>
-<label for="filterQuality">Profile Completeness</label>
-<select class="select" id="filterQuality">
-<option value="">All records</option>
-<option value="incomplete">Incomplete records</option>
-</select>
-</div>
-<div>
-<label>&nbsp;</label>
-<button class="btn btn-campus" id="coachSearchButton" type="button" style="width:100%;">Search</button>
-</div>
-</div>
-<div class="data-table-wrap hidden" id="coachTableWrap">
-<table class="table">
-<thead>
-<tr>
-<th>Name</th>
-<th>Role</th>
-<th>Sport</th>
-<th>Teams</th>
-<th>Phone</th>
-<th>Email</th>
-<th>Status</th>
-<th>Profile Completeness</th>
-<th>Open</th>
-</tr>
-</thead>
-<tbody id="coachTableBody"></tbody>
-</table>
-</div>
-<div class="empty-state hidden" id="emptyState">
-<h3>No coach records match the current filters.</h3>
-<p>Add coach or staff records to manage assignments and detailed profiles.</p>
-</div>
-</section>
-</details>
 <section class="grid grid-2">
 <details class="card collapsible-section" id="createCoachSection">
 <summary>Add Coach / Staff Member</summary>
@@ -352,6 +257,102 @@
 </section>
 </details>
 </section>
+
+<section class="insight-grid" aria-label="Coach operational insights">
+<article class="insight-card alert-card">
+<div class="insight-label">Operational Alerts</div>
+<div id="coachAlerts" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Recent Activity</div>
+<div id="coachActivity" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Profile Completeness</div>
+<div class="quality-score" id="coachQualityScore">0%</div>
+<div class="quality-track"><span id="coachQualityBar"></span></div>
+<p id="coachQualityCopy" class="fine"></p>
+</article>
+</section>
+<details class="card collapsible-section" id="coachRegistryPanel" open>
+<summary>Coach Registry</summary>
+<section>
+<div class="section-title">
+<div>
+<h2>Coach Registry</h2>
+<p>Search and filter coaches and support staff for <span data-campus-name></span>.</p>
+</div>
+</div>
+<div class="filter-grid">
+<div>
+<label for="searchInput">Search</label>
+<input class="input" id="searchInput" placeholder="Search name, email, phone, role, team, or sport" type="text"/>
+</div>
+<div>
+<label for="filterRole">Role</label>
+<select class="select" id="filterRole">
+<option value="">All roles</option>
+<option value="head_coach">Head Coach</option>
+<option value="assistant_coach">Assistant Coach</option>
+<option value="strength_conditioning_coach">Strength &amp; Conditioning Coach</option>
+<option value="physio">Physio</option>
+<option value="manager">Manager</option>
+<option value="analyst">Analyst</option>
+<option value="team_staff">Team Staff</option>
+<option value="other">Other</option>
+</select>
+</div>
+<div>
+<label for="filterSport">Sport</label>
+<select class="select" id="filterSport">
+<option value="">All sports</option>
+</select>
+</div>
+<div>
+<label for="filterStatus">Status</label>
+<select class="select" id="filterStatus">
+<option value="">All statuses</option>
+<option value="active">Active</option>
+<option value="inactive">Inactive</option>
+<option value="on_leave">On Leave</option>
+</select>
+</div>
+<div>
+<label for="filterQuality">Profile Completeness</label>
+<select class="select" id="filterQuality">
+<option value="">All records</option>
+<option value="incomplete">Incomplete records</option>
+</select>
+</div>
+<div>
+<label>&nbsp;</label>
+<button class="btn btn-campus" id="coachSearchButton" type="button" style="width:100%;">Search</button>
+</div>
+</div>
+<div class="data-table-wrap hidden" id="coachTableWrap">
+<table class="table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Role</th>
+<th>Sport</th>
+<th>Teams</th>
+<th>Phone</th>
+<th>Email</th>
+<th>Status</th>
+<th>Profile Completeness</th>
+<th>Open</th>
+</tr>
+</thead>
+<tbody id="coachTableBody"></tbody>
+</table>
+</div>
+<div class="empty-state hidden" id="emptyState">
+<h3>No coach records match the current filters.</h3>
+<p>Add coach or staff records to manage assignments and detailed profiles.</p>
+</div>
+</section>
+</details>
 </main>
 <footer class="footer">
 <div class="footer-left">

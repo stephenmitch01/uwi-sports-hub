@@ -91,86 +91,6 @@
 </div>
 </section>
 <div aria-live="polite" class="message" id="teamsPageMessage"></div>
-<section class="insight-grid" aria-label="Team operational insights">
-<article class="insight-card alert-card">
-<div class="insight-label">Operational Alerts</div>
-<div id="teamAlerts" class="insight-list"></div>
-</article>
-<article class="insight-card">
-<div class="insight-label">Recent Activity</div>
-<div id="teamActivity" class="insight-list"></div>
-</article>
-<article class="insight-card">
-<div class="insight-label">Setup Completeness</div>
-<div class="quality-score" id="teamQualityScore">0%</div>
-<div class="quality-track"><span id="teamQualityBar"></span></div>
-<p id="teamQualityCopy" class="fine"></p>
-</article>
-</section>
-<details class="card collapsible-section" id="teamsListPanel" open>
-<summary>Teams List</summary>
-<section>
-<div class="section-title">
-<div>
-<h2>Teams List</h2>
-<p>Search and filter teams for this campus.</p>
-</div>
-</div>
-<div class="filter-grid">
-<div>
-<label for="teamSearch">Search</label>
-<input class="input" id="teamSearch" placeholder="Search team name, division, season, or notes" type="text"/>
-</div>
-<div>
-<label for="teamSport">Sport</label>
-<select class="select" id="teamSport">
-<option value="">All sports</option>
-</select>
-</div>
-<div>
-<label for="teamStatus">Status</label>
-<select class="select" id="teamStatus">
-<option value="">All statuses</option>
-<option value="active">Active</option>
-<option value="inactive">Inactive</option>
-</select>
-</div>
-<div>
-<label for="teamSeasonFilter">Season</label>
-<input class="input" id="teamSeasonFilter" placeholder="e.g. 2026" type="text"/>
-</div>
-<div>
-<label for="teamQualityFilter">Setup Completeness</label>
-<select class="select" id="teamQualityFilter">
-<option value="">All records</option>
-<option value="incomplete">Incomplete records</option>
-</select>
-</div>
-<div>
-<label>&nbsp;</label>
-<button class="btn btn-campus" id="teamSearchButton" type="button" style="width:100%;">Search</button>
-</div>
-</div>
-<div class="data-table-wrap">
-<table class="table">
-<thead>
-<tr>
-<th>Team</th>
-<th>Sport</th>
-<th>Division</th>
-<th>Season</th>
-<th>Status</th>
-<th>Campus</th>
-<th>Notes</th>
-<th>Setup Completeness</th>
-<th>Open</th>
-</tr>
-</thead>
-<tbody id="teamsTableBody"></tbody>
-</table>
-</div>
-</section>
-</details>
 <details class="card collapsible-section" id="teamWorkflows">
 <summary>Add / Edit Team</summary>
 <section class="grid grid-2">
@@ -266,6 +186,88 @@
 </section>
 </section>
 </details>
+
+<section class="insight-grid" aria-label="Team operational insights">
+<article class="insight-card alert-card">
+<div class="insight-label">Operational Alerts</div>
+<div id="teamAlerts" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Recent Activity</div>
+<div id="teamActivity" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Setup Completeness</div>
+<div class="quality-score" id="teamQualityScore">0%</div>
+<div class="quality-track"><span id="teamQualityBar"></span></div>
+<p id="teamQualityCopy" class="fine"></p>
+</article>
+</section>
+<details class="card collapsible-section" id="teamsListPanel" open>
+<summary>Teams List</summary>
+<section>
+<div class="section-title">
+<div>
+<h2>Teams List</h2>
+<p>Search and filter teams for this campus.</p>
+</div>
+</div>
+<div class="filter-grid">
+<div>
+<label for="teamSearch">Search</label>
+<input class="input" id="teamSearch" placeholder="Search team name, division, season, or notes" type="text"/>
+</div>
+<div>
+<label for="teamSport">Sport</label>
+<select class="select" id="teamSport">
+<option value="">All sports</option>
+</select>
+</div>
+<div>
+<label for="teamStatus">Status</label>
+<select class="select" id="teamStatus">
+<option value="">All statuses</option>
+<option value="active">Active</option>
+<option value="inactive">Inactive</option>
+</select>
+</div>
+<div>
+<label for="teamSeasonFilter">Season</label>
+<input class="input" id="teamSeasonFilter" placeholder="e.g. 2026" type="text"/>
+</div>
+<div>
+<label for="teamQualityFilter">Setup Completeness</label>
+<select class="select" id="teamQualityFilter">
+<option value="">All records</option>
+<option value="incomplete">Incomplete records</option>
+</select>
+</div>
+<div>
+<label>&nbsp;</label>
+<button class="btn btn-campus" id="teamSearchButton" type="button" style="width:100%;">Search</button>
+</div>
+</div>
+<div class="data-table-wrap">
+<table class="table">
+<thead>
+<tr>
+<th>Team</th>
+<th>Sport</th>
+<th>Division</th>
+<th>Season</th>
+<th>Status</th>
+<th>Campus</th>
+<th>Notes</th>
+<th>Setup Completeness</th>
+<th>Open</th>
+</tr>
+</thead>
+<tbody id="teamsTableBody"></tbody>
+</table>
+</div>
+</section>
+</details>
+
 </main>
 <footer class="footer">
 <div class="footer-left">

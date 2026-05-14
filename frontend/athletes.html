@@ -95,115 +95,6 @@
 </div>
 </section>
 <div aria-live="polite" class="message" id="athletePageMessage"></div>
-<section class="insight-grid" aria-label="Athlete operational insights">
-<article class="insight-card alert-card">
-<div class="insight-label">Operational Alerts</div>
-<div id="athleteAlerts" class="insight-list"></div>
-</article>
-<article class="insight-card">
-<div class="insight-label">Recent Activity</div>
-<div id="athleteActivity" class="insight-list"></div>
-</article>
-<article class="insight-card">
-<div class="insight-label">Profile Completeness</div>
-<div class="quality-score" id="athleteQualityScore">0%</div>
-<div class="quality-track"><span id="athleteQualityBar"></span></div>
-<p id="athleteQualityCopy" class="fine"></p>
-</article>
-</section>
-<details class="card collapsible-section" id="athleteRegistryPanel" open>
-<summary>Athlete Registry</summary>
-<section>
-<div class="section-title">
-<div>
-<h2>Athlete Registry</h2>
-<p>Search and filter athlete records for <span data-campus-name></span>.</p>
-</div>
-</div>
-<div class="filter-grid">
-<div>
-<label for="athleteSearch">Search</label>
-<input class="input" id="athleteSearch" placeholder="Search athlete name, email, phone, or ID" type="text"/>
-</div>
-<div>
-<label for="athleteStatus">Status</label>
-<select class="select" id="athleteStatus">
-<option value="">All statuses</option>
-<option value="active">Active</option>
-<option value="inactive">Inactive</option>
-</select>
-</div>
-<div>
-<label for="athleteTypeFilter">Athlete Type</label>
-<select class="select" id="athleteTypeFilter">
-<option value="">All athlete types</option>
-<option value="student-athlete">Student-Athlete</option>
-<option value="non-student representative">Non-Student Representative</option>
-<option value="alumni representative">Alumni Representative</option>
-<option value="other approved representative">Other Approved Representative</option>
-</select>
-</div>
-<div>
-<label for="athleteGenderFilter">Sex</label>
-<select class="select" id="athleteGenderFilter">
-<option value="">All</option>
-<option value="male">Male</option>
-<option value="female">Female</option>
-</select>
-</div>
-<div>
-<label for="athleteSportFilter">Primary Sport</label>
-<select class="select" id="athleteSportFilter">
-<option value="">All sports</option>
-</select>
-</div>
-<div>
-<label for="athleteQualityFilter">Profile Completeness</label>
-<select class="select" id="athleteQualityFilter">
-<option value="">All records</option>
-<option value="incomplete">Incomplete records</option>
-</select>
-</div>
-<div>
-<label>&nbsp;</label>
-<button class="btn btn-campus" id="athleteSearchButton" type="button" style="width:100%;">Search</button>
-</div>
-</div>
-<div class="bulk-action-bar" id="athleteBulkActionBar" hidden>
-<div>
-<strong id="athleteBulkCount">0 selected</strong>
-<span class="fine">Apply one action to the selected athlete records.</span>
-</div>
-<div class="bulk-action-controls">
-<select class="select" id="bulkAssignTeamSelect">
-<option value="">Assign selected to team</option>
-</select>
-<button class="btn btn-campus" id="bulkAssignTeamButton" type="button">Assign</button>
-<button class="btn btn-soft" id="bulkClearSelectionButton" type="button">Clear</button>
-</div>
-</div>
-<div class="data-table-wrap">
-<table class="table">
-<thead>
-<tr>
-<th><input id="athleteSelectAll" type="checkbox" aria-label="Select all visible athletes"/></th>
-<th>Name</th>
-<th>Sex</th>
-<th>Sport</th>
-<th>Team</th>
-<th>Email</th>
-<th>Athlete Type</th>
-<th>Status</th>
-<th>Profile Completeness</th>
-<th>Headshot</th>
-<th>Open</th>
-</tr>
-</thead>
-<tbody id="athletesTableBody"></tbody>
-</table>
-</div>
-</section>
-</details>
 <details class="card collapsible-section" id="athleteWorkflows">
 <summary>Add Athlete</summary>
 <section>
@@ -348,6 +239,117 @@
 </section>
 </section>
 </details>
+
+<section class="insight-grid" aria-label="Athlete operational insights">
+<article class="insight-card alert-card">
+<div class="insight-label">Operational Alerts</div>
+<div id="athleteAlerts" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Recent Activity</div>
+<div id="athleteActivity" class="insight-list"></div>
+</article>
+<article class="insight-card">
+<div class="insight-label">Profile Completeness</div>
+<div class="quality-score" id="athleteQualityScore">0%</div>
+<div class="quality-track"><span id="athleteQualityBar"></span></div>
+<p id="athleteQualityCopy" class="fine"></p>
+</article>
+</section>
+<details class="card collapsible-section" id="athleteRegistryPanel" open>
+<summary>Athlete Registry</summary>
+<section>
+<div class="section-title">
+<div>
+<h2>Athlete Registry</h2>
+<p>Search and filter athlete records for <span data-campus-name></span>.</p>
+</div>
+</div>
+<div class="filter-grid">
+<div>
+<label for="athleteSearch">Search</label>
+<input class="input" id="athleteSearch" placeholder="Search athlete name, email, phone, or ID" type="text"/>
+</div>
+<div>
+<label for="athleteStatus">Status</label>
+<select class="select" id="athleteStatus">
+<option value="">All statuses</option>
+<option value="active">Active</option>
+<option value="inactive">Inactive</option>
+</select>
+</div>
+<div>
+<label for="athleteTypeFilter">Athlete Type</label>
+<select class="select" id="athleteTypeFilter">
+<option value="">All athlete types</option>
+<option value="student-athlete">Student-Athlete</option>
+<option value="non-student representative">Non-Student Representative</option>
+<option value="alumni representative">Alumni Representative</option>
+<option value="other approved representative">Other Approved Representative</option>
+</select>
+</div>
+<div>
+<label for="athleteGenderFilter">Sex</label>
+<select class="select" id="athleteGenderFilter">
+<option value="">All</option>
+<option value="male">Male</option>
+<option value="female">Female</option>
+</select>
+</div>
+<div>
+<label for="athleteSportFilter">Primary Sport</label>
+<select class="select" id="athleteSportFilter">
+<option value="">All sports</option>
+</select>
+</div>
+<div>
+<label for="athleteQualityFilter">Profile Completeness</label>
+<select class="select" id="athleteQualityFilter">
+<option value="">All records</option>
+<option value="incomplete">Incomplete records</option>
+</select>
+</div>
+<div>
+<label>&nbsp;</label>
+<button class="btn btn-campus" id="athleteSearchButton" type="button" style="width:100%;">Search</button>
+</div>
+</div>
+<div class="bulk-action-bar" id="athleteBulkActionBar" hidden>
+<div>
+<strong id="athleteBulkCount">0 selected</strong>
+<span class="fine">Apply one action to the selected athlete records.</span>
+</div>
+<div class="bulk-action-controls">
+<select class="select" id="bulkAssignTeamSelect">
+<option value="">Assign selected to team</option>
+</select>
+<button class="btn btn-campus" id="bulkAssignTeamButton" type="button">Assign</button>
+<button class="btn btn-soft" id="bulkClearSelectionButton" type="button">Clear</button>
+</div>
+</div>
+<div class="data-table-wrap">
+<table class="table">
+<thead>
+<tr>
+<th><input id="athleteSelectAll" type="checkbox" aria-label="Select all visible athletes"/></th>
+<th>Name</th>
+<th>Sex</th>
+<th>Sport</th>
+<th>Team</th>
+<th>Email</th>
+<th>Athlete Type</th>
+<th>Status</th>
+<th>Profile Completeness</th>
+<th>Headshot</th>
+<th>Open</th>
+</tr>
+</thead>
+<tbody id="athletesTableBody"></tbody>
+</table>
+</div>
+</section>
+</details>
+
 </main>
 <footer class="footer">
 <div class="footer-left">
