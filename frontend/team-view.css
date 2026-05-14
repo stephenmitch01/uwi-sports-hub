@@ -9,14 +9,14 @@
 .collapsible-section[open]>summary::after{content:"Close"}
 .collapsible-section>section{padding:18px 22px}
 .collapsible-section>section.card{box-shadow:none;border:0;border-radius:0;margin-top:0}
-.team-section-actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.team-section-actions{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:18px 0}
+.team-section-actions-left{display:flex;flex-wrap:wrap;gap:10px}
 .team-section-actions .btn,.quick-actions .btn{white-space:nowrap}
 .team-section-actions .btn.is-active,.quick-actions .btn.is-active{background:#0f2742;color:#fff;border-color:#0f2742}
 .team-hero-actions{display:grid;gap:10px;justify-items:start}
 .team-hero-actions-main{display:flex;flex-wrap:wrap;gap:10px}
 .team-hero-actions-main .btn:first-child{background:#fff;color:#111827;border-color:rgba(15,39,66,.16)}
-.team-lower-actions{display:flex;justify-content:flex-end;margin:10px 0 18px}
-.team-lower-actions .btn{background:#fff;color:#111827;border-color:rgba(15,39,66,.16)}
+.team-section-actions #archiveTeamBtn{background:#fff;color:#111827;border-color:rgba(15,39,66,.16)}
 .team-action-panel{margin-top:18px}
 .team-action-panel.hidden{display:none}
 .panel-action-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
@@ -59,8 +59,8 @@
   .leaderboard-access{display:grid}
   .team-section-actions,.quick-actions{align-items:stretch}
   .team-section-actions .btn,.quick-actions .btn{width:100%;justify-content:center}
+  .team-section-actions{display:grid}
+  .team-section-actions-left{display:grid}
   .team-hero-actions-main{display:grid;width:100%}
-  .team-lower-actions{justify-content:stretch}
-  .team-lower-actions .btn{width:100%;justify-content:center}
   .panel-action-head{display:grid}
 }
