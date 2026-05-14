@@ -35,6 +35,9 @@
     teamHeadNote: document.getElementById("teamHeadNote"),
     editTeamBtn: document.getElementById("editTeamBtn"),
     editTeamPanel: document.getElementById("editTeamPanel"),
+    teamSectionButtons: Array.from(document.querySelectorAll("[data-team-section]")),
+    teamActionPanels: Array.from(document.querySelectorAll("[data-team-section-panel]")),
+    closeTeamPanelButtons: Array.from(document.querySelectorAll("[data-close-team-panel]")),
     teamEditForm: document.getElementById("teamEditForm"),
     teamEditMessage: document.getElementById("teamEditMessage"),
 
@@ -113,17 +116,48 @@
 
     if (els.editTeamBtn && els.editTeamPanel) {
       els.editTeamBtn.addEventListener("click", function () {
-        els.editTeamPanel.classList.remove("hidden");
-        els.editTeamPanel.open = true;
-        els.editTeamPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        openTeamPanel("edit");
       });
     }
+
+    els.teamSectionButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        openTeamPanel(button.dataset.teamSection || "");
+      });
+    });
+
+    els.closeTeamPanelButtons.forEach((button) => {
+      button.addEventListener("click", closeTeamPanels);
+    });
 
     if (els.teamEditForm) {
       APP.trackUnsavedChanges(els.teamEditForm);
       els.teamEditForm.addEventListener("submit", handleEditTeam);
     }
     mountArchiveButton();
+  }
+
+  function openTeamPanel(panelName) {
+    if (!panelName) return;
+    const panel = els.teamActionPanels.find((item) => item.dataset.teamSectionPanel === panelName);
+    if (!panel) return;
+    els.teamActionPanels.forEach((item) => {
+      const isActive = item === panel;
+      item.classList.toggle("hidden", !isActive);
+      item.toggleAttribute("aria-hidden", !isActive);
+    });
+    els.teamSectionButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.teamSection === panelName);
+    });
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function closeTeamPanels() {
+    els.teamActionPanels.forEach((panel) => {
+      panel.classList.add("hidden");
+      panel.setAttribute("aria-hidden", "true");
+    });
+    els.teamSectionButtons.forEach((button) => button.classList.remove("is-active"));
   }
 
   async function refreshPage() {
