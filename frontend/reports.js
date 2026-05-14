@@ -578,7 +578,7 @@
               </tbody>
             </table>
           </div>
-        ` : `<div class="empty-state"><h3>No best-performance rows yet.</h3><p>No athlete stat lines are available to calculate best marks in the current dataset.</p></div>`}
+        ` : `<div class="empty-state"><h3>No best-performance rows in this view.</h3><p>No saved performance lines match the current athlete report filters.</p></div>`}
       </section>
 
       <section class="report-section">
@@ -601,7 +601,7 @@
               </tbody>
             </table>
           </div>
-        ` : `<div class="empty-state"><h3>No visible stat lines.</h3><p>No athlete-linked performance lines match the current report filters.</p></div>`}
+        ` : `<div class="empty-state"><h3>No visible performance lines in this view.</h3><p>Adjust the sport, season, or subject filters to include more saved score sheets and stat lines.</p></div>`}
       </section>
 
       <section class="report-section">
@@ -616,16 +616,16 @@
               </div>
             `).join("")}
           </div>
-        ` : `<div class="empty-state"><h3>No competition history in view.</h3><p>No competition rows are available from the currently visible athlete stat lines.</p></div>`}
+        ` : `<div class="empty-state"><h3>No competition history in this view.</h3><p>Adjust the filters to include competitions represented by this athlete's saved score sheets and stat lines.</p></div>`}
       </section>
     </div>`;
   }
 
   function renderTeamReportContent(team, forPreview) {
     const teamId = compactId(team.id || team.teamId);
-    const athletes = getFilteredAthletes().filter((athlete) => getAthleteTeamId(athlete) === teamId);
-    const stats = getFilteredStats().filter((row) => compactId(row.teamId || row.team || row.teamName) === teamId);
-    const competitions = getFilteredCompetitions().filter((competition) => compactId(competition.teamId || competition.team || competition.teamName) === teamId);
+    const athletes = getFilteredAthletes().filter((athlete) => athleteHasTeam(athlete, teamId));
+    const stats = getFilteredStats().filter((row) => statRowMatchesTeam(row, teamId));
+    const competitions = getFilteredCompetitions().filter((competition) => competitionMatchesTeam(competition, teamId) || stats.some((row) => compactId(row.competitionId) === compactId(competition.id || competition.competitionId)));
     const reportDate = new Date();
 
     return `<div class="report-shell">
@@ -680,7 +680,7 @@
                 </tbody>
               </table>
             </div>
-          ` : `<div class="empty-state"><h3>No visible roster rows.</h3><p>No athlete records currently match this team and the active report filters.</p></div>`}
+          ` : `<div class="empty-state"><h3>No roster rows in this view.</h3><p>Adjust the filters to include athletes assigned to this team.</p></div>`}
         </section>
       </div>
 
@@ -703,7 +703,7 @@
               </tbody>
             </table>
           </div>
-        ` : `<div class="empty-state"><h3>No visible performance lines.</h3><p>No team-linked stat lines currently match the selected report context.</p></div>`}
+        ` : `<div class="empty-state"><h3>No visible performance lines in this view.</h3><p>Adjust the filters to include this team's saved score sheets and stat lines.</p></div>`}
       </section>
 
       <section class="report-section">
@@ -722,14 +722,14 @@
               </div>
             `).join("")}
           </div>
-        ` : `<div class="empty-state"><h3>No visible competition rows.</h3><p>No competition records currently match the selected team and report context.</p></div>`}
+        ` : `<div class="empty-state"><h3>No competition rows in this view.</h3><p>Adjust the filters to include competitions linked to this team or its saved stat lines.</p></div>`}
       </section>
     </div>`;
   }
 
   function renderCompetitionReportContent(competition, forPreview) {
     const competitionId = compactId(competition.id || competition.competitionId);
-    const stats = getFilteredStats().filter((row) => compactId(row.competitionId || row.competition || row.competitionName) === competitionId);
+    const stats = getFilteredStats().filter((row) => statRowMatchesCompetition(row, competitionId));
     const tfSummary = buildTrackFieldSummary(stats);
     const sportSummary = buildSportSchemaSummary(stats, competition.sportSlug || competition.sport);
 
@@ -818,7 +818,7 @@
               </tbody>
             </table>
           </div>
-        ` : `<div class="empty-state"><h3>No visible performance lines.</h3><p>No competition-linked stat lines currently match the chosen report context.</p></div>`}
+        ` : `<div class="empty-state"><h3>No visible performance lines in this view.</h3><p>Adjust the filters to include saved score sheets and stat lines for this competition.</p></div>`}
       </section>
     </div>`;
   }
@@ -952,6 +952,21 @@
     return {};
   }
 
+  function getAthleteRosterAssignments(athlete) {
+    const rows = [];
+    if (Array.isArray(athlete?.rosterAssignments)) rows.push(...athlete.rosterAssignments);
+    if (Array.isArray(athlete?.teamAssignments)) rows.push(...athlete.teamAssignments);
+    const active = getAthleteRosterAssignment(athlete);
+    if (active && Object.keys(active).length) rows.unshift(active);
+    const seen = new Set();
+    return rows.filter((assignment) => {
+      const key = compactId(assignment?.id || `${assignment?.teamId || assignment?.team?.id || ""}:${assignment?.sportSlug || assignment?.sport || assignment?.team?.sportSlug || ""}`);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
   function getAthleteSportSlug(athlete) {
     const profile = getAthleteProfile(athlete);
     const roster = getAthleteRosterAssignment(athlete);
@@ -968,6 +983,31 @@
     );
   }
 
+  function getAthleteSportSlugs(athlete) {
+    const profile = getAthleteProfile(athlete);
+    return Array.from(new Set([
+      athlete?.sportSlug,
+      athlete?.primarySportSlug,
+      athlete?.sport,
+      athlete?.primarySport,
+      profile.sportSlug,
+      profile.sport,
+      ...(Array.isArray(athlete?.sports) ? athlete.sports : []),
+      ...getAthleteRosterAssignments(athlete).flatMap((assignment) => [
+        assignment?.sportSlug,
+        assignment?.sport,
+        assignment?.team?.sportSlug,
+        assignment?.team?.sport
+      ])
+    ].map((value) => APP.normalizeSportSlug(value)).filter(Boolean)));
+  }
+
+  function athleteHasSport(athlete, sportSlug) {
+    const normalized = APP.normalizeSportSlug(sportSlug);
+    if (!normalized) return true;
+    return getAthleteSportSlugs(athlete).includes(normalized);
+  }
+
   function getAthleteTeamId(athlete) {
     const roster = getAthleteRosterAssignment(athlete);
     return compactId(
@@ -977,6 +1017,25 @@
       roster.team?.id ||
       roster.team?.teamId
     );
+  }
+
+  function getAthleteTeamIds(athlete) {
+    return Array.from(new Set([
+      athlete?.teamId,
+      athlete?.team?.id,
+      athlete?.team?.teamId,
+      ...getAthleteRosterAssignments(athlete).flatMap((assignment) => [
+        assignment?.teamId,
+        assignment?.team?.id,
+        assignment?.team?.teamId
+      ])
+    ].map(compactId).filter(Boolean)));
+  }
+
+  function athleteHasTeam(athlete, teamId) {
+    const normalized = compactId(teamId);
+    if (!normalized) return true;
+    return getAthleteTeamIds(athlete).includes(normalized);
   }
 
   function getAthletePosition(athlete) {
@@ -1013,7 +1072,7 @@
       const season = String(athlete.season || athlete.seasonLabel || "").trim();
 
       if (campus && athleteCampus !== campus) return false;
-      if (state.filteredSport && sportSlug !== state.filteredSport) return false;
+      if (state.filteredSport && !athleteHasSport(athlete, state.filteredSport) && sportSlug !== state.filteredSport) return false;
       if (state.filteredSeason && season && season !== state.filteredSeason) return false;
       return true;
     });
@@ -1050,9 +1109,10 @@
   function getFilteredStats() {
     const campus = APP.normalizeCampus(state.filteredCampus || state.session?.campus);
     return state.statLines.filter((row) => {
-      const rowCampus = APP.normalizeCampus(row.campus || row.campusSlug || state.session?.campus);
-      const sportSlug = APP.normalizeSportSlug(row.sportSlug || row.sport);
-      const season = String(row.season || row.seasonLabel || "").trim();
+      const data = getRowStatData(row);
+      const rowCampus = APP.normalizeCampus(row.campus || row.campusSlug || data.campus || data.campusSlug || state.session?.campus);
+      const sportSlug = APP.normalizeSportSlug(row.sportSlug || row.sport || data.sportSlug || data.sport);
+      const season = String(row.season || row.seasonLabel || data.season || data.seasonLabel || "").trim();
 
       if (campus && rowCampus !== campus) return false;
       if (state.filteredSport && sportSlug !== state.filteredSport) return false;
@@ -1065,7 +1125,7 @@
     const teamFilterId = state.selectedTeamFilterId;
     const athletes = getFilteredAthletes();
     if (!teamFilterId) return athletes;
-    return athletes.filter((athlete) => getAthleteTeamId(athlete) === teamFilterId);
+    return athletes.filter((athlete) => athleteHasTeam(athlete, teamFilterId));
   }
 
   function getSelectedAthlete() {
@@ -1082,7 +1142,7 @@
 
   function getAthleteStats(athleteId, filteredOnly) {
     const source = filteredOnly ? getFilteredStats() : state.statLines;
-    return source.filter((row) => compactId(row.athleteId || row.athlete || row.participantId || row.subjectId || row.playerId) === athleteId);
+    return source.filter((row) => statRowIncludesAthlete(row, athleteId));
   }
 
   function getAthleteBestRows(rows) {
@@ -1116,6 +1176,81 @@
     return Array.from(seen.values());
   }
 
+  function getRowStatData(row) {
+    if (row?.statData && typeof row.statData === "object") return row.statData;
+    if (row?.data?.statData && typeof row.data.statData === "object") return row.data.statData;
+    if (row?.data && typeof row.data === "object") return row.data;
+    return row && typeof row === "object" ? row : {};
+  }
+
+  function statRowIncludesAthlete(row, athleteId) {
+    const normalized = compactId(athleteId);
+    if (!normalized) return false;
+    const data = getRowStatData(row);
+    const directIds = [
+      row?.athleteId,
+      row?.athlete,
+      row?.participantId,
+      row?.subjectId,
+      row?.playerId,
+      data.athleteId,
+      data.participantId,
+      data.subjectId,
+      data.playerId,
+      data.athlete?.athleteId,
+      data.athlete?.id,
+      data.uwiPlayer?.athleteId,
+      data.uwiPlayer?.id
+    ].map(compactId);
+    if (directIds.includes(normalized)) return true;
+    return JSON.stringify(data).includes(`"athleteId":"${normalized}"`) ||
+      JSON.stringify(data).includes(`"scorerAthleteId":"${normalized}"`) ||
+      JSON.stringify(data).includes(`"assistAthleteId":"${normalized}"`) ||
+      JSON.stringify(data).includes(`"assist1AthleteId":"${normalized}"`) ||
+      JSON.stringify(data).includes(`"assist2AthleteId":"${normalized}"`);
+  }
+
+  function statRowMatchesTeam(row, teamId) {
+    const normalized = compactId(teamId);
+    if (!normalized) return false;
+    const data = getRowStatData(row);
+    return [
+      row?.teamId,
+      row?.team,
+      data.teamId,
+      data.uwiTeamId,
+      data.team?.id,
+      data.team?.teamId
+    ].map(compactId).includes(normalized);
+  }
+
+  function statRowMatchesCompetition(row, competitionId) {
+    const normalized = compactId(competitionId);
+    if (!normalized) return false;
+    const data = getRowStatData(row);
+    return [
+      row?.competitionId,
+      row?.competition,
+      data.competitionId,
+      data.competition?.id,
+      data.competition?.competitionId
+    ].map(compactId).includes(normalized);
+  }
+
+  function competitionMatchesTeam(competition, teamId) {
+    const normalized = compactId(teamId);
+    if (!normalized) return false;
+    const data = getRowStatData(competition);
+    return [
+      competition?.teamId,
+      competition?.team,
+      data.teamId,
+      data.uwiTeamId,
+      data.team?.id,
+      data.team?.teamId
+    ].map(compactId).includes(normalized);
+  }
+
   function buildAthletePerformanceSummary(allStats, filteredStats) {
     const competitionCount = new Set(filteredStats.map((row) => row.competitionId || row.competitionName || row.competitionTitle || "")).size;
     return {
@@ -1126,7 +1261,7 @@
   }
 
   function buildTrackFieldSummary(stats) {
-    const tfRows = stats.filter((row) => APP.normalizeSportSlug(row.sportSlug || row.sport) === "track-and-field");
+    const tfRows = stats.filter((row) => APP.normalizeSportSlug(row.sportSlug || row.sport || getRowStatData(row).sportSlug || getRowStatData(row).sport) === "track-and-field");
     if (!tfRows.length) return null;
 
     const timed = tfRows.filter((row) => isTimedMark(row));
@@ -1135,8 +1270,8 @@
     return {
       timedEntries: timed.length,
       fieldEntries: field.length,
-      averageTimed: timed.length ? averageOf(timed.map((row) => parseFloat(row.resultTime || row.time || row.performance))).toFixed(2) : "",
-      averageField: field.length ? averageOf(field.map((row) => parseFloat(row.resultDistance || row.distance || row.height || row.performance))).toFixed(2) : ""
+      averageTimed: timed.length ? averageOf(timed.map((row) => numericStatValue(row))).toFixed(2) : "",
+      averageField: field.length ? averageOf(field.map((row) => numericStatValue(row))).toFixed(2) : ""
     };
   }
 
@@ -1146,7 +1281,8 @@
     const grouped = new Map();
 
     rows.forEach((row) => {
-      const sportSlug = APP.normalizeSportSlug(row.sportSlug || row.sport);
+      const data = getRowStatData(row);
+      const sportSlug = APP.normalizeSportSlug(row.sportSlug || row.sport || data.sportSlug || data.sport);
       if (!sportSlug || (selectedSport && sportSlug !== selectedSport)) return;
       if (!APP.getSportSchema?.(sportSlug)) return;
       if (!grouped.has(sportSlug)) grouped.set(sportSlug, []);
@@ -1191,7 +1327,7 @@
                   <td>${escapeHtml(String(item.statLines))}</td>
                   <td>${escapeHtml(String(item.subjects))}</td>
                   <td>${escapeHtml(`${item.fieldsCovered}/${item.schemaFields}`)}</td>
-                  <td>${escapeHtml(item.sampleFields.length ? item.sampleFields.join(", ") : "No populated schema fields yet")}</td>
+                  <td>${escapeHtml(item.sampleFields.length ? item.sampleFields.join(", ") : "Saved lines found; no schema-mapped fields in this view")}</td>
                 </tr>
               `).join("")}
             </tbody>
@@ -1202,7 +1338,7 @@
   }
 
   function getStatDataValue(row, fieldName) {
-    const data = row?.statData && typeof row.statData === "object" ? row.statData : row;
+    const data = getRowStatData(row);
     const value = data?.[fieldName];
     return value === undefined ? null : value;
   }
@@ -1245,10 +1381,17 @@
   }
 
   function numericStatValue(row) {
+    const data = getRowStatData(row);
+    const summary = data.summary && typeof data.summary === "object" ? data.summary : {};
     const possible = [
       row.resultTime, row.time, row.performance,
       row.resultDistance, row.distance, row.height,
-      row.score, row.value
+      row.score, row.value,
+      data.resultTime, data.time, data.finalTime, data.performance,
+      data.resultDistance, data.distance, data.bestDistance,
+      data.height, data.bestHeight, data.best, data.bestMark,
+      data.score, data.value, data.runs, data.goals, data.points,
+      summary.finalScore, summary.total, summary.points
     ];
     for (const item of possible) {
       const parsed = parseFloat(item);
@@ -1261,7 +1404,12 @@
     if (row.participantName) return row.participantName;
     if (row.athleteName) return row.athleteName;
     if (row.teamName) return row.teamName;
-    const athlete = state.athletes.find((item) => compactId(item.id || item.athleteId) === compactId(row.athleteId || row.athlete || row.participantId));
+    const data = getRowStatData(row);
+    if (data.name) return data.name;
+    if (data.athleteName) return data.athleteName;
+    if (data.athlete?.name) return data.athlete.name;
+    if (data.uwiPlayer?.name) return data.uwiPlayer.name;
+    const athlete = state.athletes.find((item) => statRowIncludesAthlete(row, compactId(item.id || item.athleteId)));
     if (athlete) return getAthleteDisplayName(athlete);
     return "Participant";
   }
@@ -1295,7 +1443,26 @@
   }
 
   function normalizeStat(row) {
-    return row && typeof row === "object" ? row : {};
+    if (!row || typeof row !== "object") return {};
+    const data = getRowStatData(row);
+    return {
+      ...data,
+      ...row,
+      statData: data,
+      id: row.id || data.id,
+      campus: row.campus || data.campus,
+      sport: row.sport || data.sport,
+      sportSlug: row.sportSlug || data.sportSlug || row.sport || data.sport,
+      season: row.season || data.season,
+      competitionId: row.competitionId || data.competitionId,
+      competitionName: row.competitionName || row.competitionTitle || data.competitionName || data.competitionTitle || data.title,
+      teamId: row.teamId || data.teamId || data.uwiTeamId,
+      teamName: row.teamName || data.teamName || data.uwiTeamName,
+      athleteId: row.athleteId || data.athleteId || data.athlete?.athleteId || data.uwiPlayer?.athleteId,
+      eventName: row.eventName || data.eventName || data.title,
+      statName: row.statName || data.statName || data.eventName || data.title,
+      date: row.date || data.date || data.playedAt || data.startDate || row.createdAt || data.createdAt
+    };
   }
 
   function compactId(value) {
@@ -1346,10 +1513,11 @@
   }
 
   function describeStat(row) {
-    const data = row?.statData && typeof row.statData === "object" ? row.statData : {};
+    const data = getRowStatData(row);
     const summary = data.summary && typeof data.summary === "object" ? data.summary : {};
     const candidates = [
       row.result,
+      row.statValue,
       row.performance,
       row.resultTime,
       row.time,
@@ -1369,7 +1537,7 @@
       data.height,
       data.bestHeight,
       data.bestMark,
-      data.score,
+      formatScoreObject(data.score),
       data.value,
       data.runs,
       data.goals,
@@ -1381,8 +1549,22 @@
       summary.total,
       summary.points
     ];
-    const value = candidates.find((item) => item !== undefined && item !== null && String(item).trim() !== "");
+    const value = candidates.map(formatStatCandidate).find((item) => item !== "") || "â€”";
     return value === undefined ? "—" : String(value);
+  }
+
+  function formatStatCandidate(value) {
+    if (value === undefined || value === null) return "";
+    if (typeof value === "object") return formatScoreObject(value);
+    return String(value).trim();
+  }
+
+  function formatScoreObject(value) {
+    if (!value || typeof value !== "object") return "";
+    const uwi = value.uwi?.total ?? value.uwi ?? value.home?.total ?? value.home;
+    const opponent = value.opponent?.total ?? value.opponent ?? value.away?.total ?? value.away;
+    if ((uwi || uwi === 0) && (opponent || opponent === 0)) return `${uwi}-${opponent}`;
+    return "";
   }
 
   function escapeHtml(value) {
