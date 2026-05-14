@@ -84,17 +84,20 @@
   function render() {
     const metrics = getMetrics();
     if (!state.metric) {
-      state.metric = metrics[0]?.key || "entries";
+      state.metric = "all";
       state.order = defaultOrderForMetric(state.metric);
     }
+    const visibleMetrics = getVisibleMetrics(metrics);
+    const sortMetric = state.metric === "all" ? (metrics.find((metric) => metric.key === "entries")?.key || metrics[0]?.key || "entries") : state.metric;
     const rows = buildRows();
     const sorted = rows.slice().sort((a, b) => {
-      const delta = sortValue(a, state.metric) - sortValue(b, state.metric);
+      const delta = sortValue(a, sortMetric) - sortValue(b, sortMetric);
       return state.order === "asc" ? delta : -delta;
     });
     els.playerCount.textContent = String(rows.length);
     els.recordCount.textContent = String(getFilteredStatLines().length);
     els.metricControls.innerHTML = `
+      <button class="btn btn-soft ${state.metric === "all" ? "metric-active" : ""}" type="button" data-metric="all">All stats</button>
       ${metrics.map((metric) => `<button class="btn btn-soft ${metric.key === state.metric ? "metric-active" : ""}" type="button" data-metric="${escapeHtml(metric.key)}">${escapeHtml(metric.label)}</button>`).join("")}
       <button class="btn leaderboard-order-btn" type="button" data-order="${state.order === "desc" ? "asc" : "desc"}">${state.order === "desc" ? "Highest first" : "Lowest first"}</button>
     `;
@@ -104,14 +107,14 @@
           <thead>
             <tr>
               <th>Player</th>
-              ${metrics.map((metric) => `<th>${escapeHtml(metric.label)}</th>`).join("")}
+              ${visibleMetrics.map((metric) => `<th>${escapeHtml(metric.label)}</th>`).join("")}
             </tr>
           </thead>
           <tbody>
             ${sorted.map((row) => `
               <tr>
                 <td><a href="${escapeHtml(playerHref(row.id))}">${escapeHtml(row.name)}</a></td>
-                ${metrics.map((metric) => `<td>${escapeHtml(formatMetric(row, metric))}</td>`).join("")}
+                ${visibleMetrics.map((metric) => `<td>${escapeHtml(formatMetric(row, metric))}</td>`).join("")}
               </tr>
             `).join("")}
           </tbody>
@@ -190,6 +193,12 @@
       });
     });
     return Array.from(map.values()).map(finalizeDerivedMetrics);
+  }
+
+  function getVisibleMetrics(metrics) {
+    if (state.metric === "all") return metrics;
+    const selected = metrics.find((metric) => metric.key === state.metric);
+    return selected ? [selected] : metrics;
   }
 
   function addCricketRows(map, metrics, line) {
@@ -630,6 +639,7 @@
   }
 
   function defaultOrderForMetric(key) {
+    if (key === "all") return "desc";
     return ["bestTimeSeconds", "averageTimeSeconds", "averagePlace", "bowlingAverage", "bowlingStrikeRate", "economyRate"].includes(key) ? "asc" : "desc";
   }
 
