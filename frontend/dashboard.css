@@ -7,6 +7,10 @@
 .feature-card{padding:18px;border:1px solid rgba(0,0,0,.06);border-radius:16px;background:#fff}
 .feature-card h3{font-size:20px;color:#102033}
 .feature-card p{margin-top:8px;color:var(--muted);line-height:1.65}
+.workflow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.workflow-card{border:1px solid rgba(0,0,0,.06);border-radius:8px;background:#fff;padding:16px}
+.workflow-card h3{font-size:17px;color:#102033}
+.workflow-card p{margin-top:8px;color:var(--muted);line-height:1.6}
 .card-link{
   display:inline-flex;
   align-items:center;
@@ -28,7 +32,7 @@
   transform:translateY(-1px);
   text-decoration:none;
 }
-@media (max-width:1120px){.feature-grid,.hero-card .mini-grid{grid-template-columns:1fr}}
+@media (max-width:1120px){.feature-grid,.workflow-grid,.hero-card .mini-grid{grid-template-columns:1fr}}
 .hero-card {
   margin-bottom: 28px;
 }
