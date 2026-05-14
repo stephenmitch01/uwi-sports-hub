@@ -12,6 +12,9 @@
 .team-section-actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
 .team-section-actions .btn,.quick-actions .btn{white-space:nowrap}
 .team-section-actions .btn.is-active,.quick-actions .btn.is-active{background:#0f2742;color:#fff;border-color:#0f2742}
+.team-hero-actions{display:grid;gap:10px;justify-items:start}
+.team-hero-actions-main,.team-hero-actions-secondary{display:flex;flex-wrap:wrap;gap:10px}
+.team-hero-actions-main .btn:first-child,.team-hero-actions-secondary .btn.btn-soft{background:#fff;color:#111827;border-color:rgba(15,39,66,.16)}
 .team-action-panel{margin-top:18px}
 .team-action-panel.hidden{display:none}
 .panel-action-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
@@ -54,5 +57,6 @@
   .leaderboard-access{display:grid}
   .team-section-actions,.quick-actions{align-items:stretch}
   .team-section-actions .btn,.quick-actions .btn{width:100%;justify-content:center}
+  .team-hero-actions-main,.team-hero-actions-secondary{display:grid;width:100%}
   .panel-action-head{display:grid}
 }

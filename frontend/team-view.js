@@ -34,6 +34,7 @@
     teamSportPill: document.getElementById("teamSportPill"),
     teamHeadNote: document.getElementById("teamHeadNote"),
     editTeamBtn: document.getElementById("editTeamBtn"),
+    archiveTeamBtn: document.getElementById("archiveTeamBtn"),
     editTeamPanel: document.getElementById("editTeamPanel"),
     teamSectionButtons: Array.from(document.querySelectorAll("[data-team-section]")),
     teamActionPanels: Array.from(document.querySelectorAll("[data-team-section-panel]")),
@@ -263,18 +264,14 @@
   }
 
   function mountArchiveButton() {
-    if (!els.editTeamBtn || document.getElementById("archiveTeamBtn")) return;
-    const button = document.createElement("button");
-    button.id = "archiveTeamBtn";
-    button.className = "btn btn-soft";
-    button.type = "button";
-    button.textContent = "Archive";
+    const button = els.archiveTeamBtn;
+    if (!button || button.dataset.archiveBound === "true") return;
+    button.dataset.archiveBound = "true";
     button.addEventListener("click", async function () {
       if (!state.team || !APP.confirmArchive("team", state.team)) return;
       await apiPatch(`/teams/${encodeURIComponent(state.teamId)}/archive`, { updatedAt: state.team.updatedAt });
       window.location.href = "teams.html";
     });
-    els.editTeamBtn.insertAdjacentElement("afterend", button);
   }
 
   async function handleAddAthleteToTeam(event) {
