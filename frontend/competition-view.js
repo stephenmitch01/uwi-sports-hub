@@ -2389,7 +2389,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="cricket-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Scorecard</a>
-          <a href="cricket-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Scorecard</a>
         </div>
       </article>
     `;
@@ -2423,7 +2422,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="football-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Details</a>
-          <a href="football-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
         </div>
       </article>
     `;
@@ -2452,7 +2450,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || sets.map((set) => `${set.uwiScore}-${set.opponentScore}`).join(", ") || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="volleyball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Scoresheet</a>
-          <a href="volleyball-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Scoresheet</a>
         </div>
       </article>
     `;
@@ -2475,7 +2472,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="hockey-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
-          <a href="hockey-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
         </div>
       </article>
     `;
@@ -2498,7 +2494,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="basketball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
-          <a href="basketball-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
         </div>
       </article>
     `;
@@ -2524,7 +2519,6 @@
         <p class="result-text">${escapeHtml([data.round, data.course, data.ageGroup].filter(Boolean).join(" • ") || "Results recorded")}</p>
         <div class="result-card-actions">
           <a href="swimming-results-view.html?scorecardId=${encodeURIComponent(line.id)}">View Results Sheet</a>
-          <a href="swimming-results.html?competitionId=${encodeURIComponent(state.competitionId)}">New Results Sheet</a>
         </div>
       </article>
     `;
@@ -2551,7 +2545,6 @@
         <p class="result-text">${escapeHtml(data.summary?.winningResult || [data.division, data.round].filter(Boolean).join(" • ") || "Results recorded")}</p>
         <div class="result-card-actions">
           <a href="track-field-results-view.html?scorecardId=${encodeURIComponent(line.id)}">View Results Sheet</a>
-          <a href="track-field-results.html?competitionId=${encodeURIComponent(state.competitionId)}">New Results Sheet</a>
         </div>
       </article>
     `;
@@ -2574,7 +2567,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="netball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Sheet</a>
-          <a href="netball-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Match Sheet</a>
         </div>
       </article>
     `;
@@ -2603,7 +2595,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || gameLine))}</p>
         <div class="result-card-actions">
           <a href="badminton-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Sheet</a>
-          <a href="badminton-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Match Sheet</a>
         </div>
       </article>
     `;
@@ -2626,7 +2617,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || `${summary.pointsFor ?? 0}-${summary.pointsAgainst ?? 0} points`))}</p>
         <div class="result-card-actions">
           <a href="table-tennis-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
-          <a href="table-tennis-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
         </div>
       </article>
     `;
@@ -2649,7 +2639,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || `${summary.gamesFor ?? 0}-${summary.gamesAgainst ?? 0} games`))}</p>
         <div class="result-card-actions">
           <a href="tennis-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
-          <a href="tennis-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
         </div>
       </article>
     `;
@@ -2672,7 +2661,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(summary.result || data.result || "Score recorded"))}</p>
         <div class="result-card-actions">
           <a href="taekwondo-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
-          <a href="taekwondo-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
         </div>
       </article>
     `;
@@ -2695,7 +2683,6 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(summary.resultLabel || data.result || data.opening || "Game recorded"))}</p>
         <div class="result-card-actions">
           <a href="chess-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
-          <a href="chess-scorecard.html?competitionId=${encodeURIComponent(state.competitionId)}">New Score Sheet</a>
         </div>
       </article>
     `;
