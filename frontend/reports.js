@@ -457,6 +457,8 @@
   function renderAthleteReportContent(athlete, forPreview) {
     const athleteId = compactId(athlete.id || athlete.athleteId);
     const athleteSportSlug = getAthleteSportSlug(athlete);
+    const athleteSportNames = getAthleteSportSlugs(athlete).map(getSportName).filter(Boolean);
+    const athleteTeamRows = buildAthleteTeamHistoryRows(athlete);
     const athleteTeamName = lookupTeamName(getAthleteTeamId(athlete) || athlete.teamName);
     const athleteProfile = getAthleteProfile(athlete);
     const athleteRoster = getAthleteRosterAssignment(athlete);
@@ -470,22 +472,27 @@
     const recentRows = [...filteredStats].sort((a, b) => compareDatesDesc(a.date, b.date)).slice(0, 12);
     const competitions = buildAthleteCompetitionRows(filteredStats);
     const performanceSummary = buildAthletePerformanceSummary(allStats, filteredStats);
+    const sportSummaryRows = buildAthleteSportSummaryRows(allStats);
+    const seasonRows = buildAthleteSeasonRows(allStats);
+    const completeness = buildAthleteProfileCompleteness(athlete, athleteProfile);
+    const awards = getAthleteAwards(athlete);
+    const reportNotes = buildAthleteReportNotes(athlete, completeness, allStats, competitions);
     const reportDate = new Date();
 
     return `<div class="report-shell">
       ${renderReportHero({
         eyebrow: "Athlete report",
         title: getAthleteDisplayName(athlete),
-        subtitle: "Internal athlete dossier combining identity, institutional context, body profile, performance records, best marks, and competition history.",
+        subtitle: "Individual performance review prioritizing sport-specific stats, personal marks, season totals, competition history, and athlete profile context.",
         pills: [
-          getSportName(athleteSportSlug) || "Sport not set",
+          athleteSportNames.join(" / ") || getSportName(athleteSportSlug) || "Sport not set",
           getCampusName(athlete.campus || athlete.campusSlug || state.session.campus),
           athleteTeamName || "No team assigned"
         ],
         meta: [
-          ["Filtered stats", filteredStats.length, "Visible stat lines in the current report view"],
-          ["Competitions", performanceSummary.competitionCount, "Distinct competitions touched by visible stat lines"],
-          ["Best marks", bests.length, "Unique best-performance event groups on record"]
+          ["Player stat lines", filteredStats.length, "Athlete-owned performance rows in the current report view"],
+          ["Competitions", performanceSummary.competitionCount, "Distinct competitions represented by player rows"],
+          ["Personal marks", bests.length, "Best athlete performances derived from player stats"]
         ],
         note: `Generated ${escapeHtml(reportDate.toLocaleDateString())} • ${escapeHtml(state.filteredSeason || "All seasons")}`,
         showInlineActions: !forPreview
@@ -502,7 +509,7 @@
             ${renderMetaItem("Nationality", athlete.nationality || athlete.country || "—")}
             ${renderMetaItem("Sex", athleteSex || "—")}
             ${renderMetaItem("Hometown", athlete.hometown || athleteProfile.hometown || "—")}
-            ${renderMetaItem("Date of birth", formatDate(athleteDateOfBirth) || "—")}
+            ${renderMetaItem("DOB / age", [formatDate(athleteDateOfBirth), calculateAge(athleteDateOfBirth)].filter(Boolean).join(" / ") || "—")}
           </div>
         </section>
 
@@ -549,28 +556,30 @@
       </div>
 
       <section class="report-section">
-        <h3>Performance summary</h3>
-        <p class="section-copy">Summary of the visible performance context for the athlete in the current report filters.</p>
+        <h3>Performance snapshot</h3>
+        <p class="section-copy">Athlete-owned performance rows only. Team scorecards and team totals are excluded from personal best calculations.</p>
         <div class="summary-cards">
-          <div class="mini-card"><div class="mini-label">Visible stat lines</div><div class="mini-value">${filteredStats.length}</div><div class="mini-sub">Current filter context</div></div>
+          <div class="mini-card"><div class="mini-label">Player stat lines</div><div class="mini-value">${filteredStats.length}</div><div class="mini-sub">Current report filters</div></div>
           <div class="mini-card"><div class="mini-label">Competitions</div><div class="mini-value">${performanceSummary.competitionCount}</div><div class="mini-sub">Distinct competitions represented</div></div>
-          <div class="mini-card"><div class="mini-label">Best marks</div><div class="mini-value">${bests.length}</div><div class="mini-sub">Grouped best-performance entries</div></div>
-          <div class="mini-card"><div class="mini-label">Sport</div><div class="mini-value">${escapeHtml(getSportName(athleteSportSlug) || "—")}</div><div class="mini-sub">Primary reporting sport</div></div>
+          <div class="mini-card"><div class="mini-label">Personal marks</div><div class="mini-value">${bests.length}</div><div class="mini-sub">Best player performances</div></div>
+          <div class="mini-card"><div class="mini-label">Profile status</div><div class="mini-value">${completeness.score}%</div><div class="mini-sub">${escapeHtml(completeness.status)}</div></div>
         </div>
       </section>
 
+      ${renderAthleteSportSummarySection(sportSummaryRows)}
+
       <section class="report-section">
-        <h3>Best performances</h3>
-        <p class="section-copy">Best available marks grouped by event or metric.</p>
+        <h3>Personal bests &amp; key marks</h3>
+        <p class="section-copy">Best player performances derived from the athlete's own stat rows, such as highest score, best bowling figures, top match totals, or event marks.</p>
         ${bests.length ? `
           <div class="data-table-wrap" style="margin-top:14px;">
             <table class="table">
-              <thead><tr><th>Event / metric</th><th>Best result</th><th>Date</th><th>Competition</th></tr></thead>
+              <thead><tr><th>Metric</th><th>Best result</th><th>Date</th><th>Competition</th></tr></thead>
               <tbody>
                 ${bests.map((row) => `
                   <tr>
-                    <td>${escapeHtml(row.eventName || row.statName || "General")}</td>
-                    <td>${escapeHtml(describeStat(row))}</td>
+                    <td>${escapeHtml(row.metricLabel || row.eventName || row.statName || "Personal best")}</td>
+                    <td>${escapeHtml(row.displayValue || describeStat(row))}</td>
                     <td>${escapeHtml(formatDate(row.date) || "—")}</td>
                     <td>${escapeHtml(row.competitionName || row.competitionTitle || "—")}</td>
                   </tr>
@@ -581,21 +590,24 @@
         ` : `<div class="empty-state"><h3>No best-performance rows in this view.</h3><p>No saved performance lines match the current athlete report filters.</p></div>`}
       </section>
 
+      ${renderAthleteSeasonSection(seasonRows)}
+
       <section class="report-section">
-        <h3>Recent visible performance lines</h3>
-        <p class="section-copy">Most recent visible entries for the current report context.</p>
+        <h3>Detailed player stats</h3>
+        <p class="section-copy">Recent athlete stat lines with player-specific values, categories, and linked competition context.</p>
         ${recentRows.length ? `
           <div class="data-table-wrap" style="margin-top:14px;">
             <table class="table">
-              <thead><tr><th>Date</th><th>Event / metric</th><th>Result</th><th>Competition</th><th>Team</th></tr></thead>
+              <thead><tr><th>Date</th><th>Sport</th><th>Metric</th><th>Result</th><th>Competition</th><th>Category</th></tr></thead>
               <tbody>
                 ${recentRows.map((row) => `
                   <tr>
                     <td>${escapeHtml(formatDate(row.date) || "—")}</td>
-                    <td>${escapeHtml(row.eventName || row.statName || "General")}</td>
+                    <td>${escapeHtml(getSportName(row.sportSlug || row.sport) || "—")}</td>
+                    <td>${escapeHtml(row.statName || row.eventName || "General")}</td>
                     <td>${escapeHtml(describeStat(row))}</td>
                     <td>${escapeHtml(row.competitionName || row.competitionTitle || "—")}</td>
-                    <td>${escapeHtml(lookupTeamName(row.teamId || row.teamName) || "—")}</td>
+                    <td>${escapeHtml(row.category || getRowStatData(row).category || "—")}</td>
                   </tr>
                 `).join("")}
               </tbody>
@@ -617,6 +629,51 @@
             `).join("")}
           </div>
         ` : `<div class="empty-state"><h3>No competition history in this view.</h3><p>Adjust the filters to include competitions represented by this athlete's saved score sheets and stat lines.</p></div>`}
+      </section>
+
+      <section class="report-section">
+        <h3>Team history &amp; assignments</h3>
+        <p class="section-copy">Current and previous team/squad associations visible on the athlete profile.</p>
+        ${athleteTeamRows.length ? `
+          <div class="data-table-wrap" style="margin-top:14px;">
+            <table class="table">
+              <thead><tr><th>Team</th><th>Sport</th><th>Squad / role</th><th>Season</th><th>Status</th></tr></thead>
+              <tbody>
+                ${athleteTeamRows.map((row) => `
+                  <tr>
+                    <td>${escapeHtml(row.teamName || "—")}</td>
+                    <td>${escapeHtml(row.sportName || "—")}</td>
+                    <td>${escapeHtml(row.role || "—")}</td>
+                    <td>${escapeHtml(row.season || "—")}</td>
+                    <td>${escapeHtml(row.status || "—")}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        ` : `<div class="empty-state"><h3>No team assignments in this view.</h3><p>Add the athlete to a team or squad to show team history here.</p></div>`}
+      </section>
+
+      <section class="report-section">
+        <h3>Profile completion &amp; data notes</h3>
+        <p class="section-copy">Completeness highlights which profile fields are filled and which useful details still need attention.</p>
+        <div class="summary-cards">
+          <div class="mini-card"><div class="mini-label">Profile completeness</div><div class="mini-value">${completeness.score}%</div><div class="mini-sub">${escapeHtml(completeness.status)}</div></div>
+          <div class="mini-card"><div class="mini-label">Missing priority fields</div><div class="mini-value">${completeness.missing.length}</div><div class="mini-sub">${escapeHtml(completeness.missing.slice(0, 3).join(", ") || "Core profile filled")}</div></div>
+          <div class="mini-card"><div class="mini-label">Awards / achievements</div><div class="mini-value">${awards.length}</div><div class="mini-sub">Visible profile records</div></div>
+          <div class="mini-card"><div class="mini-label">Report notes</div><div class="mini-value">${reportNotes.length}</div><div class="mini-sub">Data quality flags</div></div>
+        </div>
+        ${reportNotes.length ? `<div class="report-list" style="margin-top:14px;">${reportNotes.map((note) => `<div class="report-inline-stat"><span><strong>${escapeHtml(note.title)}</strong></span><span>${escapeHtml(note.detail)}</span></div>`).join("")}</div>` : ""}
+      </section>
+
+      <section class="report-section">
+        <h3>Awards &amp; achievements</h3>
+        <p class="section-copy">Awards, records, and achievement tags saved on the athlete profile.</p>
+        ${awards.length ? `
+          <div class="report-list">
+            ${awards.map((item) => `<div class="report-inline-stat"><span><strong>${escapeHtml(item.title)}</strong></span><span>${escapeHtml([item.detail, item.date].filter(Boolean).join(" • ") || "Achievement")}</span></div>`).join("")}
+          </div>
+        ` : `<div class="empty-state"><h3>No awards in this view.</h3><p>Add awards, records, or achievement notes to the athlete profile to show them here.</p></div>`}
       </section>
     </div>`;
   }
@@ -1038,6 +1095,81 @@
     return getAthleteTeamIds(athlete).includes(normalized);
   }
 
+  function buildAthleteTeamHistoryRows(athlete) {
+    const assignments = getAthleteRosterAssignments(athlete);
+    if (!assignments.length && (athlete.teamId || athlete.teamName || athlete.team)) {
+      assignments.push({
+        teamId: athlete.teamId || athlete.team?.id,
+        teamName: athlete.teamName || athlete.team?.name || athlete.team?.teamName,
+        sportSlug: athlete.sportSlug || athlete.sport,
+        role: athlete.position || athlete.role,
+        season: athlete.season,
+        status: athlete.status
+      });
+    }
+    return assignments.map((assignment) => {
+      const teamName = assignment.teamName || assignment.team?.name || assignment.team?.teamName || lookupTeamName(assignment.teamId || assignment.team?.id || assignment.team?.teamId) || athlete.teamName || "";
+      const sportSlug = APP.normalizeSportSlug(assignment.sportSlug || assignment.sport || assignment.team?.sportSlug || assignment.team?.sport || athlete.sportSlug || athlete.sport);
+      return {
+        teamName,
+        sportName: getSportName(sportSlug),
+        role: [assignment.squadName || assignment.squad || assignment.division, assignment.role || assignment.roleLabel || athlete.position].filter(Boolean).join(" / "),
+        season: assignment.season || assignment.seasonLabel || athlete.season || "",
+        status: assignment.status || athlete.status || ""
+      };
+    }).filter((row) => row.teamName || row.sportName || row.role || row.season || row.status);
+  }
+
+  function buildAthleteProfileCompleteness(athlete, profile) {
+    const fields = [
+      ["Name", getAthleteDisplayName(athlete) && getAthleteDisplayName(athlete) !== "Athlete"],
+      ["Campus", athlete.campus || athlete.campusSlug || state.session.campus],
+      ["Sport", getAthleteSportSlugs(athlete).length],
+      ["Team assignment", getAthleteTeamIds(athlete).length || athlete.teamName],
+      ["Status", athlete.status],
+      ["Position / role", getAthletePosition(athlete)],
+      ["Email", athlete.email],
+      ["Phone", athlete.phone],
+      ["DOB", athlete.dateOfBirth || athlete.dob || profile.dateOfBirth],
+      ["Height", getAthleteHeight(athlete)],
+      ["Weight", getAthleteWeight(athlete)],
+      ["Dominant side", getAthleteDominantHand(athlete) || getAthleteDominantLeg(athlete)]
+    ];
+    const filled = fields.filter(([, value]) => Boolean(value)).length;
+    const missing = fields.filter(([, value]) => !value).map(([label]) => label);
+    const score = Math.round((filled / fields.length) * 100);
+    return {
+      score,
+      missing,
+      status: score >= 85 ? "Strong profile" : score >= 60 ? "Usable profile" : "Needs profile updates"
+    };
+  }
+
+  function getAthleteAwards(athlete) {
+    const values = [
+      ...(Array.isArray(athlete.awards) ? athlete.awards : []),
+      ...(Array.isArray(athlete.achievements) ? athlete.achievements : []),
+      ...(Array.isArray(athlete.records) ? athlete.records : [])
+    ];
+    return values.map((item) => {
+      if (typeof item === "string") return { title: item, detail: "", date: "" };
+      return {
+        title: item.title || item.name || item.award || item.record || "Achievement",
+        detail: item.detail || item.description || item.notes || item.category || "",
+        date: item.date || item.season || item.year || ""
+      };
+    }).filter((item) => item.title);
+  }
+
+  function buildAthleteReportNotes(athlete, completeness, stats, competitions) {
+    const notes = [];
+    if (completeness.missing.length) notes.push({ title: "Profile fields to update", detail: completeness.missing.join(", ") });
+    if (!stats.length) notes.push({ title: "Performance data", detail: "No player-owned stat rows match this athlete yet. Enter stats through the relevant competition score sheet to populate this report." });
+    if (!competitions.length && stats.length) notes.push({ title: "Competition links", detail: "Player stats exist, but competition labels or dates are incomplete on some rows." });
+    if (!getAthleteTeamIds(athlete).length && !athlete.teamName) notes.push({ title: "Team assignment", detail: "Assign this athlete to one or more teams so team history appears clearly." });
+    return notes;
+  }
+
   function getAthletePosition(athlete) {
     const profile = getAthleteProfile(athlete);
     const roster = getAthleteRosterAssignment(athlete);
@@ -1142,12 +1274,15 @@
 
   function getAthleteStats(athleteId, filteredOnly) {
     const source = filteredOnly ? getFilteredStats() : state.statLines;
-    return source.filter((row) => statRowIncludesAthlete(row, athleteId));
+    return source.filter((row) => isAthletePerformanceRow(row, athleteId));
   }
 
   function getAthleteBestRows(rows) {
+    const derived = buildSportSpecificPersonalBests(rows);
+    if (derived.length) return derived;
     const map = new Map();
     rows.forEach((row) => {
+      if (isTeamScorecardRow(row)) return;
       const key = String(row.eventName || row.statName || "general").toLowerCase();
       if (!map.has(key)) {
         map.set(key, row);
@@ -1159,6 +1294,90 @@
       }
     });
     return Array.from(map.values()).sort((a, b) => String(a.eventName || a.statName || "").localeCompare(String(b.eventName || b.statName || "")));
+  }
+
+  function buildSportSpecificPersonalBests(rows) {
+    const output = [];
+    const bySport = groupBy(rows, (row) => APP.normalizeSportSlug(row.sportSlug || row.sport || getRowStatData(row).sportSlug || getRowStatData(row).sport) || "general");
+
+    output.push(...buildCricketPersonalBests(bySport.get("cricket") || []));
+    output.push(...buildTrackFieldPersonalBests(bySport.get("track-and-field") || []));
+    ["football", "hockey", "basketball", "netball", "volleyball"].forEach((sportSlug) => {
+      output.push(...buildTeamSportPersonalBests(bySport.get(sportSlug) || [], sportSlug));
+    });
+
+    if (output.length) return output;
+    return [];
+  }
+
+  function buildCricketPersonalBests(rows) {
+    const batting = rows.filter((row) => row.eventType === "batting");
+    const bowling = rows.filter((row) => row.eventType === "bowling");
+    const fielding = rows.filter((row) => row.eventType === "fielding");
+    const output = [];
+    const highScore = batting.slice().sort((a, b) => numberValue(getRowStatData(b).runs ?? b.statValue) - numberValue(getRowStatData(a).runs ?? a.statValue))[0];
+    if (highScore && numberValue(getRowStatData(highScore).runs ?? highScore.statValue) > 0) output.push(toBestRow("Highest score", `${numberValue(getRowStatData(highScore).runs ?? highScore.statValue)} runs${isNotOut(getRowStatData(highScore)) ? "*" : ""}`, highScore));
+    const bestBowling = bowling.slice().sort((a, b) => {
+      const aData = getRowStatData(a);
+      const bData = getRowStatData(b);
+      const wicketsDelta = numberValue(bData.wickets ?? b.statValue) - numberValue(aData.wickets ?? a.statValue);
+      if (wicketsDelta) return wicketsDelta;
+      return numberValue(aData.runs ?? aData.runsConceded, 999) - numberValue(bData.runs ?? bData.runsConceded, 999);
+    })[0];
+    if (bestBowling && numberValue(getRowStatData(bestBowling).wickets ?? bestBowling.statValue) > 0) {
+      const data = getRowStatData(bestBowling);
+      output.push(toBestRow("Best bowling figures", `${numberValue(data.wickets ?? bestBowling.statValue)}/${numberValue(data.runs ?? data.runsConceded)}`, bestBowling));
+    }
+    const mostCatches = bestNumericRow(fielding, "catches");
+    if (mostCatches) output.push(toBestRow("Most catches", `${mostCatches.value} catches`, mostCatches.row));
+    return output;
+  }
+
+  function buildTrackFieldPersonalBests(rows) {
+    const grouped = groupBy(rows, (row) => getRowStatData(row).eventName || row.statName || row.eventName || "Track and field event");
+    return Array.from(grouped.entries()).map(([eventName, eventRows]) => {
+      const sample = eventRows[0] || {};
+      const isTimed = isTimedMark(sample);
+      const best = eventRows.slice().sort((a, b) => {
+        const aValue = numericStatValue(a);
+        const bValue = numericStatValue(b);
+        if (aValue == null) return 1;
+        if (bValue == null) return -1;
+        return isTimed ? aValue - bValue : bValue - aValue;
+      })[0];
+      return best ? toBestRow(`Best ${eventName}`, describeStat(best), best) : null;
+    }).filter(Boolean);
+  }
+
+  function buildTeamSportPersonalBests(rows, sportSlug) {
+    const metricMap = {
+      football: [["goals", "Most goals"], ["assists", "Most assists"], ["saves", "Most saves"], ["shots", "Most shots"]],
+      hockey: [["goals", "Most goals"], ["assists", "Most assists"]],
+      basketball: [["points", "Most points"], ["rebounds", "Most rebounds"], ["assists", "Most assists"], ["steals", "Most steals"], ["blocks", "Most blocks"]],
+      netball: [["goals", "Most goals"], ["goalAssists", "Most goal assists"], ["feeds", "Most feeds"], ["gains", "Most gains"]],
+      volleyball: [["kills", "Most kills"], ["aces", "Most service aces"], ["blocks", "Most blocks"], ["assists", "Most assists"], ["digs", "Most digs"]]
+    };
+    return (metricMap[sportSlug] || []).map(([field, label]) => {
+      const best = bestNumericRow(rows, field);
+      return best ? toBestRow(label, `${best.value} ${formatFieldLabel(field).toLowerCase()}`, best.row) : null;
+    }).filter(Boolean);
+  }
+
+  function toBestRow(metricLabel, displayValue, source) {
+    return {
+      ...source,
+      metricLabel,
+      displayValue,
+      eventName: metricLabel,
+      statName: metricLabel
+    };
+  }
+
+  function bestNumericRow(rows, field) {
+    return rows
+      .map((row) => ({ row, value: numberValue(getRowStatData(row)[field] ?? row[field] ?? row.statValue) }))
+      .filter((item) => item.value > 0)
+      .sort((a, b) => b.value - a.value)[0] || null;
   }
 
   function buildAthleteCompetitionRows(rows) {
@@ -1210,6 +1429,25 @@
       JSON.stringify(data).includes(`"assist2AthleteId":"${normalized}"`);
   }
 
+  function isAthletePerformanceRow(row, athleteId) {
+    if (!statRowIncludesAthlete(row, athleteId)) return false;
+    if (isTeamScorecardRow(row)) return false;
+    return true;
+  }
+
+  function isTeamScorecardRow(row) {
+    const data = getRowStatData(row);
+    const eventType = String(row?.eventType || data.eventType || "").toLowerCase();
+    const hasPlayerOwnedId = Boolean(
+      row?.athleteId || row?.participantId || row?.subjectId || row?.playerId ||
+      data.athleteId || data.participantId || data.subjectId || data.playerId ||
+      data.uwiPlayer?.athleteId || data.scorerAthleteId || data.assistAthleteId ||
+      data.assist1AthleteId || data.assist2AthleteId || data.fielderAthleteId ||
+      data.bowlerAthleteId || data.playerOffAthleteId || data.playerOnAthleteId
+    );
+    return eventType === "scorecard" && !hasPlayerOwnedId;
+  }
+
   function statRowMatchesTeam(row, teamId) {
     const normalized = compactId(teamId);
     if (!normalized) return false;
@@ -1258,6 +1496,147 @@
       visibleStats: filteredStats.length,
       competitionCount
     };
+  }
+
+  function buildAthleteSportSummaryRows(rows) {
+    const grouped = groupBy(rows, (row) => APP.normalizeSportSlug(row.sportSlug || row.sport || getRowStatData(row).sportSlug || getRowStatData(row).sport) || "general");
+    return Array.from(grouped.entries()).flatMap(([sportSlug, sportRows]) => {
+      if (sportSlug === "cricket") return buildCricketSummaryRows(sportRows);
+      if (sportSlug === "track-and-field") return buildTrackFieldSummaryRows(sportRows);
+      return buildGenericSportSummaryRows(sportRows, sportSlug);
+    });
+  }
+
+  function renderAthleteSportSummarySection(rows) {
+    if (!rows.length) return "";
+    return `
+      <section class="report-section">
+        <h3>Sport-specific performance summary</h3>
+        <p class="section-copy">All-time aggregates and averages calculated from the athlete's own saved performance rows.</p>
+        <div class="data-table-wrap" style="margin-top:14px;">
+          <table class="table">
+            <thead><tr><th>Sport</th><th>Category</th><th>Appearances</th><th>Aggregate stats</th><th>Averages / rates</th></tr></thead>
+            <tbody>
+              ${rows.map((row) => `
+                <tr>
+                  <td>${escapeHtml(row.sport)}</td>
+                  <td>${escapeHtml(row.category)}</td>
+                  <td>${escapeHtml(String(row.appearances))}</td>
+                  <td>${escapeHtml(row.aggregates || "—")}</td>
+                  <td>${escapeHtml(row.rates || "—")}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    `;
+  }
+
+  function buildCricketSummaryRows(rows) {
+    const batting = rows.filter((row) => row.eventType === "batting");
+    const bowling = rows.filter((row) => row.eventType === "bowling");
+    const fielding = rows.filter((row) => row.eventType === "fielding");
+    const battingRuns = sumStat(batting, "runs");
+    const battingBalls = sumStat(batting, "balls");
+    const outs = batting.filter((row) => !isNotOut(getRowStatData(row))).length;
+    const bowlingRuns = sumStat(bowling, "runs") || sumStat(bowling, "runsConceded");
+    const wickets = sumStat(bowling, "wickets");
+    const balls = bowling.reduce((total, row) => total + ballsFromOvers(getRowStatData(row).overs), 0);
+    return [
+      {
+        sport: "Cricket",
+        category: "Batting",
+        appearances: batting.length,
+        aggregates: `${battingRuns} runs, ${sumStat(batting, "fours")} fours, ${sumStat(batting, "sixes")} sixes`,
+        rates: `Avg ${outs ? roundNumber(battingRuns / outs) : "—"}, SR ${battingBalls ? roundNumber((battingRuns / battingBalls) * 100) : "—"}`
+      },
+      {
+        sport: "Cricket",
+        category: "Bowling",
+        appearances: bowling.length,
+        aggregates: `${wickets} wickets, ${bowlingRuns} runs conceded, ${oversFromBalls(balls)} overs`,
+        rates: `Avg ${wickets ? roundNumber(bowlingRuns / wickets) : "—"}, Econ ${balls ? roundNumber((bowlingRuns / balls) * 6) : "—"}`
+      },
+      {
+        sport: "Cricket",
+        category: "Fielding",
+        appearances: fielding.length,
+        aggregates: `${sumStat(fielding, "catches")} catches`,
+        rates: ""
+      }
+    ].filter((row) => row.appearances);
+  }
+
+  function buildTrackFieldSummaryRows(rows) {
+    const grouped = groupBy(rows, (row) => getRowStatData(row).eventName || row.statName || row.eventName || "Event");
+    return Array.from(grouped.entries()).map(([eventName, eventRows]) => {
+      const values = eventRows.map(numericStatValue).filter((value) => value !== null);
+      const best = getAthleteBestRows(eventRows)[0];
+      return {
+        sport: "Track and Field",
+        category: eventName,
+        appearances: eventRows.length,
+        aggregates: `Best ${best ? (best.displayValue || describeStat(best)) : "—"}`,
+        rates: values.length ? `Average ${roundNumber(averageOf(values))}` : ""
+      };
+    });
+  }
+
+  function buildGenericSportSummaryRows(rows, sportSlug) {
+    const fields = ["points", "goals", "assists", "rebounds", "steals", "blocks", "saves", "shots", "kills", "aces", "digs", "gains", "feeds"];
+    const populated = fields
+      .map((field) => ({ field, total: sumStat(rows, field) }))
+      .filter((item) => item.total > 0);
+    return [{
+      sport: getSportName(sportSlug) || formatFieldLabel(sportSlug || "Sport"),
+      category: "All player rows",
+      appearances: rows.length,
+      aggregates: populated.map((item) => `${item.total} ${formatFieldLabel(item.field)}`).join(", "),
+      rates: populated.slice(0, 4).map((item) => `${formatFieldLabel(item.field)} avg ${roundNumber(item.total / rows.length)}`).join(", ")
+    }].filter((row) => row.appearances);
+  }
+
+  function buildAthleteSeasonRows(rows) {
+    const grouped = groupBy(rows, (row) => row.season || getRowStatData(row).season || inferSeason(row.date || getRowStatData(row).date) || "Unknown");
+    return Array.from(grouped.entries()).map(([season, seasonRows]) => {
+      const competitions = new Set(seasonRows.map((row) => row.competitionId || row.competitionName || row.competitionTitle).filter(Boolean)).size;
+      const totals = ["runs", "wickets", "points", "goals", "assists", "rebounds", "kills", "aces"]
+        .map((field) => ({ field, total: sumStat(seasonRows, field) }))
+        .filter((item) => item.total > 0)
+        .slice(0, 6);
+      return {
+        season,
+        rows: seasonRows.length,
+        competitions,
+        totals: totals.map((item) => `${item.total} ${formatFieldLabel(item.field)}`).join(", ") || "Player appearances recorded"
+      };
+    }).sort((a, b) => String(b.season).localeCompare(String(a.season), undefined, { numeric: true }));
+  }
+
+  function renderAthleteSeasonSection(rows) {
+    if (!rows.length) return "";
+    return `
+      <section class="report-section">
+        <h3>Season-by-season stats</h3>
+        <p class="section-copy">Season totals from the athlete's player-owned performance rows across the full saved history.</p>
+        <div class="data-table-wrap" style="margin-top:14px;">
+          <table class="table">
+            <thead><tr><th>Season</th><th>Player rows</th><th>Competitions</th><th>Key totals</th></tr></thead>
+            <tbody>
+              ${rows.map((row) => `
+                <tr>
+                  <td>${escapeHtml(row.season)}</td>
+                  <td>${escapeHtml(String(row.rows))}</td>
+                  <td>${escapeHtml(String(row.competitions))}</td>
+                  <td>${escapeHtml(row.totals)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    `;
   }
 
   function buildTrackFieldSummary(stats) {
@@ -1364,6 +1743,48 @@
     const clean = values.filter((value) => Number.isFinite(value));
     if (!clean.length) return 0;
     return clean.reduce((sum, value) => sum + value, 0) / clean.length;
+  }
+
+  function groupBy(rows, keyFn) {
+    const map = new Map();
+    (Array.isArray(rows) ? rows : []).forEach((row) => {
+      const key = keyFn(row);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(row);
+    });
+    return map;
+  }
+
+  function sumStat(rows, field) {
+    return (Array.isArray(rows) ? rows : []).reduce((total, row) => total + numberValue(getRowStatData(row)[field] ?? row[field]), 0);
+  }
+
+  function numberValue(value, fallback) {
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : (fallback ?? 0);
+  }
+
+  function roundNumber(value) {
+    return Number.isFinite(value) ? String(Math.round(value * 100) / 100) : "—";
+  }
+
+  function ballsFromOvers(overs) {
+    const text = String(overs ?? "").trim();
+    if (!text) return 0;
+    const [whole, balls] = text.split(".");
+    return (parseInt(whole, 10) || 0) * 6 + (parseInt(balls, 10) || 0);
+  }
+
+  function oversFromBalls(balls) {
+    return balls ? `${Math.floor(balls / 6)}.${balls % 6}` : "0";
+  }
+
+  function isNotOut(data) {
+    return /not\s*out/i.test(String(data?.dismissalLabel || data?.howOut || data?.dismissalMode || ""));
+  }
+
+  function inferSeason(date) {
+    return date ? String(date).slice(0, 4) : "";
   }
 
   function compareBestStat(a, b) {
@@ -1549,7 +1970,7 @@
       summary.total,
       summary.points
     ];
-    const value = candidates.map(formatStatCandidate).find((item) => item !== "") || "â€”";
+    const value = candidates.map(formatStatCandidate).find((item) => item !== "") || "—";
     return value === undefined ? "—" : String(value);
   }
 
