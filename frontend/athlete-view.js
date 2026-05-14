@@ -150,6 +150,19 @@
     const roster = athlete.activeRosterAssignment && typeof athlete.activeRosterAssignment === "object"
       ? athlete.activeRosterAssignment
       : {};
+    const rosterAssignments = Array.isArray(athlete.rosterAssignments)
+      ? athlete.rosterAssignments
+      : Array.isArray(athlete.teamAssignments)
+        ? athlete.teamAssignments
+        : [];
+    const sports = Array.from(new Set([
+      athlete.sport,
+      athlete.primarySport,
+      athlete.sportSlug,
+      profile.sportSlug,
+      ...(Array.isArray(athlete.sports) ? athlete.sports : []),
+      ...rosterAssignments.map((assignment) => assignment.sportSlug || assignment.sport || assignment.team?.sportSlug || assignment.team?.sport)
+    ].map((value) => APP.normalizeSportSlug(value)).filter(Boolean)));
     const heightValue = athlete.height || athlete.heightCm || profile.heightCm || "";
     const weightValue = athlete.weight || athlete.weightKg || profile.weightKg || "";
     const facultyProgramParts = String(athlete.facultyProgram || "").split("/").map((item) => item.trim()).filter(Boolean);
@@ -162,10 +175,13 @@
         athlete.fullName ||
         [athlete.firstName, athlete.lastName].filter(Boolean).join(" ") ||
         "Unknown Athlete",
-      sport: athlete.sport || athlete.primarySport || profile.sportSlug || "Sport not assigned",
+      sport: athlete.sport || athlete.primarySport || profile.sportSlug || sports[0] || "Sport not assigned",
+      sports,
       athleteType: athlete.athleteType || "Athlete",
       campus: athlete.campus || state.session?.campus || "",
       activeRosterAssignment: roster,
+      rosterAssignments,
+      teamAssignments: rosterAssignments,
       teamId: athlete.teamId || roster.teamId || "",
       teamName: athlete.teamName || athlete.team || roster.teamName || "",
       squadName: athlete.squadName || athlete.squad || roster.squadName || roster.squad || roster.division || roster.teamName || athlete.teamName || "",
@@ -219,6 +235,20 @@
 
   function enrichAthleteTeamContext() {
     if (!state.athlete) return;
+    const associations = getResolvedTeamAssociations();
+    if (associations.length) {
+      state.athlete.teamAssignments = associations;
+      state.athlete.rosterAssignments = associations;
+      state.athlete.teamId = state.athlete.teamId || associations[0].teamId || associations[0].id || "";
+      state.athlete.teamName = state.athlete.teamName || associations[0].teamName || associations[0].name || "";
+      state.athlete.squadName = state.athlete.squadName || associations[0].squadName || associations[0].division || associations[0].teamName || "";
+      state.athlete.sports = Array.from(new Set([
+        ...(Array.isArray(state.athlete.sports) ? state.athlete.sports : []),
+        ...associations.map((item) => item.sportSlug || item.sport || item.team?.sportSlug || item.team?.sport)
+      ].map((value) => APP.normalizeSportSlug(value)).filter(Boolean)));
+      state.teams = associations;
+      return;
+    }
     const roster = state.athlete.activeRosterAssignment || {};
     const association = state.teams.find((item) => {
       const teamId = item.teamId || item.team?.id || item.activeRosterAssignment?.teamId || item.id || "";
@@ -406,6 +436,11 @@
 
     const athlete = state.athlete;
     const profileScore = getAthleteCompleteness(athlete);
+    const sportList = getAthleteSportLabels();
+    const teamList = getAthleteTeamLabels();
+    const squadList = getAthleteSquadLabels();
+    const sportDisplay = sportList.join(" / ") || athlete.sport || "Sport not assigned";
+    const teamDisplay = teamList.join(" / ") || athlete.teamName || "Not assigned";
 
     if (els.heroName) {
       els.heroName.textContent = athlete.fullName;
@@ -414,7 +449,7 @@
     if (els.heroSummary) {
       const eventText = athlete.events.length ? athlete.events.join(", ") : athlete.position || athlete.sport;
       els.heroSummary.textContent =
-        `${athlete.athleteType} in ${athlete.sport}. ${eventText ? `Primary focus: ${eventText}. ` : ""}` +
+        `${athlete.athleteType} in ${sportDisplay}. ${eventText ? `Primary focus: ${eventText}. ` : ""}` +
         `This profile includes body information, athlete details, all-time and season-specific stats, personal bests, team history, and summary generation.`;
     }
 
@@ -422,15 +457,15 @@
       els.heroPills.innerHTML = `
         <span class="status-pill ok">Internal Profile</span>
         <span class="status-pill success">${escapeHtml(athlete.status || "Active")}</span>
-        <span class="status-pill subtle">${escapeHtml(athlete.sport || "Sport")}</span>
+        <span class="status-pill subtle">${escapeHtml(sportDisplay || "Sport")}</span>
         <span class="status-pill subtle">${escapeHtml(athlete.campus ? formatCampus(athlete.campus) : "Campus")}</span>
       `;
     }
 
     if (els.heroMeta) {
       const chips = [
-        athlete.teamName ? `Team: ${athlete.teamName}` : "",
-        athlete.squadName ? `Squad: ${athlete.squadName}` : "",
+        teamDisplay && teamDisplay !== "Not assigned" ? `Teams: ${teamDisplay}` : "",
+        squadList.length ? `Squads: ${squadList.join(" / ")}` : athlete.squadName ? `Squad: ${athlete.squadName}` : "",
         athlete.schoolOrClub ? `School/Club: ${athlete.schoolOrClub}` : "",
         athlete.athleteType ? `Type: ${athlete.athleteType}` : ""
       ].filter(Boolean);
@@ -447,15 +482,15 @@
         </div>
 
         <div class="mini-card">
-          <div class="mini-label">Sport</div>
-          <div class="mini-value">${escapeHtml(athlete.sport || "Not recorded")}</div>
-          <div class="mini-sub">Primary sport assignment</div>
+          <div class="mini-label">Sports</div>
+          <div class="mini-value">${escapeHtml(sportDisplay || "Not recorded")}</div>
+          <div class="mini-sub">Sport assignments</div>
         </div>
 
         <div class="mini-card">
-          <div class="mini-label">Team</div>
-          <div class="mini-value">${escapeHtml(athlete.teamName || "Not assigned")}</div>
-          <div class="mini-sub">${escapeHtml(athlete.squadName || athlete.teamName || "Squad not assigned")}</div>
+          <div class="mini-label">Teams</div>
+          <div class="mini-value">${escapeHtml(teamDisplay)}</div>
+          <div class="mini-sub">${escapeHtml(squadList.join(" / ") || athlete.squadName || "Squad not assigned")}</div>
         </div>
       `;
     }
@@ -481,6 +516,9 @@
     const athlete = state.athlete;
 
     const eventsDisplay = athlete.events.length ? athlete.events.join(", ") : "Not recorded";
+    const sportDisplay = getAthleteSportLabels().join(" / ") || athlete.sport || "Not recorded";
+    const teamDisplay = getAthleteTeamLabels().join(" / ") || athlete.teamName || "Not assigned";
+    const squadDisplay = getAthleteSquadLabels().join(" / ") || athlete.squadName || athlete.teamName || "Not assigned";
 
     els.athleteBodyInfo.innerHTML = `
       <div class="section-title">
@@ -508,9 +546,9 @@
 
       <div class="details-grid">
         ${detailCard("Full Name", athlete.fullName)}
-        ${detailCard("Sport", athlete.sport || "Not recorded")}
-        ${detailCard("Team", athlete.teamName || "Not assigned")}
-        ${detailCard("Squad", athlete.squadName || athlete.teamName || "Not assigned")}
+        ${detailCard("Sports", sportDisplay)}
+        ${detailCard("Teams", teamDisplay)}
+        ${detailCard("Squads", squadDisplay)}
         ${detailCard("Athlete Type", athlete.athleteType || "Not recorded")}
         ${detailCard("Status", athlete.status || "Not recorded")}
         ${detailCard("School / Club", athlete.schoolOrClub || "Not recorded")}
@@ -539,7 +577,7 @@
       athlete.email || athlete.phone,
       athlete.athleteType,
       athlete.sport && athlete.sport !== "Sport not assigned",
-      athlete.teamName,
+      getResolvedTeamAssociations().length || athlete.teamName,
       athlete.position || athlete.events.length,
       athlete.dateOfBirth,
       athlete.gender,
@@ -561,6 +599,9 @@
 
     const athlete = state.athlete;
     const eventsDisplay = athlete.events.length ? athlete.events.join(", ") : "Not recorded";
+    const sportDisplay = getAthleteSportLabels().join(" / ") || athlete.sport || "Not recorded";
+    const teamDisplay = getAthleteTeamLabels().join(" / ") || athlete.teamName || "Not assigned";
+    const squadDisplay = getAthleteSquadLabels().join(" / ") || athlete.squadName || "Not assigned";
 
     els.athleteInfo.innerHTML = `
       <div class="section-title">
@@ -572,9 +613,9 @@
 
       <div class="details-grid">
         ${detailCard("Full Name", athlete.fullName)}
-        ${detailCard("Sport", athlete.sport || "Not recorded")}
-        ${detailCard("Team", athlete.teamName || "Not assigned")}
-        ${detailCard("Squad", athlete.squadName || "Not assigned")}
+        ${detailCard("Sports", sportDisplay)}
+        ${detailCard("Teams", teamDisplay)}
+        ${detailCard("Squads", squadDisplay)}
         ${detailCard("Athlete Type", athlete.athleteType || "Not recorded")}
         ${detailCard("Status", athlete.status || "Not recorded")}
         ${detailCard("School / Club", athlete.schoolOrClub || "Not recorded")}
@@ -953,6 +994,7 @@
             <div class="stack-item-title">${escapeHtml(item.name || item.teamName || "Unnamed Team")}</div>
             <div class="stack-item-sub">
               ${escapeHtml(item.role || item.roleLabel || item.status || "Athlete")} •
+              ${escapeHtml(APP.getSportName?.(item.sportSlug || item.sport) || formatSportName(item.sportSlug || item.sport) || "Sport not recorded")} •
               ${escapeHtml(item.season || item.seasonLabel || state.athlete?.season || "Season not recorded")} •
               ${escapeHtml(item.squadName || item.squad || item.division || state.athlete?.squadName || item.teamName || item.name || state.athlete?.teamName || "No squad specified")}
             </div>
@@ -982,18 +1024,30 @@
   }
 
   function getResolvedTeamAssociations() {
-    const raw = state.teams.length ? state.teams : [];
+    const raw = [
+      ...(Array.isArray(state.teams) ? state.teams : []),
+      ...(Array.isArray(state.athlete?.rosterAssignments) ? state.athlete.rosterAssignments : []),
+      ...(Array.isArray(state.athlete?.teamAssignments) ? state.athlete.teamAssignments : [])
+    ];
+    const seen = new Set();
     const associations = raw.map((item) => {
       const teamId = item.teamId || item.id || item.team?.id || item.activeRosterAssignment?.teamId || "";
       const team = state.allTeams.find((entry) => String(entry.id || "") === String(teamId || ""));
       return {
         ...item,
         ...team,
+        teamId: teamId || team?.id || "",
         name: item.name || item.teamName || item.team?.name || team?.name || team?.teamName || state.athlete?.teamName || "",
         teamName: item.teamName || item.name || item.team?.teamName || team?.teamName || team?.name || state.athlete?.teamName || "",
+        sportSlug: item.sportSlug || item.sport || item.team?.sportSlug || item.team?.sport || team?.sportSlug || team?.sport || "",
         season: item.season || item.seasonLabel || team?.seasonLabel || team?.season || "",
         squadName: item.squadName || item.squad || item.division || team?.division || team?.name || team?.teamName || state.athlete?.squadName || state.athlete?.teamName || ""
       };
+    }).filter((item) => {
+      const key = `${item.teamId || item.id || item.teamName || item.name}:${item.sportSlug || item.sport || ""}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return Boolean(item.teamId || item.id || item.teamName || item.name);
     });
     if (associations.length) return associations;
     if (state.athlete?.teamName || state.athlete?.teamId) {
@@ -1008,6 +1062,29 @@
       }];
     }
     return [];
+  }
+
+  function getAthleteSportLabels() {
+    const values = [
+      ...(Array.isArray(state.athlete?.sports) ? state.athlete.sports : []),
+      state.athlete?.sport,
+      state.athlete?.primarySport,
+      ...getResolvedTeamAssociations().map((item) => item.sportSlug || item.sport || item.team?.sportSlug || item.team?.sport)
+    ];
+    return Array.from(new Set(values.map((value) => APP.normalizeSportSlug(value)).filter(Boolean)))
+      .map((slug) => APP.getSportName?.(slug) || formatSportName(slug));
+  }
+
+  function getAthleteTeamLabels() {
+    return Array.from(new Set(getResolvedTeamAssociations()
+      .map((item) => item.teamName || item.name || item.team?.name || item.team?.teamName)
+      .filter(Boolean)));
+  }
+
+  function getAthleteSquadLabels() {
+    return Array.from(new Set(getResolvedTeamAssociations()
+      .map((item) => item.squadName || item.squad || item.division)
+      .filter(Boolean)));
   }
 
   function renderRecords() {
@@ -1464,6 +1541,12 @@
   }
 
   function formatCampus(value) {
+    return String(value || "")
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  function formatSportName(value) {
     return String(value || "")
       .replace(/-/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());

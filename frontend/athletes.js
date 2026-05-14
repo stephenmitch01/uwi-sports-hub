@@ -522,16 +522,16 @@
 
     els.athletesTableBody.innerHTML = athletes.map((athlete) => {
       const profile = athlete.profile || {};
-      const roster = athlete.activeRosterAssignment || null;
-      const team = roster ? state.teams.find((item) => String(item.id) === String(roster.teamId)) : null;
+      const sports = getAthleteSports(athlete).map(getSportName).filter(Boolean);
+      const teamNames = getAthleteTeamNames(athlete);
 
       return `
         <tr>
           <td class="athlete-select-cell"><input type="checkbox" data-athlete-select="${escapeHtml(athlete.id)}" ${state.selectedAthleteIds.has(String(athlete.id)) ? "checked" : ""} aria-label="Select ${escapeHtml(athlete.fullName || "athlete")}"/></td>
           <td><strong>${escapeHtml(athlete.fullName || "Athlete")}</strong></td>
           <td>${escapeHtml(formatGender(athlete.gender || profile.gender || ""))}</td>
-          <td>${escapeHtml(getSportName(profile.sportSlug || "") || "—")}</td>
-          <td>${escapeHtml(team?.name || "—")}</td>
+          <td>${escapeHtml(sports.join(" / ") || getSportName(profile.sportSlug || "") || "—")}</td>
+          <td>${escapeHtml(teamNames.join(" / ") || "—")}</td>
           <td>${escapeHtml(athlete.email || "—")}</td>
           <td>${escapeHtml(formatAthleteType(athlete.athleteType))}</td>
           <td>${escapeHtml(normalizeStatus(athlete.status) === "inactive" ? "Inactive" : "Active")}</td>
@@ -928,6 +928,25 @@
       ...(Array.isArray(athlete?.sports) ? athlete.sports : []),
       ...(Array.isArray(athlete?.rosterAssignments) ? athlete.rosterAssignments : []).map((assignment) => assignment.sportSlug || assignment.sport || assignment.team?.sportSlug || assignment.team?.sport)
     ].map((value) => APP.normalizeSportSlug(value)).filter(Boolean)));
+  }
+
+  function getAthleteTeamNames(athlete) {
+    const assignments = Array.isArray(athlete?.rosterAssignments)
+      ? athlete.rosterAssignments
+      : Array.isArray(athlete?.teamAssignments)
+        ? athlete.teamAssignments
+        : [];
+    const names = assignments.map((assignment) => {
+      const teamId = assignment.teamId || assignment.team?.id || "";
+      const team = state.teams.find((item) => String(item.id || "") === String(teamId || ""));
+      return assignment.teamName || assignment.team?.name || assignment.team?.teamName || team?.name || team?.teamName || "";
+    });
+    if (!names.length && athlete?.activeRosterAssignment) {
+      const roster = athlete.activeRosterAssignment;
+      const team = state.teams.find((item) => String(item.id || "") === String(roster.teamId || ""));
+      names.push(roster.teamName || roster.team?.name || team?.name || team?.teamName || "");
+    }
+    return Array.from(new Set(names.filter(Boolean)));
   }
 
   async function apiGet(path, tolerateFailure = false) {

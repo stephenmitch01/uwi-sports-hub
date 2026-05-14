@@ -459,7 +459,8 @@
     const athleteSportSlug = getAthleteSportSlug(athlete);
     const athleteSportNames = getAthleteSportSlugs(athlete).map(getSportName).filter(Boolean);
     const athleteTeamRows = buildAthleteTeamHistoryRows(athlete);
-    const athleteTeamName = lookupTeamName(getAthleteTeamId(athlete) || athlete.teamName);
+    const athleteTeamNames = athleteTeamRows.map((row) => row.teamName).filter(Boolean);
+    const athleteTeamName = athleteTeamNames.join(" / ") || lookupTeamName(getAthleteTeamId(athlete) || athlete.teamName);
     const athleteProfile = getAthleteProfile(athlete);
     const athleteRoster = getAthleteRosterAssignment(athlete);
     const athleteDateOfBirth = athlete.dateOfBirth || athlete.dob || athleteProfile.dateOfBirth || "";
@@ -519,7 +520,7 @@
           <div class="report-meta-grid">
             ${renderMetaItem("Campus", getCampusName(athlete.campus || athlete.campusSlug || state.session.campus))}
             ${renderMetaItem("Sport", getSportName(athleteSportSlug) || "—")}
-            ${renderMetaItem("Team", athleteTeamName || "—")}
+            ${renderMetaItem("Teams", athleteTeamName || "—")}
             ${renderMetaItem("Squad", athleteSquadName || "—")}
             ${renderMetaItem("School / club", athleteSchoolClub || "—")}
             ${renderMetaItem("Athlete type", athlete.athleteType || athlete.type || "—")}
