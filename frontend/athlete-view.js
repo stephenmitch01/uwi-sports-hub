@@ -21,6 +21,25 @@
   const params = new URLSearchParams(window.location.search);
   state.athleteId = params.get("athleteId") || params.get("id");
 
+  const ATHLETE_STAT_PAGES = {
+    basketball: {
+      href: "athlete-basketball-stats.html",
+      label: "Basketball Stats"
+    },
+    cricket: {
+      href: "athlete-cricket-stats.html",
+      label: "Cricket Stats"
+    },
+    football: {
+      href: "athlete-football-stats.html",
+      label: "Football Stats"
+    },
+    "track-and-field": {
+      href: "athlete-track-field-stats.html",
+      label: "Track and Field Stats"
+    }
+  };
+
   const els = {
     topBar: document.getElementById("topBar"),
     shellNav: document.getElementById("shellNav"),
@@ -438,9 +457,10 @@
     const profileScore = getAthleteCompleteness(athlete);
     const sportList = getAthleteSportLabels();
     const teamList = getAthleteTeamLabels();
-    const squadList = getAthleteSquadLabels();
     const sportDisplay = sportList.join(" / ") || athlete.sport || "Sport not assigned";
-    const teamDisplay = teamList.join(" / ") || athlete.teamName || "Not assigned";
+    const teamAssignmentText = teamList.length
+      ? `${teamList.length} team assignment${teamList.length === 1 ? "" : "s"}`
+      : "No team assignment recorded";
 
     if (els.heroName) {
       els.heroName.textContent = athlete.fullName;
@@ -449,7 +469,7 @@
     if (els.heroSummary) {
       const eventText = athlete.events.length ? athlete.events.join(", ") : athlete.position || athlete.sport;
       els.heroSummary.textContent =
-        `${athlete.athleteType} in ${sportDisplay}. ${eventText ? `Primary focus: ${eventText}. ` : ""}` +
+        `${athlete.athleteType} in ${sportDisplay}. ${teamAssignmentText}. ${eventText ? `Primary focus: ${eventText}. ` : ""}` +
         `This profile includes body information, athlete details, all-time and season-specific stats, personal bests, team history, and summary generation.`;
     }
 
@@ -464,8 +484,6 @@
 
     if (els.heroMeta) {
       const chips = [
-        teamDisplay && teamDisplay !== "Not assigned" ? `Teams: ${teamDisplay}` : "",
-        squadList.length ? `Squads: ${squadList.join(" / ")}` : athlete.squadName ? `Squad: ${athlete.squadName}` : "",
         athlete.schoolOrClub ? `School/Club: ${athlete.schoolOrClub}` : "",
         athlete.athleteType ? `Type: ${athlete.athleteType}` : ""
       ].filter(Boolean);
@@ -479,18 +497,6 @@
           <div class="mini-label">Profile Completeness</div>
           ${completenessMarkup(profileScore, true)}
           <div class="mini-sub">Profile completeness</div>
-        </div>
-
-        <div class="mini-card">
-          <div class="mini-label">Sports</div>
-          <div class="mini-value">${escapeHtml(sportDisplay || "Not recorded")}</div>
-          <div class="mini-sub">Sport assignments</div>
-        </div>
-
-        <div class="mini-card">
-          <div class="mini-label">Teams</div>
-          <div class="mini-value">${escapeHtml(teamDisplay)}</div>
-          <div class="mini-sub">${escapeHtml(squadList.join(" / ") || athlete.squadName || "Squad not assigned")}</div>
         </div>
       `;
     }
@@ -722,18 +728,7 @@
         Athlete statistics shown in this platform reflect records from 2026 onwards.
       </div>
 
-      ${state.stats.some((item) => APP.normalizeSportSlug(item.sport || item.sportSlug) === "cricket")
-        ? `<div class="quick-actions" style="margin:14px 0;"><a class="btn btn-campus" href="athlete-cricket-stats.html?athleteId=${encodeURIComponent(state.athleteId)}">Open Detailed Cricket Stats</a></div>`
-        : ""}
-      ${state.stats.some((item) => APP.normalizeSportSlug(item.sport || item.sportSlug) === "football")
-        ? `<div class="quick-actions" style="margin:14px 0;"><a class="btn btn-campus" href="athlete-football-stats.html?athleteId=${encodeURIComponent(state.athleteId)}">Open Detailed Football Stats</a></div>`
-        : ""}
-      ${state.stats.some((item) => APP.normalizeSportSlug(item.sport || item.sportSlug) === "basketball")
-        ? `<div class="quick-actions" style="margin:14px 0;"><a class="btn btn-campus" href="athlete-basketball-stats.html?athleteId=${encodeURIComponent(state.athleteId)}">Open Detailed Basketball Stats</a></div>`
-        : ""}
-      ${state.stats.some((item) => APP.normalizeSportSlug(item.sport || item.sportSlug) === "track-and-field")
-        ? `<div class="quick-actions" style="margin:14px 0;"><a class="btn btn-campus" href="athlete-track-field-stats.html?athleteId=${encodeURIComponent(state.athleteId)}">Open Detailed Track and Field Stats</a></div>`
-        : ""}
+      ${renderSportStatsButtons()}
 
       ${
         filteredStats.length
@@ -1064,15 +1059,38 @@
     return [];
   }
 
-  function getAthleteSportLabels() {
+  function getAthleteSportSlugs() {
     const values = [
       ...(Array.isArray(state.athlete?.sports) ? state.athlete.sports : []),
       state.athlete?.sport,
       state.athlete?.primarySport,
-      ...getResolvedTeamAssociations().map((item) => item.sportSlug || item.sport || item.team?.sportSlug || item.team?.sport)
+      ...getResolvedTeamAssociations().map((item) => item.sportSlug || item.sport || item.team?.sportSlug || item.team?.sport),
+      ...state.stats.map((item) => item.sportSlug || item.sport)
     ];
-    return Array.from(new Set(values.map((value) => APP.normalizeSportSlug(value)).filter(Boolean)))
+    return Array.from(new Set(values.map((value) => APP.normalizeSportSlug(value)).filter(Boolean)));
+  }
+
+  function getAthleteSportLabels() {
+    return getAthleteSportSlugs()
       .map((slug) => APP.getSportName?.(slug) || formatSportName(slug));
+  }
+
+  function renderSportStatsButtons() {
+    const links = getAthleteSportSlugs()
+      .map((slug) => ATHLETE_STAT_PAGES[slug] ? { ...ATHLETE_STAT_PAGES[slug], slug } : null)
+      .filter(Boolean);
+
+    if (!links.length) return "";
+
+    return `
+      <div class="quick-actions" style="margin:14px 0;">
+        ${links.map((link) => `
+          <a class="btn btn-campus" href="${link.href}?athleteId=${encodeURIComponent(state.athleteId)}">
+            Open ${escapeHtml(link.label)}
+          </a>
+        `).join("")}
+      </div>
+    `;
   }
 
   function getAthleteTeamLabels() {
