@@ -20,6 +20,12 @@
   const sportsCoveredValue = document.getElementById("sportsCoveredValue");
   const recordActivityValue = document.getElementById("recordActivityValue");
   const permissionValue = document.getElementById("permissionValue");
+  const overviewAthletesData = document.getElementById("overviewAthletesData");
+  const overviewCoachesData = document.getElementById("overviewCoachesData");
+  const overviewTeamsData = document.getElementById("overviewTeamsData");
+  const overviewCompetitionsData = document.getElementById("overviewCompetitionsData");
+  const overviewReportsData = document.getElementById("overviewReportsData");
+  const overviewSupportData = document.getElementById("overviewSupportData");
 
   document.addEventListener("DOMContentLoaded", init);
 
@@ -44,8 +50,8 @@
     const roleLabel = formatRole(user.role);
 
     roleEyebrow.textContent = roleLabel;
-    welcomeHeading.textContent = `Welcome, ${user.fullName || "User"}`;
-    welcomeText.textContent = `Signed in as ${user.email || "your campus account"}. Your account summary is loading below.`;
+    welcomeHeading.textContent = "Dashboard";
+    welcomeText.textContent = `Signed in as ${user.email || "your campus account"}. Your campus summary is loading below.`;
     rolePill.textContent = roleLabel;
     if (roleStat) roleStat.textContent = roleLabel;
     if (accountSummaryText) {
@@ -85,6 +91,12 @@
     setText(sportsCoveredValue, sportsCovered.length);
     setText(recordActivityValue, mostRecent || "No record activity yet");
     setText(welcomeText, `${athletes.length} athlete records, ${coaches.length} coach/staff records, ${teams.length} teams, and ${competitions.length} competitions are connected to this account.`);
+    setText(overviewAthletesData, `${athletes.length} total, ${assignedAthletes} assigned to teams`);
+    setText(overviewCoachesData, `${coaches.length} total, ${assignedCoaches} assigned to teams`);
+    setText(overviewTeamsData, `${teams.length} total, ${activeTeams} active`);
+    setText(overviewCompetitionsData, `${competitions.length} total, ${scheduledCompetitions} active or scheduled`);
+    setText(overviewReportsData, `${sportsCovered.length} sports represented`);
+    setText(overviewSupportData, mostRecent || "No record activity yet");
 
     if (accountSummaryText) {
       const campusLabel = UWISportsHub.getCampusMeta(user.campus).name;

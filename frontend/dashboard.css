@@ -7,31 +7,24 @@
 .feature-card{padding:18px;border:1px solid rgba(0,0,0,.06);border-radius:16px;background:#fff}
 .feature-card h3{font-size:20px;color:#102033}
 .feature-card p{margin-top:8px;color:var(--muted);line-height:1.65}
+.feature-card .feature-stat{
+  display:inline-flex;
+  align-items:center;
+  min-height:34px;
+  margin-top:14px;
+  padding:7px 10px;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:8px;
+  background:#f8fafc;
+  color:#102033;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.35;
+}
 .workflow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .workflow-card{border:1px solid rgba(0,0,0,.06);border-radius:8px;background:#fff;padding:16px}
 .workflow-card h3{font-size:17px;color:#102033}
 .workflow-card p{margin-top:8px;color:var(--muted);line-height:1.6}
-.card-link{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  margin-top:12px;
-  min-height:40px;
-  padding:10px 14px;
-  border-radius:12px;
-  border:1px solid #08090b;
-  background:#08090b;
-  color:#ffffff;
-  font-family:Arial,Helvetica,sans-serif;
-  font-size:14px;
-  font-weight:550;
-  text-decoration:none;
-  box-shadow:0 6px 14px rgba(0,0,0,.14);
-}
-.card-link:hover{
-  transform:translateY(-1px);
-  text-decoration:none;
-}
 @media (max-width:1120px){.feature-grid,.workflow-grid,.hero-card .mini-grid{grid-template-columns:1fr}}
 .hero-card {
   margin-bottom: 28px;
