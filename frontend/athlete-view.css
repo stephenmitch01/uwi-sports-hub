@@ -16,6 +16,20 @@
 .compact-content-card .data-table-wrap{margin-top:10px}
 .compact-content-card .table{margin-bottom:0}
 .info-grid{align-items:start}
+.athlete-overview-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr);gap:16px;align-items:start}
+.profile-info-card,.key-stats-card{border-radius:22px}
+.profile-overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.profile-subcard{border:1px solid rgba(15,23,42,.08);border-radius:16px;background:#fbfcfe;padding:16px}
+.profile-subcard h3{font-size:18px;color:#102033;margin-bottom:12px}
+.compact-detail-list{display:grid;gap:8px}
+.compact-detail-list .detail-item{display:grid;grid-template-columns:minmax(120px,.42fr) minmax(0,1fr);gap:12px;align-items:center;padding:10px 12px;border-radius:12px}
+.compact-detail-list .detail-label{margin-bottom:0}
+.key-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat-metric-card{border:1px solid rgba(15,23,42,.08);border-radius:14px;background:#fbfcfe;padding:14px;min-height:98px}
+.stat-metric-card strong{display:block;margin-top:5px;font-size:28px;line-height:1;color:#102033}
+.stat-metric-card span:last-child{display:block;margin-top:8px;color:var(--muted);font-size:13px;line-height:1.35}
+.key-stats-card .quick-actions{margin-top:14px}
+.key-stat-note{margin-top:14px}
 #athleteStatsSection .section-title,#athletePersonalBests .section-title,#athleteStatEntry .section-title,#athleteHistory .section-title,#athleteTeams .section-title,#athleteRecords .section-title{margin-bottom:14px}
 #athleteStatsSection .data-table-wrap,#athleteHistory .data-table-wrap,#athleteRecords .data-table-wrap{margin-top:14px}
 #athleteStatEntry form{display:grid;gap:12px}
@@ -28,4 +42,4 @@
 .collapsible-section[open]>summary{border-bottom:1px solid rgba(15,39,66,.1)}
 .collapsible-section[open]>summary::after{content:"Close"}
 .collapsible-section>section{padding:18px 22px}
-@media (max-width:1120px){.hero-main,.hero-side,.hero-meta,.summary-cards{grid-template-columns:1fr}.hero-profile{flex-direction:column}.avatar-shell{width:112px;height:112px}.hero-copy h1{font-size:32px}}
+@media (max-width:1120px){.hero-main,.hero-side,.hero-meta,.summary-cards,.athlete-overview-grid,.profile-overview-grid,.key-stat-grid{grid-template-columns:1fr}.compact-detail-list .detail-item{grid-template-columns:1fr;gap:4px}.hero-profile{flex-direction:column}.avatar-shell{width:112px;height:112px}.hero-copy h1{font-size:32px}}

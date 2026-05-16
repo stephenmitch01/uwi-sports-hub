@@ -52,6 +52,7 @@
     athleteHeadshotFallback: document.getElementById("athleteHeadshotFallback"),
     athleteBodyInfo: document.getElementById("athleteBodyInfo"),
     athleteInfo: document.getElementById("athleteInfo"),
+    athleteStatsOverview: document.getElementById("athleteStatsOverview"),
     athleteStatsSection: document.getElementById("athleteStatsSection"),
     athletePersonalBests: document.getElementById("athletePersonalBests"),
     athleteStatEntry: document.getElementById("athleteStatEntry"),
@@ -297,6 +298,7 @@
     renderHero();
     renderBodyInfo();
     renderAthleteInfo();
+    renderStatsOverview();
     renderStatsSection();
     renderPersonalBests();
     renderStatEntry();
@@ -534,39 +536,41 @@
         </div>
       </div>
 
-      <div class="details-grid">
-        ${detailCard("Height", athlete.height || "Not recorded")}
-        ${detailCard("Weight", athlete.weight || "Not recorded")}
-        ${detailCard("Handedness", athlete.handedness || "Not recorded")}
-        ${detailCard("Dominant Foot", athlete.dominantFoot || "Not recorded")}
-        ${detailCard("Sex", formatGender(athlete.gender))}
-        ${detailCard("Date of Birth", formatDate(athlete.dateOfBirth) || "Not recorded")}
-        ${detailCard("Age", athlete.age || calculateAge(athlete.dateOfBirth) || "Not recorded")}
-      </div>
+      <div class="profile-overview-grid">
+        <section class="profile-subcard">
+          <h3>Body Info</h3>
+          <div class="compact-detail-list">
+            ${detailCard("Height", athlete.height || "Not recorded")}
+            ${detailCard("Weight", athlete.weight || "Not recorded")}
+            ${detailCard("Handedness", athlete.handedness || "Not recorded")}
+            ${detailCard("Dominant Foot", athlete.dominantFoot || "Not recorded")}
+            ${detailCard("Sex", formatGender(athlete.gender))}
+            ${detailCard("Date of Birth", formatDate(athlete.dateOfBirth) || "Not recorded")}
+            ${detailCard("Age", athlete.age || calculateAge(athlete.dateOfBirth) || "Not recorded")}
+          </div>
+        </section>
 
-      <div class="section-title compact-section-title">
-        <div>
-          <h3>Athlete Information</h3>
-        </div>
-      </div>
-
-      <div class="details-grid">
-        ${detailCard("Full Name", athlete.fullName)}
-        ${detailCard("Sports", sportDisplay)}
-        ${detailCard("Teams", teamDisplay)}
-        ${detailCard("Squads", squadDisplay)}
-        ${detailCard("Athlete Type", athlete.athleteType || "Not recorded")}
-        ${detailCard("Status", athlete.status || "Not recorded")}
-        ${detailCard("School / Club", athlete.schoolOrClub || "Not recorded")}
-        ${detailCard("Position / Event Focus", athlete.position || eventsDisplay)}
-        ${detailCard("Email", athlete.email || "Not recorded")}
-        ${detailCard("Phone", athlete.phone || "Not recorded")}
-        ${detailCard("Student ID", athlete.studentId || "Optional / not recorded")}
-        ${detailCard("Year of Study", athlete.yearOfStudy || "Not recorded")}
-        ${detailCard("Faculty", athlete.faculty || "Not recorded")}
-        ${detailCard("Program", athlete.program || "Not recorded")}
-        ${detailCard("Nationality", athlete.nationality || "Not recorded")}
-        ${detailCard("Hometown", athlete.hometown || "Not recorded")}
+        <section class="profile-subcard">
+          <h3>Athlete Info</h3>
+          <div class="compact-detail-list">
+            ${detailCard("Full Name", athlete.fullName)}
+            ${detailCard("Sports", sportDisplay)}
+            ${detailCard("Teams", teamDisplay)}
+            ${detailCard("Squads", squadDisplay)}
+            ${detailCard("Athlete Type", athlete.athleteType || "Not recorded")}
+            ${detailCard("Status", athlete.status || "Not recorded")}
+            ${detailCard("School / Club", athlete.schoolOrClub || "Not recorded")}
+            ${detailCard("Position / Event Focus", athlete.position || eventsDisplay)}
+            ${detailCard("Email", athlete.email || "Not recorded")}
+            ${detailCard("Phone", athlete.phone || "Not recorded")}
+            ${detailCard("Student ID", athlete.studentId || "Optional / not recorded")}
+            ${detailCard("Year of Study", athlete.yearOfStudy || "Not recorded")}
+            ${detailCard("Faculty", athlete.faculty || "Not recorded")}
+            ${detailCard("Program", athlete.program || "Not recorded")}
+            ${detailCard("Nationality", athlete.nationality || "Not recorded")}
+            ${detailCard("Hometown", athlete.hometown || "Not recorded")}
+          </div>
+        </section>
       </div>
 
       <div class="note-box">
@@ -598,6 +602,44 @@
     const normalized = Math.max(0, Math.min(100, Number(score) || 0));
     const wrapperClass = large ? "completeness-large" : "completeness-cell";
     return `<div class="${wrapperClass}"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
+  }
+
+  function renderStatsOverview() {
+    if (!els.athleteStatsOverview) return;
+
+    const allStats = state.stats || [];
+    const filteredStats = getFilteredStats();
+    const linkedCount = allStats.filter((item) => item.linkedCompetitionId || item.competitionName).length;
+    const verifiedCount = allStats.filter((item) => item.verified).length;
+    const seasons = getAvailableSeasons();
+    const categoriesCount = countUniqueValues(allStats.map((item) => item.category || item.statName).filter(Boolean));
+    const pbs = state.personalBests || [];
+
+    els.athleteStatsOverview.innerHTML = `
+      <div class="section-title">
+        <div>
+          <h2>Key Stats</h2>
+          <p>Quick performance context for this athlete. Open the sport stat pages for the detailed breakdown.</p>
+        </div>
+      </div>
+
+      <div class="key-stat-grid">
+        ${statMetricCard("Stat Lines", allStats.length, "All recorded stat entries")}
+        ${statMetricCard("Personal Bests", pbs.length, "Best marks or performances")}
+        ${statMetricCard("Linked Results", linkedCount, "Connected to competitions")}
+        ${statMetricCard("Verified", verifiedCount, "Marked verified")}
+        ${statMetricCard("Seasons", seasons.length, "Seasons with data")}
+        ${statMetricCard("Categories", categoriesCount, "Stat/event groups")}
+      </div>
+
+      ${renderSportStatsButtons()}
+
+      <div class="note-box key-stat-note">
+        ${filteredStats.length
+          ? `${filteredStats.length} stat line${filteredStats.length === 1 ? "" : "s"} match the current detailed-stat filters below.`
+          : "Detailed stat records will appear here once score sheets or direct stat entries are saved."}
+      </div>
+    `;
   }
 
   function renderAthleteInfo() {
@@ -728,8 +770,6 @@
         Athlete statistics shown in this platform reflect records from 2026 onwards.
       </div>
 
-      ${renderSportStatsButtons()}
-
       ${
         filteredStats.length
           ? `
@@ -781,6 +821,7 @@
       seasonFilter.addEventListener("change", function () {
         state.filteredSeason = this.value;
         renderHero();
+        renderStatsOverview();
         renderStatsSection();
         renderPersonalBests();
       });
@@ -789,6 +830,7 @@
     if (statsSearch) {
       statsSearch.addEventListener("input", function () {
         state.searchTerm = this.value.trim();
+        renderStatsOverview();
         renderStatsSection();
         renderPersonalBests();
       });
@@ -1163,6 +1205,7 @@
 
     if (els.athleteBodyInfo) els.athleteBodyInfo.innerHTML = message;
     if (els.athleteInfo) els.athleteInfo.innerHTML = message;
+    if (els.athleteStatsOverview) els.athleteStatsOverview.innerHTML = message;
     if (els.athleteStatsSection) els.athleteStatsSection.innerHTML = message;
     if (els.athletePersonalBests) els.athletePersonalBests.innerHTML = message;
     if (els.athleteStatEntry) els.athleteStatEntry.innerHTML = message;
@@ -1177,6 +1220,7 @@
 
     if (els.athleteBodyInfo) els.athleteBodyInfo.innerHTML = block;
     if (els.athleteInfo) els.athleteInfo.innerHTML = block;
+    if (els.athleteStatsOverview) els.athleteStatsOverview.innerHTML = block;
     if (els.athleteStatsSection) els.athleteStatsSection.innerHTML = block;
     if (els.athletePersonalBests) els.athletePersonalBests.innerHTML = block;
     if (els.athleteStatEntry) els.athleteStatEntry.innerHTML = block;
@@ -1545,6 +1589,16 @@
       <div class="detail-item">
         <span class="detail-label">${escapeHtml(label)}</span>
         <div>${escapeHtml(value || "—")}</div>
+      </div>
+    `;
+  }
+
+  function statMetricCard(label, value, subtext) {
+    return `
+      <div class="stat-metric-card">
+        <span class="mini-label">${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+        <span>${escapeHtml(subtext || "")}</span>
       </div>
     `;
   }
