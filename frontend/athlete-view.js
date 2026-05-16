@@ -335,7 +335,7 @@
       sportSelect.innerHTML = `<option value="">Not set</option>${APP.SPORT_REGISTRY.map((sport) => `<option value="${escapeHtml(sport.slug)}">${escapeHtml(sport.name)}</option>`).join("")}`;
     }
     if (teamSelect) {
-      teamSelect.innerHTML = `<option value="">No squad selected</option>${state.allTeams.map((team) => `<option value="${escapeHtml(team.id || "")}">${escapeHtml(team.name || team.teamName || "Team")}</option>`).join("")}`;
+      teamSelect.innerHTML = `<option value="">No team selected</option>${state.allTeams.map((team) => `<option value="${escapeHtml(team.id || "")}">${escapeHtml(team.name || team.teamName || "Team")}</option>`).join("")}`;
     }
 
     setField("editAthleteFirstName", athlete.firstName);
@@ -526,7 +526,6 @@
     const eventsDisplay = athlete.events.length ? athlete.events.join(", ") : "Not recorded";
     const sportDisplay = getAthleteSportLabels().join(" / ") || athlete.sport || "Not recorded";
     const teamDisplay = getAthleteTeamLabels().join(" / ") || athlete.teamName || "Not assigned";
-    const squadDisplay = getAthleteSquadLabels().join(" / ") || athlete.squadName || athlete.teamName || "Not assigned";
 
     els.athleteBodyInfo.innerHTML = `
       <div class="section-title">
@@ -556,7 +555,6 @@
             ${detailCard("Full Name", athlete.fullName)}
             ${detailCard("Sports", sportDisplay)}
             ${detailCard("Teams", teamDisplay)}
-            ${detailCard("Squads", squadDisplay)}
             ${detailCard("Athlete Type", athlete.athleteType || "Not recorded")}
             ${detailCard("Status", athlete.status || "Not recorded")}
             ${detailCard("School / Club", athlete.schoolOrClub || "Not recorded")}
@@ -649,7 +647,6 @@
     const eventsDisplay = athlete.events.length ? athlete.events.join(", ") : "Not recorded";
     const sportDisplay = getAthleteSportLabels().join(" / ") || athlete.sport || "Not recorded";
     const teamDisplay = getAthleteTeamLabels().join(" / ") || athlete.teamName || "Not assigned";
-    const squadDisplay = getAthleteSquadLabels().join(" / ") || athlete.squadName || "Not assigned";
 
     els.athleteInfo.innerHTML = `
       <div class="section-title">
@@ -663,7 +660,6 @@
         ${detailCard("Full Name", athlete.fullName)}
         ${detailCard("Sports", sportDisplay)}
         ${detailCard("Teams", teamDisplay)}
-        ${detailCard("Squads", squadDisplay)}
         ${detailCard("Athlete Type", athlete.athleteType || "Not recorded")}
         ${detailCard("Status", athlete.status || "Not recorded")}
         ${detailCard("School / Club", athlete.schoolOrClub || "Not recorded")}
@@ -1049,8 +1045,8 @@
     els.athleteTeams.innerHTML = `
       <div class="section-title">
         <div>
-          <h2 id="athleteTeamsHeading">Team / Squad Associations</h2>
-          <p>Current and historical team or squad connections for this athlete.</p>
+          <h2 id="athleteTeamsHeading">Team Associations</h2>
+          <p>Current and historical team connections for this athlete.</p>
         </div>
       </div>
 
@@ -1138,12 +1134,6 @@
   function getAthleteTeamLabels() {
     return Array.from(new Set(getResolvedTeamAssociations()
       .map((item) => item.teamName || item.name || item.team?.name || item.team?.teamName)
-      .filter(Boolean)));
-  }
-
-  function getAthleteSquadLabels() {
-    return Array.from(new Set(getResolvedTeamAssociations()
-      .map((item) => item.squadName || item.squad || item.division)
       .filter(Boolean)));
   }
 

@@ -357,7 +357,7 @@
     const teams = getCampusTeams();
 
     const options = [
-      `<option value="">No squad selected</option>`,
+      `<option value="">No team selected</option>`,
       ...teams.map((team) => {
         const selected = String(selectedTeamId) === String(team.id) ? "selected" : "";
         return `<option value="${escapeHtml(team.id)}" ${selected}>${escapeHtml(team.name || "Team")}</option>`;
@@ -512,7 +512,7 @@
               <td colspan="11">
             <div class="empty-state">
               <h3>No athlete records match the current filters.</h3>
-              <p>Add athlete records to manage profiles, squad assignments, and athlete details.</p>
+              <p>Add athlete records to manage profiles, team assignments, and athlete details.</p>
             </div>
           </td>
         </tr>

@@ -465,7 +465,6 @@
     const athleteRoster = getAthleteRosterAssignment(athlete);
     const athleteDateOfBirth = athlete.dateOfBirth || athlete.dob || athleteProfile.dateOfBirth || "";
     const athleteSex = formatSex(athlete.gender || athlete.sex || athleteProfile.gender || athleteProfile.sex || "");
-    const athleteSquadName = athlete.squadName || athlete.squad || athleteRoster.squadName || athleteRoster.squad || athleteRoster.division || athleteTeamName || "";
     const athleteSchoolClub = athlete.schoolOrClub || athlete.school || athlete.club || athleteProfile.schoolOrClub || athleteProfile.school || athleteProfile.club || "";
     const allStats = getAthleteStats(athleteId, false);
     const filteredStats = getAthleteStats(athleteId, true);
@@ -521,12 +520,11 @@
             ${renderMetaItem("Campus", getCampusName(athlete.campus || athlete.campusSlug || state.session.campus))}
             ${renderMetaItem("Sport", getSportName(athleteSportSlug) || "—")}
             ${renderMetaItem("Teams", athleteTeamName || "—")}
-            ${renderMetaItem("Squad", athleteSquadName || "—")}
             ${renderMetaItem("School / club", athleteSchoolClub || "—")}
             ${renderMetaItem("Athlete type", athlete.athleteType || athlete.type || "—")}
             ${renderMetaItem("Status", athlete.status || "—")}
             ${renderMetaItem("Position / role", getAthletePosition(athlete) || "—")}
-            ${renderMetaItem("Squad role", athleteRoster.role || athleteRoster.roleLabel || "—")}
+            ${renderMetaItem("Team role", athleteRoster.role || athleteRoster.roleLabel || "—")}
             ${renderMetaItem("Jersey / bib", athlete.jerseyNumber || athlete.bibNumber || athleteRoster.jerseyNumber || athleteRoster.bibNumber || "—")}
             ${renderMetaItem("Captain", athlete.isCaptain || athleteRoster.isCaptain ? "Yes" : "No")}
           </div>
@@ -634,11 +632,11 @@
 
       <section class="report-section">
         <h3>Team history &amp; assignments</h3>
-        <p class="section-copy">Current and previous team/squad associations visible on the athlete profile.</p>
+        <p class="section-copy">Current and previous team associations visible on the athlete profile.</p>
         ${athleteTeamRows.length ? `
           <div class="data-table-wrap" style="margin-top:14px;">
             <table class="table">
-              <thead><tr><th>Team</th><th>Sport</th><th>Squad / role</th><th>Season</th><th>Status</th></tr></thead>
+              <thead><tr><th>Team</th><th>Sport</th><th>Role</th><th>Season</th><th>Status</th></tr></thead>
               <tbody>
                 ${athleteTeamRows.map((row) => `
                   <tr>
@@ -652,7 +650,7 @@
               </tbody>
             </table>
           </div>
-        ` : `<div class="empty-state"><h3>No team assignments in this view.</h3><p>Add the athlete to a team or squad to show team history here.</p></div>`}
+        ` : `<div class="empty-state"><h3>No team assignments in this view.</h3><p>Add the athlete to a team to show team history here.</p></div>`}
       </section>
 
       <section class="report-section">

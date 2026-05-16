@@ -283,7 +283,7 @@
     const jerseyNumber = (els.athleteJersey?.value || "").trim();
 
     if (!athleteId) {
-      setSquadMessage("Select an athlete before adding to the squad.", "error");
+      setSquadMessage("Select an athlete before adding to the team.", "error");
       return;
     }
 
@@ -609,7 +609,7 @@
     if (!state.roster.length) {
       els.teamRoster.innerHTML = emptyStateMarkup(
         "No roster assignments yet.",
-        "Add athletes to this team using the squad management form."
+        "Add athletes to this team using the team assignment form."
       );
       return;
     }
