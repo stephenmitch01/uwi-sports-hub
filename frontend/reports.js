@@ -521,8 +521,8 @@
             ${renderMetaItem("Sport", getSportName(athleteSportSlug) || "—")}
             ${renderMetaItem("Teams", athleteTeamName || "—")}
             ${renderMetaItem("School / club", athleteSchoolClub || "—")}
-            ${renderMetaItem("Athlete type", athlete.athleteType || athlete.type || "—")}
-            ${renderMetaItem("Status", athlete.status || "—")}
+            ${renderMetaItem("Athlete type", formatDisplayLabel(athlete.athleteType || athlete.type) || "—")}
+            ${renderMetaItem("Status", formatDisplayLabel(athlete.status) || "—")}
             ${renderMetaItem("Position / role", getAthletePosition(athlete) || "—")}
             ${renderMetaItem("Team role", athleteRoster.role || athleteRoster.roleLabel || "—")}
             ${renderMetaItem("Jersey / bib", athlete.jerseyNumber || athlete.bibNumber || athleteRoster.jerseyNumber || athleteRoster.bibNumber || "—")}
@@ -992,6 +992,14 @@
         <div class="report-meta-value">${escapeHtml(String(value ?? "—"))}</div>
       </div>
     `;
+  }
+
+  function formatDisplayLabel(value) {
+    return String(value || "")
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/\b\w/g, (match) => match.toUpperCase());
   }
 
   function getAthleteProfile(athlete) {

@@ -306,11 +306,12 @@ label{display:block;font-size:12px;font-weight:600;color:#102033;margin-bottom:6
   align-self:center;
   justify-self:end;
   min-width:min(380px,100%);
-  padding:18px 22px;
-  border-left:4px solid var(--shell-accent,#0b243f);
-  background:rgba(255,255,255,.82);
-  border-radius:14px;
-  box-shadow:0 12px 28px rgba(15,39,66,.08);
+  padding:4px 0;
+  text-align:right;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
 }
 .scorecard-result-panel > span{
   display:block;

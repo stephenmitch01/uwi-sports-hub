@@ -572,7 +572,7 @@
   }
 
   function opponentName() {
-    return els.opponentName.value.trim() || "Opposition";
+    return els.opponentName.value.trim() || "Opponent";
   }
 
   function opponentPlayerName(row) {

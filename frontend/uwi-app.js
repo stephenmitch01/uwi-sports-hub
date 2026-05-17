@@ -879,7 +879,13 @@
     const linked = Array.isArray(record?.linkedDataSummary) && record.linkedDataSummary.length
       ? `\n\nLinked data will be preserved:\n${record.linkedDataSummary.map((item) => `- ${item.count} ${item.label}`).join("\n")}`
       : "";
-    return window.confirm(`Archive this ${recordType}?\n\n${recordDisplayName(record)}${linked}\n\nArchived records are hidden unless you search archived records.`);
+    return window.confirm(
+      `Archive this ${recordType}?\n\n` +
+      `${recordDisplayName(record)}${linked}\n\n` +
+      `Warning: archiving hides this record from normal lists, dashboards, reports, and selection workflows. ` +
+      `It does not delete the record, but users will only see it when archived records are explicitly included.\n\n` +
+      `Are you sure you want to archive it?`
+    );
   }
 
   function trackUnsavedChanges(form) {

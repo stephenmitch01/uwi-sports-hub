@@ -4,10 +4,12 @@
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
+  const scorecardId = params.get("scorecardId") || "";
 
   const state = {
     session: null,
     competition: null,
+    scorecard: null,
     athletes: [],
     teams: []
   };
@@ -59,6 +61,11 @@
         return;
       }
       renderPage();
+      if (scorecardId) {
+        const scorecard = await APP.apiGet(`/competition-stat-lines/${encodeURIComponent(scorecardId)}`);
+        state.scorecard = scorecard?.data || scorecard;
+        applyExistingScorecard();
+      }
       bindEvents();
       updateDerivedFields();
     } catch (error) {
@@ -70,7 +77,9 @@
   function renderPage() {
     const title = state.competition?.title || state.competition?.name || "Basketball Competition";
     els.heading.textContent = `${title} Score Sheet`;
-    els.subtitle.textContent = "Select the UWI game roster first. Player stat rows then link directly to athlete records.";
+    els.subtitle.textContent = scorecardId
+      ? "Editing a saved basketball score sheet. Update missing information, then save changes."
+      : "Select the UWI game roster first. Player stat rows then link directly to athlete records.";
     els.backLink.href = `competition-view.html?id=${encodeURIComponent(competitionId)}`;
     els.title.value = title;
     els.date.value = formatDateInput(state.competition?.startDate || new Date().toISOString());
@@ -80,6 +89,55 @@
       .join("")}`;
     renderRoster();
     renderPlayerRows();
+  }
+
+  function applyExistingScorecard() {
+    const row = state.scorecard || {};
+    const data = row.statData || row.data?.statData || {};
+    const score = data.score || {};
+    els.teamSelect.value = data.uwiTeamId || row.teamId || "";
+    els.opponentName.value = data.opponentName || "";
+    els.title.value = data.title || row.eventName || els.title.value;
+    els.date.value = formatDateInput(row.date || data.date || els.date.value);
+    els.playedAt.value = data.playedAt || "";
+    els.gameTime.value = data.gameTime || "";
+    els.coachName.value = data.coachName || "";
+    els.homeTeamLabel.value = data.uwiTeamName || getUwiTeamName();
+    renderRoster();
+    (data.roster || []).slice(0, 15).forEach((player, index) => setValue(`roster${index + 1}`, player.athleteId || "", false));
+    renderPlayerRows();
+    refreshRosterPlayerOptions();
+    setValue("homeQ1", score.uwi?.q1, false);
+    setValue("homeQ2", score.uwi?.q2, false);
+    setValue("homeQ3", score.uwi?.q3, false);
+    setValue("homeQ4", score.uwi?.q4, false);
+    setValue("homeOT", score.uwi?.overtime, false);
+    setValue("visitQ1", score.opponent?.q1, false);
+    setValue("visitQ2", score.opponent?.q2, false);
+    setValue("visitQ3", score.opponent?.q3, false);
+    setValue("visitQ4", score.opponent?.q4, false);
+    setValue("visitOT", score.opponent?.overtime, false);
+    (data.playerStats || []).slice(0, 15).forEach((player, index) => {
+      const rowNumber = index + 1;
+      const id = `p${rowNumber}`;
+      setValue(`${id}Number`, player.number, false);
+      setValue(`${id}PlayerAthleteId`, player.athleteId || "", false);
+      setValue(`${id}Fouls`, player.fouls, false);
+      setValue(`${id}Q1`, player.q1, false);
+      setValue(`${id}Q2`, player.q2, false);
+      setValue(`${id}Q3`, player.q3, false);
+      setValue(`${id}Q4`, player.q4, false);
+      ["TwoMade", "ThreeMade", "FreeThrowsMade", "Rebounds", "Assists", "Steals", "Blocks", "Turnovers", "Minutes"].forEach((name) => {
+        const source = name.charAt(0).toLowerCase() + name.slice(1);
+        setValue(`${id}${name}`, player[source], false);
+      });
+    });
+    setValue("teamFouls", data.gameAdmin?.teamFouls, false);
+    setValue("fullTimeouts", data.gameAdmin?.fullTimeouts, false);
+    setValue("shortTimeouts", data.gameAdmin?.shortTimeouts, false);
+    setValue("otTimeouts", data.gameAdmin?.otTimeouts, false);
+    setValue("warningCount", data.gameAdmin?.warnings, false);
+    els.possessionStart.value = data.gameAdmin?.possessionStart || "uwi";
   }
 
   function bindEvents() {
@@ -233,8 +291,12 @@
       source: "basketball-scorecard"
     };
     try {
-      await APP.apiPost("/competition-stat-lines", payload);
-      showSuccess("Basketball score sheet saved successfully.");
+      if (scorecardId) {
+        await APP.apiPatch(`/competition-stat-lines/${encodeURIComponent(scorecardId)}`, payload);
+      } else {
+        await APP.apiPost("/competition-stat-lines", payload);
+      }
+      showSuccess(scorecardId ? "Basketball score sheet updated successfully." : "Basketball score sheet saved successfully.");
     } catch (error) {
       showError(error?.message || "Basketball score sheet could not be saved.");
     }

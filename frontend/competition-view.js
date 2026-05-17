@@ -1774,6 +1774,31 @@
     return label;
   }
 
+  function scorecardEditHref(line) {
+    const sportSlug = normalizeSportSlug(line.sportSlug || line.sport || line.statData?.sport || line.statData?.sportSlug || getCompetitionSportSlug());
+    const pages = {
+      cricket: "cricket-scorecard.html",
+      football: "football-scorecard.html",
+      volleyball: "volleyball-scorecard.html",
+      hockey: "hockey-scorecard.html",
+      basketball: "basketball-scorecard.html",
+      swimming: "swimming-results.html",
+      "track-and-field": "track-field-results.html",
+      netball: "netball-scorecard.html",
+      badminton: "badminton-scorecard.html",
+      "table-tennis": "table-tennis-scorecard.html",
+      "lawn-tennis": "tennis-scorecard.html",
+      taekwondo: "taekwondo-scorecard.html",
+      chess: "chess-scorecard.html"
+    };
+    const page = pages[sportSlug] || "cricket-scorecard.html";
+    return `${page}?competitionId=${encodeURIComponent(line.competitionId || state.competitionId)}&scorecardId=${encodeURIComponent(line.id)}`;
+  }
+
+  function scorecardEditLink(line) {
+    return `<a href="${scorecardEditHref(line)}">Edit</a>`;
+  }
+
   function buildParticipantRows() {
     if (!state.participants.length) {
       const inferred = new Map();
@@ -2389,6 +2414,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="cricket-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Scorecard</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2422,6 +2448,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="football-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Details</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2450,6 +2477,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || sets.map((set) => `${set.uwiScore}-${set.opponentScore}`).join(", ") || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="volleyball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Scoresheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2472,6 +2500,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="hockey-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2494,6 +2523,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="basketball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2519,6 +2549,7 @@
         <p class="result-text">${escapeHtml([data.round, data.course, data.ageGroup].filter(Boolean).join(" • ") || "Results recorded")}</p>
         <div class="result-card-actions">
           <a href="swimming-results-view.html?scorecardId=${encodeURIComponent(line.id)}">View Results Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2545,6 +2576,7 @@
         <p class="result-text">${escapeHtml(data.summary?.winningResult || [data.division, data.round].filter(Boolean).join(" • ") || "Results recorded")}</p>
         <div class="result-card-actions">
           <a href="track-field-results-view.html?scorecardId=${encodeURIComponent(line.id)}">View Results Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2567,6 +2599,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="netball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2595,6 +2628,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || gameLine))}</p>
         <div class="result-card-actions">
           <a href="badminton-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2617,6 +2651,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || `${summary.pointsFor ?? 0}-${summary.pointsAgainst ?? 0} points`))}</p>
         <div class="result-card-actions">
           <a href="table-tennis-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2639,6 +2674,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || `${summary.gamesFor ?? 0}-${summary.gamesAgainst ?? 0} games`))}</p>
         <div class="result-card-actions">
           <a href="tennis-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2661,6 +2697,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(summary.result || data.result || "Score recorded"))}</p>
         <div class="result-card-actions">
           <a href="taekwondo-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;
@@ -2683,6 +2720,7 @@
         <p class="result-text">${escapeHtml(compactUwiResultLabel(summary.resultLabel || data.result || data.opening || "Game recorded"))}</p>
         <div class="result-card-actions">
           <a href="chess-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
+          ${scorecardEditLink(line)}
         </div>
       </article>
     `;

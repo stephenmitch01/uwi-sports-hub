@@ -1672,6 +1672,29 @@ app.get(
   "/competition-stat-lines/:id",
   asyncRoute((req, res) => getEntity(req, res, "competitionStatLine"))
 );
+app.patch(
+  "/competition-stat-lines/:id",
+  requireManager,
+  asyncRoute(async (req, res) => {
+    const existing = await prisma.competitionStatLine.findFirst({ where: scopedWhere(req, { id: req.params.id }) });
+    if (!existing) return sendError(res, 404, "Record not found.");
+    const body = getRecordBody(req);
+    const record = await prisma.competitionStatLine.update({
+      where: { id: req.params.id },
+      data: {
+        competitionId: body.competitionId ? String(body.competitionId) : existing.competitionId,
+        subjectId: body.subjectId ? String(body.subjectId) : existing.subjectId,
+        subjectType: body.subjectType || existing.subjectType,
+        teamId: body.teamId ? String(body.teamId) : body.subjectType === "team" ? String(body.subjectId || "") : existing.teamId,
+        athleteId: body.athleteId ? String(body.athleteId) : body.subjectType === "athlete" ? String(body.subjectId || "") : existing.athleteId,
+        sport: body.sport || body.sportSlug || existing.sport,
+        data: body
+      }
+    });
+    await writeAuditLog(req, { action: "update", entityType: "competitionStatLine", entityId: record.id, summary: "Updated competition stat line or score sheet", data: { competitionId: record.competitionId, teamId: record.teamId, athleteId: record.athleteId, sport: record.sport, eventType: body.eventType } });
+    res.json(entityResponse(record));
+  })
+);
 app.post(
   "/competition-stat-lines",
   requireManager,

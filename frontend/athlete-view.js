@@ -299,11 +299,9 @@
     renderBodyInfo();
     renderAthleteInfo();
     renderStatsOverview();
-    renderStatsSection();
     renderPersonalBests();
     renderStatEntry();
     renderHistory();
-    renderTeams();
     renderRecords();
     populateEditForm();
   }
@@ -471,14 +469,13 @@
     if (els.heroSummary) {
       const eventText = athlete.events.length ? athlete.events.join(", ") : athlete.position || athlete.sport;
       els.heroSummary.textContent =
-        `${athlete.athleteType} in ${sportDisplay}. ${teamAssignmentText}. ${eventText ? `Primary focus: ${eventText}. ` : ""}` +
-        `This profile includes body information, athlete details, all-time and season-specific stats, personal bests, team history, and summary generation.`;
+        `${formatDisplayLabel(athlete.athleteType || "Athlete")} in ${sportDisplay}. ${teamAssignmentText}. ${eventText ? `Primary focus: ${eventText}. ` : ""}`;
     }
 
     if (els.heroPills) {
       els.heroPills.innerHTML = `
         <span class="status-pill ok">Internal Profile</span>
-        <span class="status-pill success">${escapeHtml(athlete.status || "Active")}</span>
+        <span class="status-pill success">${escapeHtml(formatDisplayLabel(athlete.status || "Active"))}</span>
         <span class="status-pill subtle">${escapeHtml(sportDisplay || "Sport")}</span>
         <span class="status-pill subtle">${escapeHtml(athlete.campus ? formatCampus(athlete.campus) : "Campus")}</span>
       `;
@@ -486,8 +483,10 @@
 
     if (els.heroMeta) {
       const chips = [
+        teamList.length ? `Teams: ${teamList.join(" / ")}` : "",
         athlete.schoolOrClub ? `School/Club: ${athlete.schoolOrClub}` : "",
-        athlete.athleteType ? `Type: ${athlete.athleteType}` : ""
+        athlete.athleteType ? `Type: ${formatDisplayLabel(athlete.athleteType)}` : "",
+        athlete.position || athlete.events.length ? `Focus: ${athlete.position || athlete.events.join(", ")}` : ""
       ].filter(Boolean);
 
       els.heroMeta.innerHTML = chips.map((chip) => `<span class="meta-chip">${escapeHtml(chip)}</span>`).join("");
@@ -555,8 +554,8 @@
             ${detailCard("Full Name", athlete.fullName)}
             ${detailCard("Sports", sportDisplay)}
             ${detailCard("Teams", teamDisplay)}
-            ${detailCard("Athlete Type", athlete.athleteType || "Not recorded")}
-            ${detailCard("Status", athlete.status || "Not recorded")}
+            ${detailCard("Athlete Type", formatDisplayLabel(athlete.athleteType) || "Not recorded")}
+            ${detailCard("Status", formatDisplayLabel(athlete.status) || "Not recorded")}
             ${detailCard("School / Club", athlete.schoolOrClub || "Not recorded")}
             ${detailCard("Position / Event Focus", athlete.position || eventsDisplay)}
             ${detailCard("Email", athlete.email || "Not recorded")}
@@ -634,7 +633,7 @@
 
       <div class="note-box key-stat-note">
         ${filteredStats.length
-          ? `${filteredStats.length} stat line${filteredStats.length === 1 ? "" : "s"} match the current detailed-stat filters below.`
+          ? `${filteredStats.length} stat line${filteredStats.length === 1 ? "" : "s"} available from linked entries and score sheets.`
           : "Detailed stat records will appear here once score sheets or direct stat entries are saved."}
       </div>
     `;
@@ -660,8 +659,8 @@
         ${detailCard("Full Name", athlete.fullName)}
         ${detailCard("Sports", sportDisplay)}
         ${detailCard("Teams", teamDisplay)}
-        ${detailCard("Athlete Type", athlete.athleteType || "Not recorded")}
-        ${detailCard("Status", athlete.status || "Not recorded")}
+        ${detailCard("Athlete Type", formatDisplayLabel(athlete.athleteType) || "Not recorded")}
+        ${detailCard("Status", formatDisplayLabel(athlete.status) || "Not recorded")}
         ${detailCard("School / Club", athlete.schoolOrClub || "Not recorded")}
         ${detailCard("Position / Event Focus", athlete.position || eventsDisplay)}
         ${detailCard("Email", athlete.email || "Not recorded")}
@@ -887,8 +886,13 @@
     if (!els.athleteStatEntry) return;
 
     const currentSeason = getCurrentSeasonValue();
+    const sportOptions = getAthleteSportSlugs()
+      .map((slug) => `<option value="${escapeHtml(slug)}">${escapeHtml(APP.getSportName?.(slug) || formatSportName(slug))}</option>`)
+      .join("");
 
     els.athleteStatEntry.innerHTML = `
+      <summary>Add Stat / Personal Best</summary>
+      <section>
       <div class="section-title">
         <div>
           <h2 id="athleteStatEntryHeading">Add Stat / Add Personal Best</h2>
@@ -901,6 +905,13 @@
 
       <form id="statEntryForm">
         <div class="stats-toolbar">
+          <div>
+            <label for="entrySport">Sport</label>
+            <select class="select" id="entrySport" name="entrySport" required>
+              ${sportOptions || `<option value="${escapeHtml(APP.normalizeSportSlug(state.athlete?.sport || "") || "")}">${escapeHtml(state.athlete?.sport || "Sport")}</option>`}
+            </select>
+          </div>
+
           <div>
             <label for="entrySeason">Season</label>
             <input class="input" id="entrySeason" name="entrySeason" type="text" value="${escapeHtml(currentSeason)}" required />
@@ -917,6 +928,11 @@
           <div>
             <label for="entryMetric">Stat / Event Name</label>
             <input class="input" id="entryMetric" name="entryMetric" type="text" placeholder="e.g. 100m, Goals, Assists" required />
+          </div>
+
+          <div>
+            <label for="entryEventType">Event Type / Stat Group</label>
+            <input class="input" id="entryEventType" name="entryEventType" type="text" placeholder="e.g. batting, track, field, match" />
           </div>
 
           <div>
@@ -953,6 +969,14 @@
           </div>
 
           <div>
+            <label for="entryVerified">Verified</label>
+            <select class="select" id="entryVerified" name="entryVerified">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+
+          <div>
             <label for="entryCompetitionId">Competition ID (optional)</label>
             <input class="input" id="entryCompetitionId" name="entryCompetitionId" type="text" placeholder="Optional competition ID" />
           </div>
@@ -970,6 +994,7 @@
 
         <div id="entryFeedback"></div>
       </form>
+      </section>
     `;
 
     const statEntryForm = document.getElementById("statEntryForm");
@@ -1229,12 +1254,15 @@
 
     const entryType = String(formData.get("entryType") || "stat");
     const linkedNow = String(formData.get("entryLinkedNow") || "yes") === "yes";
+    const verified = String(formData.get("entryVerified") || "false") === "true";
 
     const entry = {
       id: cryptoRandomId(),
+      sport: String(formData.get("entrySport") || "").trim(),
       season: String(formData.get("entrySeason") || "").trim(),
       statName: String(formData.get("entryMetric") || "").trim(),
       eventName: String(formData.get("entryMetric") || "").trim(),
+      eventType: String(formData.get("entryEventType") || "").trim(),
       performance: String(formData.get("entryValue") || "").trim(),
       statValue: String(formData.get("entryValue") || "").trim(),
       unit: String(formData.get("entryUnit") || "").trim(),
@@ -1244,12 +1272,12 @@
       linkedCompetitionId: linkedNow ? String(formData.get("entryCompetitionId") || "").trim() : "",
       date: String(formData.get("entryDate") || "").trim(),
       notes: String(formData.get("entryNotes") || "").trim(),
-      verified: false
+      verified
     };
 
-    if (!entry.season || !entry.statName || !entry.statValue) {
+    if (!entry.sport || !entry.season || !entry.statName || !entry.statValue) {
       if (feedback) {
-        feedback.innerHTML = `<div class="message error">Season, entry name, and value are required.</div>`;
+        feedback.innerHTML = `<div class="message error">Sport, season, entry name, and value are required.</div>`;
       }
       return;
     }
@@ -1260,25 +1288,28 @@
           eventName: entry.eventName,
           performance: entry.performance,
           unit: entry.unit,
+          sport: entry.sport,
           season: entry.season,
           competitionName: entry.competitionName,
           competitionId: entry.competitionId || null,
           date: entry.date,
+          verified: entry.verified,
           notes: entry.notes
         });
       } else {
         await APP.apiPost(`/athletes/${encodeURIComponent(state.athleteId)}/stats`, {
           athleteId: state.athleteId,
-          sport: state.athlete?.primarySport || state.athlete?.sport || "",
+          sport: entry.sport,
           season: entry.season,
           statName: entry.statName,
           statValue: entry.statValue,
           unit: entry.unit,
           competitionName: entry.competitionName,
           eventName: entry.eventName,
+          eventType: entry.eventType,
           category: entry.category,
           date: entry.date,
-          verified: false,
+          verified: entry.verified,
           competitionId: entry.competitionId || null,
           linkedCompetitionId: entry.linkedCompetitionId,
           notes: entry.notes
@@ -1653,6 +1684,14 @@
     if (normalized === "male") return "Male";
     if (normalized === "female") return "Female";
     return "Not recorded";
+  }
+
+  function formatDisplayLabel(value) {
+    return String(value || "")
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/\b\w/g, (match) => match.toUpperCase());
   }
 
   function formatValueWithUnit(value, unit) {
