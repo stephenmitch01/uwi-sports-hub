@@ -4,10 +4,12 @@
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
+  const scorecardId = params.get("scorecardId") || "";
 
   const state = {
     session: null,
     competition: null,
+    scorecard: null,
     athletes: [],
     teams: []
   };
@@ -55,6 +57,11 @@
         return;
       }
       renderPage();
+      if (scorecardId) {
+        const scorecard = await APP.apiGet(`/competition-stat-lines/${encodeURIComponent(scorecardId)}`);
+        state.scorecard = scorecard?.data || scorecard;
+        applyExistingScorecard();
+      }
       bindEvents();
       updateDerivedFields();
     } catch (error) {
@@ -66,7 +73,9 @@
   function renderPage() {
     const title = state.competition?.title || state.competition?.name || "Football Competition";
     els.heading.textContent = `${title} Score Sheet`;
-    els.subtitle.textContent = "Select the UWI match squad first. UWI player stat rows then link directly to athlete records.";
+    els.subtitle.textContent = scorecardId
+      ? "Editing a saved football score sheet. Update missing information, then save changes."
+      : "Select the UWI match squad first. UWI player stat rows then link directly to athlete records.";
     els.backLink.href = `competition-view.html?id=${encodeURIComponent(competitionId)}`;
     els.title.value = title;
     els.date.value = formatDateInput(state.competition?.startDate || new Date().toISOString());
@@ -77,6 +86,59 @@
     renderSquad();
     renderPlayerRows();
     renderGoalEvents();
+  }
+
+  function applyExistingScorecard() {
+    const row = state.scorecard || {};
+    const data = row.statData || row.data?.statData || {};
+    const score = data.score || {};
+    els.teamSelect.value = data.uwiTeamId || row.teamId || "";
+    els.opponentName.value = data.opponentName || "";
+    els.title.value = data.title || row.eventName || els.title.value;
+    els.date.value = formatDateInput(row.date || data.date || els.date.value);
+    els.location.value = data.location || "";
+    els.homeTeamLabel.value = data.uwiTeamName || getUwiTeamName();
+    renderSquad();
+    (data.squad || []).slice(0, 18).forEach((player, index) => {
+      setValue(`squad${index + 1}`, player.athleteId || "", false);
+    });
+    renderPlayerRows();
+    renderGoalEvents();
+    refreshSquadPlayerOptions();
+    setValue("homeH1", score.uwi?.firstHalf, false);
+    setValue("homeH2", score.uwi?.secondHalf, false);
+    setValue("homeOT", score.uwi?.overtime, false);
+    setValue("awayH1", score.opponent?.firstHalf, false);
+    setValue("awayH2", score.opponent?.secondHalf, false);
+    setValue("awayOT", score.opponent?.overtime, false);
+    (data.playerStats || []).slice(0, 18).forEach((player, index) => {
+      const id = `p${index + 1}`;
+      setValue(`${id}Number`, player.number, false);
+      setValue(`${id}PlayerAthleteId`, player.athleteId || "", false);
+      setValue(`${id}Shots`, player.shots, false);
+      setValue(`${id}ShotsOnTarget`, player.shotsOnTarget, false);
+      setValue(`${id}Assists`, player.assists, false);
+      setValue(`${id}Goals`, player.goals, false);
+      setValue(`${id}GoalsConceded`, player.goalsConceded, false);
+      setValue(`${id}Saves`, player.saves, false);
+      setValue(`${id}Fouls`, player.fouls, false);
+      setValue(`${id}Offside`, player.offside, false);
+      setValue(`${id}Yellow`, player.yellowCards, false);
+      setValue(`${id}Red`, player.redCards, false);
+      setValue(`${id}Minutes`, player.minutes, false);
+    });
+    (data.goals || []).slice(0, 10).forEach((goal, index) => {
+      const rowNumber = index + 1;
+      setValue(`goal${rowNumber}Minute`, goal.minute, false);
+      setValue(`goal${rowNumber}Team`, goal.team || "uwi", false);
+      setValue(`goal${rowNumber}ScorerAthleteId`, goal.scorerAthleteId || "", false);
+      setValue(`goal${rowNumber}AssistAthleteId`, goal.assistAthleteId || "", false);
+      setValue(`goal${rowNumber}Type`, goal.type || "open-play", false);
+    });
+    writeTeamMatchStats("uwi", data.matchStats?.uwi || {});
+    writeTeamMatchStats("opp", data.matchStats?.opponent || {});
+    els.result.value = data.result || "";
+    updateDerivedFields();
   }
 
   function bindEvents() {
@@ -226,8 +288,12 @@
       source: "football-scorecard"
     };
     try {
-      await APP.apiPost("/competition-stat-lines", payload);
-      showSuccess("Football score sheet saved successfully.");
+      if (scorecardId) {
+        await APP.apiPatch(`/competition-stat-lines/${encodeURIComponent(scorecardId)}`, payload);
+      } else {
+        await APP.apiPost("/competition-stat-lines", payload);
+      }
+      showSuccess(scorecardId ? "Football score sheet updated successfully." : "Football score sheet saved successfully.");
     } catch (error) {
       showError(error?.message || "Football score sheet could not be saved.");
     }
@@ -278,6 +344,24 @@
       saves: `${prefix}Saves`
     };
     return Object.fromEntries(Object.entries(ids).map(([key, id]) => [key, numberValue(id)]));
+  }
+
+  function writeTeamMatchStats(prefix, stats) {
+    const ids = {
+      possession: `${prefix}Possession`,
+      shots: `${prefix}Shots`,
+      shotsOnTarget: `${prefix}ShotsOnTarget`,
+      fouls: `${prefix}Fouls`,
+      offsides: `${prefix}Offsides`,
+      corners: `${prefix}Corners`,
+      freeKicks: `${prefix}FreeKicks`,
+      passesCompletedPct: `${prefix}PassesCompleted`,
+      crosses: `${prefix}Crosses`,
+      interceptions: `${prefix}Interceptions`,
+      tackles: `${prefix}Tackles`,
+      saves: `${prefix}Saves`
+    };
+    Object.entries(ids).forEach(([key, id]) => setValue(id, stats[key], false));
   }
 
   function readGoalEvent(row) {

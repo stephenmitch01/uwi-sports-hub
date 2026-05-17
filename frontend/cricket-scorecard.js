@@ -4,6 +4,7 @@
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
+  const scorecardId = params.get("scorecardId") || "";
 
   const DISMISSALS = [
     ["", "Not out / not dismissed"],
@@ -35,6 +36,7 @@
   const state = {
     session: null,
     competition: null,
+    scorecard: null,
     athletes: [],
     teams: [],
     inningsCount: 2
@@ -87,6 +89,11 @@
       }
 
       renderPage();
+      if (scorecardId) {
+        const scorecard = await APP.apiGet(`/competition-stat-lines/${encodeURIComponent(scorecardId)}`);
+        state.scorecard = scorecard?.data || scorecard;
+        applyExistingScorecard();
+      }
       bindEvents();
       updateDerivedFields();
     } catch (error) {
@@ -98,7 +105,9 @@
   function renderPage() {
     const title = state.competition?.title || state.competition?.name || "Cricket Competition";
     els.heading.textContent = `${title} Scorecard`;
-    els.subtitle.textContent = "Select the UWI starting XI first. UWI scorecard rows then link directly to those athlete records.";
+    els.subtitle.textContent = scorecardId
+      ? "Editing a saved cricket scorecard. Update missing information, then save changes."
+      : "Select the UWI starting XI first. UWI scorecard rows then link directly to those athlete records.";
     els.backLink.href = `competition-view.html?id=${encodeURIComponent(competitionId)}`;
     els.title.value = title;
     els.date.value = formatDateInput(state.competition?.startDate || new Date().toISOString());
@@ -110,6 +119,29 @@
 
     renderStartingXi();
     renderInningsSet();
+  }
+
+  function applyExistingScorecard() {
+    const row = state.scorecard || {};
+    const data = row.statData || row.data?.statData || {};
+    els.teamSelect.value = data.uwiTeamId || row.teamId || "";
+    els.opponentName.value = data.opponentName || "";
+    els.title.value = data.title || row.eventName || els.title.value;
+    els.date.value = formatDateInput(row.date || data.date || els.date.value);
+    els.venue.value = data.venue || "";
+    state.inningsCount = clamp(Number(data.inningsCount || data.innings?.length || state.inningsCount) || 2, 1, 4);
+    els.inningsCount.value = String(state.inningsCount);
+    renderStartingXi();
+    (data.startingXi || []).slice(0, 11).forEach((player, index) => {
+      setValue(`xi${index + 1}`, player.athleteId || "");
+    });
+    renderInningsSet();
+    refreshUwiPlayerOptions();
+    (data.innings || []).slice(0, state.inningsCount).forEach((innings, index) => {
+      writeInnings(index + 1, innings || {});
+    });
+    els.result.value = data.result || "";
+    updateDerivedFields();
   }
 
   function bindEvents() {
@@ -461,10 +493,57 @@
     };
 
     try {
-      await APP.apiPost("/competition-stat-lines", payload);
-      showSuccess("Cricket scorecard saved successfully.");
+      if (scorecardId) {
+        await APP.apiPatch(`/competition-stat-lines/${encodeURIComponent(scorecardId)}`, payload);
+      } else {
+        await APP.apiPost("/competition-stat-lines", payload);
+      }
+      showSuccess(scorecardId ? "Cricket scorecard updated successfully." : "Cricket scorecard saved successfully.");
     } catch (error) {
       showError(error?.message || "Cricket scorecard could not be saved.");
+    }
+  }
+
+  function writeInnings(index, innings) {
+    const batting = Array.isArray(innings.batting) ? innings.batting : [];
+    const bowling = Array.isArray(innings.bowling) ? innings.bowling : [];
+    setValue(`innings${index}Side`, innings.battingSide || defaultBattingSide(index));
+    renderInnings(index);
+    setValue(`innings${index}Overs`, innings.overs);
+    setValue(`innings${index}Extras`, innings.extras);
+    setValue(`innings${index}ExtrasRuns`, innings.extrasRuns);
+    setValue(`innings${index}TeamLabel`, innings.team);
+    setValue(`innings${index}FallOfWickets`, Array.isArray(innings.fallOfWickets) ? innings.fallOfWickets.join(", ") : innings.fallOfWickets);
+    const declared = document.getElementById(`innings${index}Declared`);
+    if (declared) declared.checked = Boolean(innings.declared);
+    batting.slice(0, 11).forEach((player, rowIndex) => {
+      const id = `i${index}bat${rowIndex + 1}`;
+      setPlayerValue(`${id}Player`, player);
+      setValue(`${id}Dismissal`, player.dismissalMode || "");
+      setPlayerValue(`${id}Bowler`, { athleteId: player.bowlerAthleteId, name: player.bowlerName });
+      setPlayerValue(`${id}Fielder`, { athleteId: player.fielderAthleteId, name: player.fielderName });
+      setValue(`${id}Runs`, player.runs);
+      setValue(`${id}Minutes`, player.minutes);
+      setValue(`${id}Balls`, player.balls);
+      setValue(`${id}Fours`, player.fours);
+      setValue(`${id}Sixes`, player.sixes);
+    });
+    bowling.slice(0, 11).forEach((player, rowIndex) => {
+      const id = `i${index}bowl${rowIndex + 1}`;
+      setPlayerValue(`${id}Player`, player);
+      setValue(`${id}Overs`, player.overs);
+      setValue(`${id}Maidens`, player.maidens);
+      setValue(`${id}Runs`, player.runs);
+      setValue(`${id}Notes`, player.notes);
+    });
+  }
+
+  function setPlayerValue(prefix, player) {
+    if (document.getElementById(`${prefix}AthleteId`)) {
+      setValue(`${prefix}AthleteId`, player?.athleteId || "");
+    }
+    if (document.getElementById(`${prefix}Name`)) {
+      setValue(`${prefix}Name`, player?.name || "");
     }
   }
 

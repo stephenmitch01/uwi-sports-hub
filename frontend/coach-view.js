@@ -222,7 +222,6 @@
     if (els.coachCompletenessStat) els.coachCompletenessStat.innerHTML = completenessMarkup(getCoachCompleteness(coach), true);
 
     renderAssignments(assignments);
-    renderTeamsSummary(assignments);
   }
 
   function populateCoachEditForm(coach) {

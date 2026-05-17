@@ -50,7 +50,7 @@
     const roleLabel = formatRole(user.role);
 
     roleEyebrow.textContent = roleLabel;
-    welcomeHeading.textContent = "Dashboard";
+    welcomeHeading.textContent = `Welcome, ${user.fullName || "User"}`;
     welcomeText.textContent = `Signed in as ${user.email || "your campus account"}. Your campus summary is loading below.`;
     rolePill.textContent = roleLabel;
     if (roleStat) roleStat.textContent = roleLabel;
