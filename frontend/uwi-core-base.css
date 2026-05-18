@@ -302,21 +302,31 @@ label{display:block;font-size:12px;font-weight:600;color:#102033;margin-bottom:6
 .empty-state h3{font-size:20px;color:#102033}
 .empty-state p{margin-top:8px;color:var(--muted);line-height:1.7}
 .hidden{display:none!important}
+.head:has(.scorecard-result-panel){
+  grid-template-columns:minmax(0,1fr) minmax(220px,320px);
+  align-items:start;
+}
+.head:has(.scorecard-result-panel) .head-right{
+  display:flex;
+  justify-content:flex-end;
+  align-items:flex-start;
+}
 .scorecard-result-panel{
-  align-self:center;
+  align-self:start;
   justify-self:end;
-  min-width:min(380px,100%);
-  padding:4px 0;
-  text-align:right;
-  background:transparent;
-  border:0;
-  border-radius:0;
-  box-shadow:none;
+  width:min(300px,100%);
+  min-width:0;
+  padding:16px;
+  text-align:left;
+  background:#fff;
+  border:1px solid rgba(15,39,66,.1);
+  border-radius:16px;
+  box-shadow:0 10px 24px rgba(15,39,66,.08);
 }
 .scorecard-result-panel > span{
   display:block;
   color:var(--muted);
-  font-size:13px;
+  font-size:12px;
   font-weight:600;
   letter-spacing:.08em;
   text-transform:uppercase;
@@ -325,15 +335,18 @@ label{display:block;font-size:12px;font-weight:600;color:#102033;margin-bottom:6
   display:block;
   margin-top:6px;
   color:#071b33;
-  font-size:clamp(28px,4vw,48px);
-  line-height:1.05;
+  font-size:clamp(20px,2vw,28px);
+  line-height:1.15;
   font-weight:600;
+  overflow-wrap:anywhere;
 }
 .scorecard-result-panel p{
   margin:8px 0 0;
   color:#4d5870;
-  line-height:1.45;
+  font-size:13px;
+  line-height:1.4;
   font-weight:500;
+  overflow-wrap:anywhere;
 }
 .link-row{display:grid;gap:10px}
 .nav-tile{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:16px;background:#fff}
@@ -366,6 +379,9 @@ label{display:block;font-size:12px;font-weight:600;color:#102033;margin-bottom:6
 
 @media (max-width:1120px){
   .head,.hero-card,.grid-2,.filter-grid,.form-grid,.details-grid,.head-right,.mini-grid{grid-template-columns:1fr}
+  .head:has(.scorecard-result-panel){grid-template-columns:1fr}
+  .head:has(.scorecard-result-panel) .head-right{justify-content:stretch}
+  .scorecard-result-panel{width:100%}
 }
 @media (max-width:760px){
   .top-bar,.page,.footer,.site-footer{padding-left:16px;padding-right:16px}
