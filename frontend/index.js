@@ -36,6 +36,9 @@
     }
   }
 
+  /**
+   * Handles the sign in workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleSignIn(event) {
     event.preventDefault();
     APP?.clearMessage?.(signInMessage);

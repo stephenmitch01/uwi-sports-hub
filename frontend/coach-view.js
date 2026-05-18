@@ -64,6 +64,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     bindStaticEvents();
     clearMessage();
@@ -94,6 +97,9 @@
     }
   }
 
+  /**
+   * Binds one-time page controls that should not be recreated during data refreshes.
+   */
   function bindStaticEvents() {
     if (els.printBtn) {
       els.printBtn.addEventListener("click", function () {
@@ -121,11 +127,17 @@
     return (params.get("id") || params.get("coachId") || "").trim();
   }
 
+  /**
+   * Fetches the selected coach record before assignment normalization and rendering.
+   */
   async function loadCoach() {
     const data = await APP.apiGet(`/coaches/${encodeURIComponent(state.coachId)}`);
     state.coach = normalizeCoach(data?.coach || data?.data?.coach || data?.data || data || null);
   }
 
+  /**
+   * Fetches teams used to resolve relationship IDs into display labels and links.
+   */
   async function loadTeams() {
     const data = await APP.apiGet("/teams?includeArchived=true", true);
     state.teams =
@@ -136,6 +148,9 @@
       [];
   }
 
+  /**
+   * Loads staff assignment rows so the view can merge embedded and current relationship data.
+   */
   async function loadCoachAssignments() {
     const data = await APP.apiGet(`/team-staff-assignments?coachId=${encodeURIComponent(state.coachId)}`, true);
     const rows =
@@ -150,6 +165,9 @@
     });
   }
 
+  /**
+   * Normalizes coach/profile fields from current and legacy response shapes before display.
+   */
   function normalizeCoach(raw) {
     const coach = raw && typeof raw === "object" ? raw : {};
     return {
@@ -177,6 +195,9 @@
     }
   }
 
+  /**
+   * Renders the coach profile from normalized identity, role, and assignment data.
+   */
   function renderCoachView() {
     const coach = state.coach;
     const assignments = getAssignments(coach);
@@ -231,6 +252,9 @@
     renderAssignments(assignments);
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateCoachEditForm(coach) {
     const sportSelect = document.getElementById("editCoachSport");
     if (sportSelect) {
@@ -255,6 +279,9 @@
     setField("editCoachNotes", coach.notes);
   }
 
+  /**
+   * Persists coach edits and active team assignment changes in one operational workflow.
+   */
   async function handleEditCoachSubmit(event) {
     event.preventDefault();
     clearEditMessage();
@@ -298,6 +325,9 @@
     }
   }
 
+  /**
+   * Adds archive behavior after data load so warnings can include the current record context.
+   */
   function mountArchiveButton() {
     if (!els.editCoachBtn || document.getElementById("archiveCoachBtn")) return;
     const button = document.createElement("button");
@@ -357,6 +387,9 @@
     return `<div class="${wrapperClass}"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
+  /**
+   * Renders the assignments section from normalized page state without mutating backend data.
+   */
   function renderAssignments(assignments) {
     if (!els.assignmentTableBody || !els.assignmentTableWrap || !els.assignmentEmptyState) return;
     els.assignmentTableBody.innerHTML = "";
@@ -389,6 +422,9 @@
     els.assignmentTableBody.appendChild(fragment);
   }
 
+  /**
+   * Renders the teams summary section from normalized page state without mutating backend data.
+   */
   function renderTeamsSummary(assignments) {
     if (!els.teamsSummaryBody || !els.teamsSummaryWrap || !els.teamsSummaryEmptyState) return;
     els.teamsSummaryBody.innerHTML = "";
@@ -428,6 +464,9 @@
     }) || null;
   }
 
+  /**
+   * Renders the empty state section from normalized page state without mutating backend data.
+   */
   function renderEmptyState(title, message) {
     if (els.assignmentTableWrap) els.assignmentTableWrap.classList.add("hidden");
     if (els.assignmentEmptyState) {
@@ -515,6 +554,9 @@
     els.pageMessage.textContent = message || "";
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     if (!els.pageMessage) return;
     els.pageMessage.className = "message";

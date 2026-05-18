@@ -33,6 +33,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "Hockey Score Sheet" });
     if (!session) return;
@@ -63,6 +66,9 @@
     }
   }
 
+  /**
+   * Builds the initial page UI from loaded campus-scoped data and default workflow state.
+   */
   function renderPage() {
     const title = state.competition?.title || state.competition?.name || "Hockey Competition";
     els.heading.textContent = `${title} Score Sheet`;
@@ -79,6 +85,9 @@
     renderPenaltyRows();
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     APP.trackUnsavedChanges(els.form);
     els.teamSelect.addEventListener("change", () => {
@@ -97,6 +106,9 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  /**
+   * Renders the roster section from normalized page state without mutating backend data.
+   */
   function renderRoster() {
     const roster = getRosterAthletes();
     els.rosterGrid.innerHTML = Array.from({ length: 18 }, (_, index) => {
@@ -105,6 +117,9 @@
     }).join("");
   }
 
+  /**
+   * Renders the scoring rows section from normalized page state without mutating backend data.
+   */
   function renderScoringRows() {
     els.homeScoringRows.innerHTML = Array.from({ length: 12 }, (_, index) => scoringRow("home", index + 1, true)).join("");
     els.visitScoringRows.innerHTML = Array.from({ length: 12 }, (_, index) => scoringRow("visit", index + 1, false)).join("");
@@ -115,6 +130,9 @@
     return `<tr><td><input class="input" id="${id}Number" type="number" min="0"/></td><td>${uwiSide ? playerControl(`${id}Scorer`) : `<input class="input" id="${id}ScorerName" type="text" value="Opp ${row}"/>`}</td><td><select class="select" id="${id}Period"><option value="">Period</option><option>1</option><option>2</option><option>3</option><option>OT</option></select></td><td><input class="input" id="${id}Goal" type="number" min="0" max="1"/></td><td>${uwiSide ? playerControl(`${id}Assist1`, "Assist 1") : `<input class="input" id="${id}Assist1Name" type="text"/>`}</td><td>${uwiSide ? playerControl(`${id}Assist2`, "Assist 2") : `<input class="input" id="${id}Assist2Name" type="text"/>`}</td></tr>`;
   }
 
+  /**
+   * Renders the penalty rows section from normalized page state without mutating backend data.
+   */
   function renderPenaltyRows() {
     els.homePenaltyRows.innerHTML = Array.from({ length: 8 }, (_, index) => penaltyRow("home", index + 1, true)).join("");
     els.visitPenaltyRows.innerHTML = Array.from({ length: 8 }, (_, index) => penaltyRow("visit", index + 1, false)).join("");
@@ -138,6 +156,9 @@
     });
   }
 
+  /**
+   * Recalculates derived display values from editable fields without saving until submit.
+   */
   function updateDerivedFields() {
     setValue("visitTeamLabel", opponentName(), false);
     setValue("homePeriodLabel", getUwiTeamName(), false);
@@ -153,6 +174,9 @@
     setValue("penaltyMinutes", readPenalties("home", true).reduce((total, item) => total + (item.minutes || 0), 0));
   }
 
+  /**
+   * Builds result text from score inputs while leaving manual corrections possible before save.
+   */
   function deriveResult(homeTotal, visitTotal) {
     if (homeTotal === 0 && visitTotal === 0 && !hasScoreEntered()) return "";
     if (homeTotal > visitTotal) return `${getUwiTeamName()} won ${homeTotal}-${visitTotal}`;
@@ -160,6 +184,9 @@
     return `Draw ${homeTotal}-${visitTotal}`;
   }
 
+  /**
+   * Validates and persists the workflow payload through the shared API helper.
+   */
   async function handleSubmit(event) {
     event.preventDefault();
     clearMessage();
@@ -208,6 +235,9 @@
     }
   }
 
+  /**
+   * Reads scoring values into the structured payload consumed by reports and result views.
+   */
   function readScoring(side, uwiSide) {
     return Array.from({ length: 12 }, (_, index) => {
       const row = index + 1;
@@ -230,6 +260,9 @@
     }).filter((row) => row.period || row.scorerAthleteId || row.scorerName || row.assist1AthleteId || row.assist2AthleteId);
   }
 
+  /**
+   * Reads penalties values into the structured payload consumed by reports and result views.
+   */
   function readPenalties(side, uwiSide) {
     return Array.from({ length: 8 }, (_, index) => {
       const row = index + 1;
@@ -247,6 +280,9 @@
     return readScoring("home", true).reduce((total, row) => total + (row.assist1AthleteId || row.assist1Name ? 1 : 0) + (row.assist2AthleteId || row.assist2Name ? 1 : 0), 0);
   }
 
+  /**
+   * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
+   */
   function getRosterAthletes() {
     const teamId = els.teamSelect.value;
     if (!teamId) return state.athletes.filter((athlete) => APP.athleteHasSport(athlete, "hockey"));
@@ -258,6 +294,9 @@
     return ids.map((id) => state.athletes.find((athlete) => String(athlete.id) === String(id))).filter(Boolean);
   }
 
+  /**
+   * Handles the roster select change workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleRosterSelectChange(select) {
     if (select.value !== "__quick_add__") {
       refreshRosterPlayerOptions();
@@ -279,15 +318,24 @@
     return displayName(state.athletes.find((athlete) => String(athlete.id) === String(id)));
   }
 
+  /**
+   * Resolves the selected UWI team label from backend data for saved statData and display.
+   */
   function getUwiTeamName() {
     const team = state.teams.find((item) => String(item.id) === String(els.teamSelect.value));
     return els.homeTeamLabel.value.trim() || team?.name || team?.teamName || "UWI Team";
   }
 
+  /**
+   * Returns the typed opponent label, falling back only when staff did not enter one.
+   */
   function opponentName() {
     return els.opponentName.value.trim() || "Opponent";
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.teams)) return payload.teams;
@@ -333,21 +381,33 @@
     return date.toISOString().slice(0, 10);
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     els.message.className = "message";
     els.message.textContent = "";
   }
 
+  /**
+   * Displays blocking load errors without throwing away the signed-in shell.
+   */
   function showPageError(text) {
     els.pageMessage.className = "message error is-visible";
     els.pageMessage.textContent = text;
   }
 
+  /**
+   * Displays recoverable workflow errors near the relevant form or result section.
+   */
   function showError(text) {
     els.message.className = "message error is-visible";
     els.message.textContent = text;
   }
 
+  /**
+   * Confirms successful backend persistence without changing page state unexpectedly.
+   */
   function showSuccess(text) {
     els.message.className = "message success is-visible";
     els.message.textContent = text;

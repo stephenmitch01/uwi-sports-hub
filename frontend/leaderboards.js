@@ -50,6 +50,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const active = state.scope === "competition" ? "competitions" : "teams";
     const session = await APP.mountSignedInShell({ active, contextLabel: "Leaderboards" });
@@ -88,6 +91,9 @@
     render();
   }
 
+  /**
+   * Renders the current state into the page without mutating backend data.
+   */
   function render() {
     const metrics = getMetrics();
     if (!state.metric) {
@@ -162,6 +168,9 @@
     }
   }
 
+  /**
+   * Builds rows from shared state so markup and payload labels stay consistent.
+   */
   function buildRows() {
     const metrics = getMetrics();
     const map = new Map();
@@ -442,6 +451,9 @@
     return APP.normalizeSportSlug(state.team?.sportSlug || state.team?.sport || state.competition?.sportSlug || state.competition?.sport || state.statLines[0]?.sportSlug || state.statLines[0]?.sport);
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.data)) return payload.data;
@@ -450,6 +462,9 @@
     return [];
   }
 
+  /**
+   * Normalizes stat line data across current API and legacy nested shapes.
+   */
   function normalizeStatLine(line) {
     const data = line?.statData && typeof line.statData === "object" ? line.statData : line?.data?.statData || line?.data || {};
     return { ...line, statData: data };
@@ -512,6 +527,9 @@
     });
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateSportFilters() {
     const sportSlug = getSportSlug();
     if (els.eventFilterWrap) els.eventFilterWrap.classList.toggle("hidden", sportSlug !== "track-and-field");
@@ -575,6 +593,9 @@
     return inningOvers.length ? Math.max(...inningOvers) : 0;
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateCompetitionFilter() {
     if (!els.competitionFilter) return;
     const options = getCompetitionOptions();

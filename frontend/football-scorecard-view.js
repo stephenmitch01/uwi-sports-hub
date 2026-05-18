@@ -19,6 +19,9 @@
   };
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "View Football Score Sheet" });
     if (!session) return;
@@ -41,6 +44,9 @@
     }
   }
 
+  /**
+   * Renders the current state into the page without mutating backend data.
+   */
   function render(data) {
     const rows = Array.isArray(data.playerStats) ? data.playerStats : [];
     const goals = Array.isArray(data.goals) ? data.goals : [];
@@ -73,10 +79,16 @@
     `;
   }
 
+  /**
+   * Renders the player row section from normalized page state without mutating backend data.
+   */
   function renderPlayerRow(row) {
     return `<tr><td>${escapeHtml(row.number ?? "")}</td><td>${playerLink(row.athleteId, row.name)}</td><td>${escapeHtml(row.shots ?? "")}</td><td>${escapeHtml(row.shotsOnTarget ?? "")}</td><td>${escapeHtml(row.assists ?? "")}</td><td>${escapeHtml(row.goals ?? "")}</td><td>${escapeHtml(row.goalsConceded ?? "")}</td><td>${escapeHtml(row.saves ?? "")}</td><td>${escapeHtml(row.fouls ?? "")}</td><td>${escapeHtml(row.offsides ?? row.offside ?? "")}</td><td>${escapeHtml(row.yellowCards ?? "")}</td><td>${escapeHtml(row.redCards ?? "")}</td><td>${escapeHtml(row.minutes ?? "")}</td></tr>`;
   }
 
+  /**
+   * Renders the goal section from normalized page state without mutating backend data.
+   */
   function renderGoal(goal) {
     const scorer = goal.scorerAthleteId ? playerLink(goal.scorerAthleteId, goal.scorerName) : escapeHtml(goal.scorerName || "Opponent");
     const assist = goal.assistAthleteId ? `, assist ${playerLink(goal.assistAthleteId, goal.assistName)}` : "";
@@ -135,6 +147,9 @@
     return id ? `<a href="athlete-view.html?athleteId=${encodeURIComponent(id)}">${safeName}</a>` : safeName;
   }
 
+  /**
+   * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
+   */
   function normalizeLine(row) {
     const data = row?.statData && typeof row.statData === "object" ? row.statData : row?.data?.statData && typeof row.data.statData === "object" ? row.data.statData : row?.data && typeof row.data === "object" ? row.data : {};
     return { ...row, ...data, id: row.id, competitionId: row.competitionId || data.competitionId, eventName: row.eventName || data.eventName || data.title, date: row.date || data.date || row.createdAt, statData: data };

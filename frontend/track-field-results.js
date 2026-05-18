@@ -39,6 +39,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "Track and Field Results" });
     if (!session) return;
@@ -74,6 +77,9 @@
     }
   }
 
+  /**
+   * Builds the initial page UI from loaded campus-scoped data and default workflow state.
+   */
   function renderPage() {
     const title = state.competition?.title || state.competition?.name || "Track and Field Competition";
     els.heading.textContent = `${title} Results Entry`;
@@ -88,6 +94,9 @@
     renderFieldRows();
   }
 
+  /**
+   * Prefills edit mode from the saved result sheet while preserving linked athlete/opponent rows.
+   */
   function applyExistingResults() {
     const row = state.scorecard || {};
     const data = row.statData || row.data?.statData || {};
@@ -112,6 +121,9 @@
     renderFieldRowsFrom(data.entries || []);
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     APP.trackUnsavedChanges(els.form);
     els.resultKind.addEventListener("change", () => {
@@ -135,6 +147,9 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateMode() {
     const kind = getKind();
     els.trackSheet.classList.toggle("is-hidden", kind !== "track");
@@ -143,20 +158,32 @@
     els.fieldEventLabel.textContent = buildEventLabel() || "Field Event";
   }
 
+  /**
+   * Renders the track rows section from normalized page state without mutating backend data.
+   */
   function renderTrackRows() {
     const previous = readTrackResults();
     els.trackRows.innerHTML = Array.from({ length: TRACK_ROW_COUNT }, (_, index) => trackRow(index + 1, previous[index] || {})).join("");
   }
 
+  /**
+   * Renders the field rows section from normalized page state without mutating backend data.
+   */
   function renderFieldRows() {
     const previous = readFieldResults();
     els.fieldRows.innerHTML = Array.from({ length: FIELD_ROW_COUNT }, (_, index) => fieldRow(index + 1, previous[index] || {})).join("");
   }
 
+  /**
+   * Renders track rows rows from normalized page state without mutating backend data.
+   */
   function renderTrackRowsFrom(entries) {
     els.trackRows.innerHTML = Array.from({ length: TRACK_ROW_COUNT }, (_, index) => trackRow(index + 1, entries[index] || {})).join("");
   }
 
+  /**
+   * Renders field rows rows from normalized page state without mutating backend data.
+   */
   function renderFieldRowsFrom(entries) {
     els.fieldRows.innerHTML = Array.from({ length: FIELD_ROW_COUNT }, (_, index) => fieldRow(index + 1, entries[index] || {})).join("");
   }
@@ -212,6 +239,9 @@
    * Field events rank by best legal mark, track events rank by parsed time, and
    * DNS/DNF/DQ/NM-style values are preserved instead of forced into numbers.
    */
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateDerivedFields() {
     updateMode();
     const kind = getKind();
@@ -228,6 +258,9 @@
     setValue("winnerResult", winner ? `${winner.name || "Winner"} - ${kind === "track" ? winner.time : winner.best}` : "");
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateFieldDerived() {
     const rows = readFieldResults();
     const afterThree = rows.filter(hasFieldData).sort((a, b) => (b.best1Number ?? -1) - (a.best1Number ?? -1));
@@ -303,6 +336,9 @@
     }
   }
 
+  /**
+   * Reads track meta values into the structured payload consumed by reports and result views.
+   */
   function readTrackMeta() {
     return {
       heatNumber: valueOf("heatNumber"),
@@ -313,6 +349,9 @@
     };
   }
 
+  /**
+   * Reads field meta values into the structured payload consumed by reports and result views.
+   */
   function readFieldMeta() {
     return {
       fieldEventType: valueOf("fieldEventType"),
@@ -322,6 +361,9 @@
     };
   }
 
+  /**
+   * Serializes track rows, preserving manual opponent entries and linked UWI athlete IDs.
+   */
   function readTrackResults() {
     return Array.from({ length: TRACK_ROW_COUNT }, (_, index) => {
       const place = index + 1;
@@ -346,6 +388,9 @@
     });
   }
 
+  /**
+   * Serializes field rows and legal marks so PB/report logic can use official attempts.
+   */
   function readFieldResults() {
     return Array.from({ length: FIELD_ROW_COUNT }, (_, index) => {
       const rank = index + 1;
@@ -394,6 +439,9 @@
     return legal.reduce((best, item) => item.number > best.number ? item : best, legal[0]);
   }
 
+  /**
+   * Supports quick-add from score sheets when an eligible athlete record is missing.
+   */
   async function handleAthleteSelectChange(select) {
     if (select.value !== "__quick_add__") return;
     const athlete = await APP.quickAddAthleteForTeam({ teamId: els.teamSelect.value, teamName: getUwiTeamName(), sportSlug: "track-and-field" });
@@ -409,17 +457,26 @@
     if (target) target.value = selectedId;
   }
 
+  /**
+   * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
+   */
   function getRosterAthletes() {
     const teamId = els.teamSelect.value;
     if (!teamId) return state.athletes.filter((athlete) => APP.athleteHasSport(athlete, "track-and-field"));
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  /**
+   * Resolves the selected UWI team label from backend data for saved statData and display.
+   */
   function getUwiTeamName() {
     const team = state.teams.find((item) => String(item.id) === String(els.teamSelect.value));
     return team?.name || team?.teamName || "UWI Track and Field";
   }
 
+  /**
+   * Builds event label from shared state so markup and payload labels stay consistent.
+   */
   function buildEventLabel() {
     return [els.eventNumber.value && `Event ${els.eventNumber.value}`, els.roundType.value, els.eventName.value].filter(Boolean).join(" • ");
   }
@@ -448,6 +505,9 @@
     return `${number}${suffix}`;
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload, key) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.[key])) return payload[key];
@@ -481,21 +541,33 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     els.message.className = "message";
     els.message.textContent = "";
   }
 
+  /**
+   * Displays blocking load errors without throwing away the signed-in shell.
+   */
   function showPageError(text) {
     els.pageMessage.className = "message error is-visible";
     els.pageMessage.textContent = text;
   }
 
+  /**
+   * Displays recoverable workflow errors near the relevant form or result section.
+   */
   function showError(text) {
     els.message.className = "message error is-visible";
     els.message.textContent = text;
   }
 
+  /**
+   * Confirms successful backend persistence without changing page state unexpectedly.
+   */
   function showSuccess(text) {
     els.message.className = "message success is-visible";
     els.message.textContent = text;

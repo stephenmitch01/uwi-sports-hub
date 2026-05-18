@@ -25,6 +25,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "athletes", contextLabel: "Track and Field Stats" });
     if (!session) return;
@@ -46,6 +49,9 @@
     }
   }
 
+  /**
+   * Renders the current state into the page without mutating backend data.
+   */
   function render(rows) {
     const scoped = rows.filter((row) => {
       const seasonOk = selectedSeason === "all" || String(row.season || "") === selectedSeason;
@@ -137,11 +143,17 @@
     return type === "field" || ["horizontal-jump", "vertical-jump", "throw"].includes(type);
   }
 
+  /**
+   * Binds the scope filters interactions once so rerenders do not duplicate listeners.
+   */
   function bindScopeFilters() {
     document.getElementById("seasonScope")?.addEventListener("change", updateScope);
     document.getElementById("competitionScope")?.addEventListener("change", updateScope);
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateScope() {
     const url = new URL(window.location.href);
     url.searchParams.set("athleteId", athleteId);
@@ -150,11 +162,17 @@
     window.location.href = url.toString();
   }
 
+  /**
+   * Normalizes row data across current API and legacy nested shapes.
+   */
   function normalizeRow(row) {
     const data = row?.statData && typeof row.statData === "object" ? row.statData : row?.data?.statData || row?.data || {};
     return { ...row, statData: data, date: row.date || data.date || row.createdAt };
   }
   function mini(label, value, sub) { return `<div class="mini-card"><div class="mini-label">${escapeHtml(label)}</div><div class="mini-value">${escapeHtml(value)}</div><div class="mini-sub">${escapeHtml(sub)}</div></div>`; }
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload) { if (Array.isArray(payload)) return payload; if (Array.isArray(payload?.data)) return payload.data; if (Array.isArray(payload?.stats)) return payload.stats; return []; }
   function unique(values) { return [...new Set(values)]; }
   function uniqueBy(rows, getKey) { const map = new Map(); rows.forEach((row) => { const key = getKey(row); if (key && !map.has(key)) map.set(key, row); }); return Array.from(map.values()); }

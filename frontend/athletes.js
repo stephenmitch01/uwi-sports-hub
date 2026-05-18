@@ -107,6 +107,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     try {
       const session = await APP.mountSignedInShell({
@@ -155,6 +158,9 @@
     renderAll(selectedAthleteId);
   }
 
+  /**
+   * Binds the filters interactions once so rerenders do not duplicate listeners.
+   */
   function bindFilters() {
     [els.searchInput, els.statusFilter, els.athleteTypeFilter, els.athleteGenderFilter, els.athleteSportFilter, els.athleteQualityFilter].forEach((node) => {
       if (!node) return;
@@ -165,6 +171,9 @@
     mountRecentSearches("athletes");
   }
 
+  /**
+   * Handles the filter change workflow and keeps side effects inside the intended API/action path.
+   */
   function handleFilterChange() {
     const panel = document.getElementById("athleteRegistryPanel");
     if (hasActiveRegistryFilter() && panel) panel.open = true;
@@ -189,6 +198,9 @@
     renderAthletesTable();
   }
 
+  /**
+   * Binds the workflow links interactions once so rerenders do not duplicate listeners.
+   */
   function bindWorkflowLinks() {
     document.querySelectorAll("a[href='#athleteWorkflows']").forEach((link) => {
       link.addEventListener("click", () => {
@@ -201,6 +213,9 @@
     });
   }
 
+  /**
+   * Binds the workflow close interactions once so rerenders do not duplicate listeners.
+   */
   function bindWorkflowClose() {
     const panel = document.getElementById("athleteWorkflows");
     if (!panel) return;
@@ -209,6 +224,9 @@
     });
   }
 
+  /**
+   * Binds the create form interactions once so rerenders do not duplicate listeners.
+   */
   function bindCreateForm() {
     if (!els.athleteCreateForm) return;
 
@@ -247,6 +265,9 @@
     });
   }
 
+  /**
+   * Binds the edit form interactions once so rerenders do not duplicate listeners.
+   */
   function bindEditForm() {
     if (els.editAthleteSelect) {
       els.editAthleteSelect.addEventListener("change", () => {
@@ -289,12 +310,18 @@
     });
   }
 
+  /**
+   * Renders the registry table and summary widgets from the current campus-scoped athlete state.
+   */
   function renderAll(selectedAthleteId = "") {
     renderAthleteEditSelect(selectedAthleteId);
     renderOperationalSummary();
     renderAthletesTable();
   }
 
+  /**
+   * Renders the operational summary section from normalized page state without mutating backend data.
+   */
   function renderOperationalSummary() {
     const athletes = getCampusAthletes();
     const active = athletes.filter((athlete) => normalizeStatus(athlete.status) !== "inactive");
@@ -340,6 +367,9 @@
     return Math.round((checks.filter(Boolean).length / checks.length) * 100);
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateCampusLabels() {
     const campusLabel = APP.getCampusMeta(state.session.campus).name;
     els.campusNameNodes.forEach((node) => {
@@ -347,6 +377,9 @@
     });
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateSportSelects() {
     const options = APP.SPORT_REGISTRY.map(
       (sport) => `<option value="${escapeHtml(sport.slug)}">${escapeHtml(sport.name)}</option>`
@@ -360,6 +393,9 @@
     if (els.athleteSportFilter) els.athleteSportFilter.innerHTML = filterOptions;
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateCampusTeamSelects(selectedTeamId = "") {
     const teams = getCampusTeams();
 
@@ -381,6 +417,9 @@
     }
   }
 
+  /**
+   * Renders the athlete edit select section from normalized page state without mutating backend data.
+   */
   function renderAthleteEditSelect(selectedAthleteId = "") {
     if (!els.editAthleteSelect) return;
 
@@ -405,6 +444,9 @@
     }
   }
 
+  /**
+   * Loads selected athlete into form data required by later normalization and rendering steps.
+   */
   function loadSelectedAthleteIntoForm(athleteId) {
     const athlete = state.athletes.find((item) => String(item.id) === String(athleteId));
 
@@ -490,6 +532,9 @@
     populateCampusTeamSelects("");
   }
 
+  /**
+   * Renders the athletes table section from normalized page state without mutating backend data.
+   */
   function renderAthletesTable() {
     if (!els.athletesTableBody) return;
 
@@ -552,6 +597,9 @@
     updateBulkActionBar(athletes);
   }
 
+  /**
+   * Binds the bulk actions interactions once so rerenders do not duplicate listeners.
+   */
   function bindBulkActions() {
     if (els.athleteSelectAll) {
       els.athleteSelectAll.addEventListener("change", () => {
@@ -575,6 +623,9 @@
     }
   }
 
+  /**
+   * Binds the row selection controls interactions once so rerenders do not duplicate listeners.
+   */
   function bindRowSelectionControls(visibleAthletes) {
     document.querySelectorAll("[data-athlete-select]").forEach((checkbox) => {
       checkbox.addEventListener("change", () => {
@@ -587,6 +638,9 @@
     });
   }
 
+  /**
+   * Handles the bulk assign team workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleBulkAssignTeam() {
     clearMessage();
     const teamId = String(els.bulkAssignTeamSelect?.value || "").trim();
@@ -631,6 +685,9 @@
     });
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateBulkActionBar(visibleAthletes = getFilteredAthletes()) {
     const count = state.selectedAthleteIds.size;
     if (els.athleteBulkActionBar) els.athleteBulkActionBar.hidden = count === 0;
@@ -699,6 +756,9 @@
     return payload;
   }
 
+  /**
+   * Builds athlete record from shared state so markup and payload labels stay consistent.
+   */
   function buildAthleteRecord(payload, existingAthlete) {
     const base = existingAthlete && typeof existingAthlete === "object" ? existingAthlete : {};
     const profile = base.profile && typeof base.profile === "object" ? base.profile : {};
@@ -836,6 +896,9 @@
     }
   }
 
+  /**
+   * Normalizes collection data across current API and legacy nested shapes.
+   */
   function normalizeCollection(payload, keys) {
     if (Array.isArray(payload)) return payload;
     if (!payload || typeof payload !== "object") return [];
@@ -850,6 +913,9 @@
     return [];
   }
 
+  /**
+   * Normalizes team record data across current API and legacy nested shapes.
+   */
   function normalizeTeamRecord(team) {
     if (!team || typeof team !== "object") return {};
     return {
@@ -861,6 +927,9 @@
     };
   }
 
+  /**
+   * Normalizes athlete record data across current API and legacy nested shapes.
+   */
   function normalizeAthleteRecord(athlete) {
     if (!athlete || typeof athlete !== "object") return {};
     const profile = athlete.profile && typeof athlete.profile === "object" ? athlete.profile : {};
@@ -1001,6 +1070,9 @@
     return age >= 0 && age < 120 ? String(age) : "";
   }
 
+  /**
+   * Normalizes gender data across current API and legacy nested shapes.
+   */
   function normalizeGender(value) {
     const raw = String(value || "").trim().toLowerCase();
     if (raw === "m" || raw === "male") return "male";
@@ -1015,10 +1087,16 @@
     return "Not recorded";
   }
 
+  /**
+   * Normalizes status data across current API and legacy nested shapes.
+   */
   function normalizeStatus(value) {
     return String(value || "").trim().toLowerCase() === "inactive" ? "inactive" : "active";
   }
 
+  /**
+   * Normalizes campus data across current API and legacy nested shapes.
+   */
   function normalizeCampus(value) {
     return APP.normalizeCampus(value);
   }
@@ -1044,6 +1122,9 @@
     APP.showMessage?.(els.pageMessage, message, "error");
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     APP.clearMessage?.(els.pageMessage);
   }
@@ -1056,6 +1137,9 @@
     if (node) node.textContent = String(value);
   }
 
+  /**
+   * Renders the insight list section from normalized page state without mutating backend data.
+   */
   function renderInsightList(node, rows, emptyText) {
     if (!node) return;
     const activeRows = rows.filter((row) => Number(row.value) > 0);
@@ -1071,6 +1155,9 @@
     `).join("");
   }
 
+  /**
+   * Binds the insight actions interactions once so rerenders do not duplicate listeners.
+   */
   function bindInsightActions() {
     document.addEventListener("click", (event) => {
       const action = event.target.closest(".insight-action[data-target]");
@@ -1088,6 +1175,9 @@
     });
   }
 
+  /**
+   * Renders the activity list section from normalized page state without mutating backend data.
+   */
   function renderActivityList(node, records) {
     if (!node) return;
     if (!records.length) {
@@ -1114,6 +1204,9 @@
     return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || record.date || "") || 0;
   }
 
+  /**
+   * Renders the quality section from normalized page state without mutating backend data.
+   */
   function renderQuality(scoreNode, barNode, copyNode, score, copy) {
     setText(scoreNode, `${score}%`);
     if (barNode) barNode.style.width = `${Math.max(0, Math.min(100, score))}%`;
@@ -1125,6 +1218,9 @@
     return `<div class="completeness-cell"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
+  /**
+   * Reads file as data url values into the structured payload consumed by reports and result views.
+   */
   function readFileAsDataUrl(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1148,6 +1244,9 @@
     APP.saveRecentSearch(scope, label, values);
   }
 
+  /**
+   * Mounts the recent searches feature after required context has loaded.
+   */
   function mountRecentSearches(scope) {
     if (!APP.renderRecentSearches || !els.athleteSearchButton?.parentElement) return;
     document.querySelector(`[data-recent-searches='${scope}']`)?.remove();

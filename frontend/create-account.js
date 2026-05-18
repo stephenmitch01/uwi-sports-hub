@@ -32,6 +32,9 @@
 
   createAccountForm?.addEventListener("submit", handleSubmit);
 
+  /**
+   * Validates and persists the workflow payload through the shared API helper.
+   */
   async function handleSubmit(event) {
     event.preventDefault();
     APP?.clearMessage?.(createAccountMessage);

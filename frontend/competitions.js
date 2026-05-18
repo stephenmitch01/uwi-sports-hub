@@ -39,6 +39,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     state.session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "Competitions" });
     if (!state.session) {
@@ -59,6 +62,9 @@
     renderCompetitionsTable();
   }
 
+  /**
+   * Binds the create panel link interactions once so rerenders do not duplicate listeners.
+   */
   function bindCreatePanelLink() {
     document.querySelectorAll('a[href="#competitionCreatePanel"]').forEach((link) => {
       link.addEventListener("click", () => {
@@ -71,6 +77,9 @@
     });
   }
 
+  /**
+   * Binds the create panel close interactions once so rerenders do not duplicate listeners.
+   */
   function bindCreatePanelClose() {
     const panel = document.getElementById("competitionCreatePanel");
     if (!panel) return;
@@ -79,6 +88,9 @@
     });
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateFilters() {
     if (els.sportFilter) {
       els.sportFilter.innerHTML = `
@@ -102,6 +114,9 @@
 }
   }
 
+  /**
+   * Renders the competitions page shell section from normalized page state without mutating backend data.
+   */
   function renderCompetitionsPageShell() {
     if (!els.competitionsEmpty) return;
 
@@ -178,6 +193,9 @@
     bindCompetitionCreateForm();
   }
 
+  /**
+   * Binds the competition create form interactions once so rerenders do not duplicate listeners.
+   */
   function bindCompetitionCreateForm() {
     const form = document.getElementById("competitionCreateForm");
     const messageEl = document.getElementById("competitionsPageMessage");
@@ -248,6 +266,9 @@
     });
   }
 
+  /**
+   * Binds the competition filters interactions once so rerenders do not duplicate listeners.
+   */
   function bindCompetitionFilters() {
     [els.searchInput, els.sportFilter, els.campusFilter, els.formatFilter, els.qualityFilter].forEach((node) => {
       if (!node) return;
@@ -258,6 +279,9 @@
     mountRecentSearches("competitions");
   }
 
+  /**
+   * Handles the filter change workflow and keeps side effects inside the intended API/action path.
+   */
   function handleFilterChange() {
     const panel = document.getElementById("competitionsListPanel");
     if (hasActiveRegistryFilter() && panel) panel.open = true;
@@ -273,6 +297,9 @@
     renderCompetitionsTable();
   }
 
+  /**
+   * Loads competitions data required by later normalization and rendering steps.
+   */
   async function loadCompetitions() {    try {
       const data = await APP.apiGet("/competitions?includeArchived=true", true);
       state.competitions =
@@ -291,6 +318,9 @@
     }
   }
 
+  /**
+   * Renders the competitions table section from normalized page state without mutating backend data.
+   */
   function renderCompetitionsTable() {
     if (!els.competitionsTableBody) return;
 
@@ -352,6 +382,9 @@
       .join("");
   }
 
+  /**
+   * Renders the hero stats section from normalized page state without mutating backend data.
+   */
   function renderHeroStats() {
     const sessionCampus = normalizeCampusFilter(state.session?.campus);
     const rows = state.competitions.filter((competition) => normalizeCampusFilter(competition.campusOwner || competition.campus || "") === sessionCampus && !APP.isArchivedRecord(competition));
@@ -362,6 +395,9 @@
     if (els.competitionsMissingResultsStat) els.competitionsMissingResultsStat.textContent = String(rows.filter((competition) => !hasCompetitionResults(competition)).length);
   }
 
+  /**
+   * Renders the operational summary section from normalized page state without mutating backend data.
+   */
   function renderOperationalSummary() {
     const sessionCampus = normalizeCampusFilter(state.session?.campus);
     const rows = state.competitions.filter((competition) => normalizeCampusFilter(competition.campusOwner || competition.campus || "") === sessionCampus && !APP.isArchivedRecord(competition));
@@ -460,6 +496,9 @@
     return map[normalized] || slug || "—";
   }
 
+  /**
+   * Normalizes campus filter data across current API and legacy nested shapes.
+   */
   function normalizeCampusFilter(value) {
     const raw = String(value || "").trim().toLowerCase();
     const map = {
@@ -477,6 +516,9 @@
     return map[raw] || raw;
   }
 
+  /**
+   * Normalizes format filter data across current API and legacy nested shapes.
+   */
   function normalizeFormatFilter(value) {
     const raw = String(value || "").trim().toLowerCase();
     const map = {
@@ -510,6 +552,9 @@
     return UWISportsHub.escapeHtml(value);
   }
 
+  /**
+   * Renders the insight list section from normalized page state without mutating backend data.
+   */
   function renderInsightList(node, rows, emptyText) {
     if (!node) return;
     const activeRows = rows.filter((row) => Number(row.value) > 0);
@@ -525,6 +570,9 @@
     `).join("");
   }
 
+  /**
+   * Binds the insight actions interactions once so rerenders do not duplicate listeners.
+   */
   function bindInsightActions() {
     document.addEventListener("click", (event) => {
       const action = event.target.closest(".insight-action[data-target]");
@@ -541,6 +589,9 @@
     });
   }
 
+  /**
+   * Renders the activity list section from normalized page state without mutating backend data.
+   */
   function renderActivityList(node, records) {
     if (!node) return;
     if (!records.length) {
@@ -567,6 +618,9 @@
     return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || record.startDate || "") || 0;
   }
 
+  /**
+   * Renders the quality section from normalized page state without mutating backend data.
+   */
   function renderQuality(scoreNode, barNode, copyNode, score, copy) {
     if (scoreNode) scoreNode.textContent = `${score}%`;
     if (barNode) barNode.style.width = `${Math.max(0, Math.min(100, score))}%`;
@@ -595,6 +649,9 @@
     APP.saveRecentSearch(scope, label, values);
   }
 
+  /**
+   * Mounts the recent searches feature after required context has loaded.
+   */
   function mountRecentSearches(scope) {
     if (!APP.renderRecentSearches || !els.searchButton?.parentElement) return;
     document.querySelector(`[data-recent-searches='${scope}']`)?.remove();

@@ -36,6 +36,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "athletes", contextLabel: "Cricket Stats" });
     if (!session) return;
@@ -57,6 +60,9 @@
     render(rows, athlete);
   }
 
+  /**
+   * Renders the current state into the page without mutating backend data.
+   */
   function render(rows, athlete) {
     const scopedRows = rows.filter((row) => {
       const seasonOk = selectedSeason === "all" || String(row.season || "") === selectedSeason;
@@ -117,6 +123,9 @@
     ]);
   }
 
+  /**
+   * Renders the drilldown section from normalized page state without mutating backend data.
+   */
   function renderDrilldown(rows, athlete) {
     const filtered = rowsOf(rows, selectedType).filter((row) => row.format === selectedFormat);
     const title = `${FORMAT_LABELS[selectedFormat] || selectedFormat} ${labelType(selectedType)}`;
@@ -279,6 +288,9 @@
     };
   }
 
+  /**
+   * Normalizes row data across current API and legacy nested shapes.
+   */
   function normalizeRow(raw) {
     const data = raw.statData && typeof raw.statData === "object" ? raw.statData : raw.data || {};
     return {
@@ -367,6 +379,9 @@
     Object.entries(overrides || {}).forEach(([key, value]) => next.set(key, value));
     return `athlete-cricket-stats.html?${next.toString()}`;
   }
+  /**
+   * Binds the scope filters interactions once so rerenders do not duplicate listeners.
+   */
   function bindScopeFilters() {
     document.getElementById("seasonScope")?.addEventListener("change", function () {
       window.location.href = baseUrl({ season: this.value });
@@ -376,6 +391,9 @@
     });
     document.querySelectorAll("[data-href]").forEach((row) => row.addEventListener("click", () => { window.location.href = row.dataset.href; }));
   }
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload) { if (Array.isArray(payload)) return payload; if (Array.isArray(payload?.data)) return payload.data; return []; }
   function displayName(a) { return a?.fullName || [a?.firstName, a?.lastName].filter(Boolean).join(" ") || "Athlete"; }
   function formatDate(value) { return value ? String(value).slice(0, 10) : "—"; }

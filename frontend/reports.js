@@ -80,6 +80,9 @@
     return node;
   }
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({
       active: "reports",
@@ -130,6 +133,9 @@
     }
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     [
       "reportCampus", "reportSport", "reportSeason", "reportType",
@@ -160,6 +166,9 @@
     });
   }
 
+  /**
+   * Handles the input change workflow and keeps side effects inside the intended API/action path.
+   */
   function handleInputChange(event) {
     const targetId = event && event.target ? event.target.id : "";
     if (["reportCampus", "reportSport", "reportSeason", "reportType"].includes(targetId)) {
@@ -193,6 +202,9 @@
     state.selectedCompetitionId = (els.reportCompetition && els.reportCompetition.value || state.selectedCompetitionId || "").trim();
   }
 
+  /**
+   * Loads report source data required by later normalization and rendering steps.
+   */
   async function loadReportData() {
     const [athletesRes, teamsRes, competitionsRes, athleteStatsRes] = await Promise.allSettled([
       APP.apiGet("/athletes", true),
@@ -207,12 +219,18 @@
     state.statLines = normalizeArray(athleteStatsRes, ["stats", "statLines", "data"], []).map(normalizeStat);
   }
 
+  /**
+   * Renders report selectors, generated output, and guidance from the loaded read-only data snapshot.
+   */
   function renderAll() {
     renderSelectionControls();
     renderReports();
     renderHelp();
   }
 
+  /**
+   * Renders the selection controls section from normalized page state without mutating backend data.
+   */
   function renderSelectionControls() {
     if (!els.reportSelectionCard) return;
 
@@ -336,6 +354,9 @@
     }
   }
 
+  /**
+   * Renders the reports section from normalized page state without mutating backend data.
+   */
   function renderReports() {
     if (!els.reportsList) return;
 
@@ -345,6 +366,9 @@
     els.reportsList.innerHTML = payload.html;
   }
 
+  /**
+   * Renders the help section from normalized page state without mutating backend data.
+   */
   function renderHelp() {
     if (!els.reportsHelp) return;
 
@@ -405,6 +429,9 @@
     `;
   }
 
+  /**
+   * Builds current report payload from shared state so markup and payload labels stay consistent.
+   */
   function buildCurrentReportPayload(forPreview) {
     if (!state.reportType) {
       return {
@@ -461,6 +488,9 @@
     };
   }
 
+  /**
+   * Renders the athlete report content section from normalized page state without mutating backend data.
+   */
   function renderAthleteReportContent(athlete, forPreview) {
     const athleteId = compactId(athlete.id || athlete.athleteId);
     const athleteSportSlug = getAthleteSportSlug(athlete);
@@ -684,6 +714,9 @@
     </div>`;
   }
 
+  /**
+   * Renders the team report content section from normalized page state without mutating backend data.
+   */
   function renderTeamReportContent(team, forPreview) {
     const teamId = compactId(team.id || team.teamId);
     const athletes = getFilteredAthletes().filter((athlete) => athleteHasTeam(athlete, teamId));
@@ -790,6 +823,9 @@
     </div>`;
   }
 
+  /**
+   * Renders the competition report content section from normalized page state without mutating backend data.
+   */
   function renderCompetitionReportContent(competition, forPreview) {
     const competitionId = compactId(competition.id || competition.competitionId);
     const stats = getFilteredStats().filter((row) => statRowMatchesCompetition(row, competitionId));
@@ -886,6 +922,9 @@
     </div>`;
   }
 
+  /**
+   * Renders the campus summary content section from normalized page state without mutating backend data.
+   */
   function renderCampusSummaryContent(forPreview) {
     const stats = getFilteredStats();
     const athletes = getFilteredAthletes();
@@ -957,6 +996,9 @@
     </div>`;
   }
 
+  /**
+   * Renders the report hero section from normalized page state without mutating backend data.
+   */
   function renderReportHero(config) {
     const pills = Array.isArray(config.pills) ? config.pills.filter(Boolean) : [];
     const meta = Array.isArray(config.meta) ? config.meta : [];
@@ -992,6 +1034,9 @@
     `;
   }
 
+  /**
+   * Renders the meta item section from normalized page state without mutating backend data.
+   */
   function renderMetaItem(label, value) {
     return `
       <div class="report-meta-item">
@@ -1109,6 +1154,9 @@
     return getAthleteTeamIds(athlete).includes(normalized);
   }
 
+  /**
+   * Builds athlete team history rows from shared state so markup and payload labels stay consistent.
+   */
   function buildAthleteTeamHistoryRows(athlete) {
     const assignments = getAthleteRosterAssignments(athlete);
     if (!assignments.length && (athlete.teamId || athlete.teamName || athlete.team)) {
@@ -1134,6 +1182,9 @@
     }).filter((row) => row.teamName || row.sportName || row.role || row.season || row.status);
   }
 
+  /**
+   * Builds athlete profile completeness from shared state so markup and payload labels stay consistent.
+   */
   function buildAthleteProfileCompleteness(athlete, profile) {
     const fields = [
       ["Name", getAthleteDisplayName(athlete) && getAthleteDisplayName(athlete) !== "Athlete"],
@@ -1175,6 +1226,9 @@
     }).filter((item) => item.title);
   }
 
+  /**
+   * Builds athlete report notes from shared state so markup and payload labels stay consistent.
+   */
   function buildAthleteReportNotes(athlete, completeness, stats, competitions) {
     const notes = [];
     if (completeness.missing.length) notes.push({ title: "Profile fields to update", detail: completeness.missing.join(", ") });
@@ -1310,6 +1364,9 @@
     return Array.from(map.values()).sort((a, b) => String(a.eventName || a.statName || "").localeCompare(String(b.eventName || b.statName || "")));
   }
 
+  /**
+   * Builds sport specific personal bests from shared state so markup and payload labels stay consistent.
+   */
   function buildSportSpecificPersonalBests(rows) {
     const output = [];
     const bySport = groupBy(rows, (row) => APP.normalizeSportSlug(row.sportSlug || row.sport || getRowStatData(row).sportSlug || getRowStatData(row).sport) || "general");
@@ -1324,6 +1381,9 @@
     return [];
   }
 
+  /**
+   * Builds cricket personal bests from shared state so markup and payload labels stay consistent.
+   */
   function buildCricketPersonalBests(rows) {
     const batting = rows.filter((row) => row.eventType === "batting");
     const bowling = rows.filter((row) => row.eventType === "bowling");
@@ -1347,6 +1407,9 @@
     return output;
   }
 
+  /**
+   * Builds track field personal bests from shared state so markup and payload labels stay consistent.
+   */
   function buildTrackFieldPersonalBests(rows) {
     const grouped = groupBy(rows, (row) => getRowStatData(row).eventName || row.statName || row.eventName || "Track and field event");
     return Array.from(grouped.entries()).map(([eventName, eventRows]) => {
@@ -1363,6 +1426,9 @@
     }).filter(Boolean);
   }
 
+  /**
+   * Builds team sport personal bests from shared state so markup and payload labels stay consistent.
+   */
   function buildTeamSportPersonalBests(rows, sportSlug) {
     const metricMap = {
       football: [["goals", "Most goals"], ["assists", "Most assists"], ["saves", "Most saves"], ["shots", "Most shots"]],
@@ -1394,6 +1460,9 @@
       .sort((a, b) => b.value - a.value)[0] || null;
   }
 
+  /**
+   * Builds athlete competition rows from shared state so markup and payload labels stay consistent.
+   */
   function buildAthleteCompetitionRows(rows) {
     const seen = new Map();
     rows.forEach((row) => {
@@ -1503,6 +1572,9 @@
     ].map(compactId).includes(normalized);
   }
 
+  /**
+   * Builds athlete performance summary from shared state so markup and payload labels stay consistent.
+   */
   function buildAthletePerformanceSummary(allStats, filteredStats) {
     const competitionCount = new Set(filteredStats.map((row) => row.competitionId || row.competitionName || row.competitionTitle || "")).size;
     return {
@@ -1512,6 +1584,9 @@
     };
   }
 
+  /**
+   * Builds athlete sport summary rows from shared state so markup and payload labels stay consistent.
+   */
   function buildAthleteSportSummaryRows(rows) {
     const grouped = groupBy(rows, (row) => APP.normalizeSportSlug(row.sportSlug || row.sport || getRowStatData(row).sportSlug || getRowStatData(row).sport) || "general");
     return Array.from(grouped.entries()).flatMap(([sportSlug, sportRows]) => {
@@ -1521,6 +1596,9 @@
     });
   }
 
+  /**
+   * Renders the athlete sport summary section from normalized page state without mutating backend data.
+   */
   function renderAthleteSportSummarySection(rows) {
     if (!rows.length) return "";
     return `
@@ -1547,6 +1625,9 @@
     `;
   }
 
+  /**
+   * Builds cricket summary rows from shared state so markup and payload labels stay consistent.
+   */
   function buildCricketSummaryRows(rows) {
     const batting = rows.filter((row) => row.eventType === "batting");
     const bowling = rows.filter((row) => row.eventType === "bowling");
@@ -1582,6 +1663,9 @@
     ].filter((row) => row.appearances);
   }
 
+  /**
+   * Builds track field summary rows from shared state so markup and payload labels stay consistent.
+   */
   function buildTrackFieldSummaryRows(rows) {
     const grouped = groupBy(rows, (row) => getRowStatData(row).eventName || row.statName || row.eventName || "Event");
     return Array.from(grouped.entries()).map(([eventName, eventRows]) => {
@@ -1597,6 +1681,9 @@
     });
   }
 
+  /**
+   * Builds generic sport summary rows from shared state so markup and payload labels stay consistent.
+   */
   function buildGenericSportSummaryRows(rows, sportSlug) {
     const fields = ["points", "goals", "assists", "rebounds", "steals", "blocks", "saves", "shots", "kills", "aces", "digs", "gains", "feeds"];
     const populated = fields
@@ -1611,6 +1698,9 @@
     }].filter((row) => row.appearances);
   }
 
+  /**
+   * Builds athlete season rows from shared state so markup and payload labels stay consistent.
+   */
   function buildAthleteSeasonRows(rows) {
     const grouped = groupBy(rows, (row) => row.season || getRowStatData(row).season || inferSeason(row.date || getRowStatData(row).date) || "Unknown");
     return Array.from(grouped.entries()).map(([season, seasonRows]) => {
@@ -1628,6 +1718,9 @@
     }).sort((a, b) => String(b.season).localeCompare(String(a.season), undefined, { numeric: true }));
   }
 
+  /**
+   * Renders the athlete season section from normalized page state without mutating backend data.
+   */
   function renderAthleteSeasonSection(rows) {
     if (!rows.length) return "";
     return `
@@ -1653,6 +1746,9 @@
     `;
   }
 
+  /**
+   * Builds track field summary from shared state so markup and payload labels stay consistent.
+   */
   function buildTrackFieldSummary(stats) {
     const tfRows = stats.filter((row) => APP.normalizeSportSlug(row.sportSlug || row.sport || getRowStatData(row).sportSlug || getRowStatData(row).sport) === "track-and-field");
     if (!tfRows.length) return null;
@@ -1668,6 +1764,9 @@
     };
   }
 
+  /**
+   * Builds sport schema summary from shared state so markup and payload labels stay consistent.
+   */
   function buildSportSchemaSummary(stats, sportFilter) {
     const rows = Array.isArray(stats) ? stats : [];
     const selectedSport = APP.normalizeSportSlug(sportFilter || "");
@@ -1704,6 +1803,9 @@
     });
   }
 
+  /**
+   * Renders the sport schema summary section from normalized page state without mutating backend data.
+   */
   function renderSportSchemaSummarySection(summary, title) {
     if (!summary || !summary.length) return "";
     return `
@@ -1863,6 +1965,9 @@
     return athlete.fullName || [athlete.firstName, athlete.lastName].filter(Boolean).join(" ").trim() || athlete.name || "Athlete";
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(result, preferredKeys, fallback) {
     if (!result) return fallback || [];
     const source = result.status === "fulfilled" ? result.value : null;
@@ -1877,6 +1982,9 @@
     return fallback || [];
   }
 
+  /**
+   * Normalizes stat data across current API and legacy nested shapes.
+   */
   function normalizeStat(row) {
     if (!row || typeof row !== "object") return {};
     const data = getRowStatData(row);

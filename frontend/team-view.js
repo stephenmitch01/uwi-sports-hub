@@ -80,6 +80,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     bindEvents();
     clearMessage(els.pageMessage);
@@ -113,6 +116,9 @@
     }
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     if (els.addAthleteForm) {
       els.addAthleteForm.addEventListener("submit", handleAddAthleteToTeam);
@@ -168,6 +174,9 @@
     els.teamSectionButtons.forEach((button) => button.classList.remove("is-active"));
   }
 
+  /**
+   * Refreshes all backend data for the page, then rerenders dependent sections from the same normalized state.
+   */
   async function refreshPage() {
     setSquadMessage("", "");
 
@@ -217,6 +226,9 @@
     renderAllSections();
   }
 
+  /**
+   * Renders every team detail section from normalized roster, staff, competition, and result state.
+   */
   function renderAllSections() {
     renderHead();
     renderTeamIdentity();
@@ -229,6 +241,9 @@
     populateTeamEditForm();
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateTeamEditForm() {
     if (!els.teamEditForm || !state.team) return;
     const sportSelect = document.getElementById("editTeamSport");
@@ -243,6 +258,9 @@
     setField("editTeamNotes", state.team.notes || "");
   }
 
+  /**
+   * Persists team edits used by roster, staff, competition, and result projections.
+   */
   async function handleEditTeam(event) {
     event.preventDefault();
     setEditMessage("", "");
@@ -270,6 +288,9 @@
     }
   }
 
+  /**
+   * Adds archive behavior after data load so warnings can include the current record context.
+   */
   function mountArchiveButton() {
     const button = els.archiveTeamBtn;
     if (!button || button.dataset.archiveBound === "true") return;
@@ -281,6 +302,9 @@
     });
   }
 
+  /**
+   * Handles the add athlete to team workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleAddAthleteToTeam(event) {
     event.preventDefault();
     setSquadMessage("", "");
@@ -322,6 +346,9 @@
     }
   }
 
+  /**
+   * Handles the add coach to team workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleAddCoachToTeam(event) {
     event.preventDefault();
     setSquadMessage("", "");
@@ -361,6 +388,9 @@
     }
   }
 
+  /**
+   * Renders the missing team selection section from normalized page state without mutating backend data.
+   */
   function renderMissingTeamSelection() {
     if (els.teamIdentity) {
       els.teamIdentity.innerHTML = emptyStateMarkup(
@@ -408,6 +438,9 @@
     if (els.teamSportPill) els.teamSportPill.textContent = "Sport";
   }
 
+  /**
+   * Renders the not found section from normalized page state without mutating backend data.
+   */
   function renderNotFound() {
     if (els.teamIdentity) {
       els.teamIdentity.innerHTML = emptyStateMarkup(
@@ -451,6 +484,9 @@
     if (els.teamStatusPill) els.teamStatusPill.textContent = "Unavailable";
   }
 
+  /**
+   * Renders the load failure section from normalized page state without mutating backend data.
+   */
   function renderLoadFailure(error) {
     const message = error?.message || "Team data could not be loaded.";
 
@@ -476,6 +512,9 @@
     setSquadMessage("Team details could not be loaded right now.", "error");
   }
 
+  /**
+   * Renders the head section from normalized page state without mutating backend data.
+   */
   function renderHead() {
     const team = state.team;
     const sportLabel = getSportName(team.sport || team.sportSlug || team.sportName);
@@ -508,6 +547,9 @@
     if (els.teamCompletenessStat) els.teamCompletenessStat.innerHTML = completenessMarkup(getTeamCompleteness(team), true);
   }
 
+  /**
+   * Renders the team identity section from normalized page state without mutating backend data.
+   */
   function renderTeamIdentity() {
     const team = state.team;
     const sportLabel = getSportName(team.sport || team.sportSlug || team.sportName);
@@ -557,6 +599,9 @@
     return `<div class="${wrapperClass}"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
+  /**
+   * Renders the team staff section from normalized page state without mutating backend data.
+   */
   function renderTeamStaff() {
     if (!els.teamStaff) return;
 
@@ -610,6 +655,9 @@
     `;
   }
 
+  /**
+   * Renders the team roster section from normalized page state without mutating backend data.
+   */
   function renderTeamRoster() {
     if (!els.teamRoster) return;
 
@@ -662,6 +710,9 @@
     `;
   }
 
+  /**
+   * Renders the team competitions section from normalized page state without mutating backend data.
+   */
   function renderTeamCompetitions() {
     if (!els.teamCompetitions) return;
 
@@ -709,6 +760,9 @@
     `;
   }
 
+  /**
+   * Renders the team recent results section from normalized page state without mutating backend data.
+   */
   function renderTeamRecentResults() {
     if (!els.teamRecentResults) return;
     const sportSlug = APP.normalizeSportSlug(state.team?.sportSlug || state.team?.sport);
@@ -755,6 +809,9 @@
     `;
 
     const strip = document.getElementById("teamResultStrip");
+    /**
+     * Renders the strip section from normalized page state without mutating backend data.
+     */
     const renderStrip = (competitionId) => {
       const rows = scorecards.filter((line) => !competitionId || String(line.competitionId) === String(competitionId)).slice(0, 4);
       strip.innerHTML = rows.map((line) => isFootball ? renderTeamFootballResultCard(line) : isVolleyball ? renderTeamVolleyballResultCard(line) : isHockey ? renderTeamHockeyResultCard(line) : isBasketball ? renderTeamBasketballResultCard(line) : isSwimming ? renderTeamSwimmingResultCard(line) : isTrackField ? renderTeamTrackFieldResultCard(line) : renderTeamResultCard(line)).join("");
@@ -769,6 +826,9 @@
     renderStrip("");
   }
 
+  /**
+   * Renders the team performance section from normalized page state without mutating backend data.
+   */
   function renderTeamPerformance() {
     if (!els.teamPerformance) return;
 
@@ -834,6 +894,9 @@
     `;
   }
 
+  /**
+   * Renders the team leaderboard access section from normalized page state without mutating backend data.
+   */
   function renderTeamLeaderboardAccess() {
     const rows = buildTeamLeaderboardRows();
     const href = `leaderboards.html?scope=team&teamId=${encodeURIComponent(state.teamId)}`;
@@ -848,6 +911,9 @@
     `;
   }
 
+  /**
+   * Renders the team leaderboards section from normalized page state without mutating backend data.
+   */
   function renderTeamLeaderboards() {
     const rows = buildTeamLeaderboardRows();
     if (!rows.length) return `<div class="empty-state" style="margin-top:16px;">No player leaderboard data is linked to this team yet. Stats reflect 2026 onwards.</div>`;
@@ -882,6 +948,9 @@
     `;
   }
 
+  /**
+   * Binds the team leaderboard controls interactions once so rerenders do not duplicate listeners.
+   */
   function bindTeamLeaderboardControls() {
     document.querySelectorAll("[data-team-leaderboard-metric]").forEach((button) => {
       button.addEventListener("click", function () {
@@ -897,6 +966,9 @@
     });
   }
 
+  /**
+   * Renders the team achievements section from normalized page state without mutating backend data.
+   */
   function renderTeamAchievements() {
     const achievements = [];
     state.results.forEach((result) => {
@@ -930,6 +1002,9 @@
     `;
   }
 
+  /**
+   * Builds team leaderboard rows from shared state so markup and payload labels stay consistent.
+   */
   function buildTeamLeaderboardRows() {
     const metrics = getTeamLeaderboardMetrics();
     const map = new Map();
@@ -1155,6 +1230,9 @@
     return [];
   }
 
+  /**
+   * Normalizes team stat line data across current API and legacy nested shapes.
+   */
   function normalizeTeamStatLine(row) {
     const data = row?.statData && typeof row.statData === "object"
       ? row.statData
@@ -1191,6 +1269,9 @@
     return text || fallback;
   }
 
+  /**
+   * Renders the team result card section from normalized page state without mutating backend data.
+   */
   function renderTeamResultCard(line) {
     const data = line.statData || {};
     const innings = Array.isArray(data.innings) ? data.innings : [];
@@ -1218,6 +1299,9 @@
     `;
   }
 
+  /**
+   * Renders the team football result card section from normalized page state without mutating backend data.
+   */
   function renderTeamFootballResultCard(line) {
     const data = line.statData || {};
     const goals = Array.isArray(data.goals) ? data.goals : [];
@@ -1244,6 +1328,9 @@
     `;
   }
 
+  /**
+   * Renders the team volleyball result card section from normalized page state without mutating backend data.
+   */
   function renderTeamVolleyballResultCard(line) {
     const data = line.statData || {};
     const competition = state.competitions.find((item) => String(item.id || item.competitionId) === String(line.competitionId));
@@ -1266,6 +1353,9 @@
     `;
   }
 
+  /**
+   * Renders the team hockey result card section from normalized page state without mutating backend data.
+   */
   function renderTeamHockeyResultCard(line) {
     const data = line.statData || {};
     const score = data.score || {};
@@ -1289,6 +1379,9 @@
     `;
   }
 
+  /**
+   * Renders the team basketball result card section from normalized page state without mutating backend data.
+   */
   function renderTeamBasketballResultCard(line) {
     const data = line.statData || {};
     const score = data.score || {};
@@ -1312,6 +1405,9 @@
     `;
   }
 
+  /**
+   * Renders the team swimming result card section from normalized page state without mutating backend data.
+   */
   function renderTeamSwimmingResultCard(line) {
     const data = line.statData || {};
     const lanes = Array.isArray(data.lanes) ? data.lanes : [];
@@ -1338,6 +1434,9 @@
     `;
   }
 
+  /**
+   * Renders the team track field result card section from normalized page state without mutating backend data.
+   */
   function renderTeamTrackFieldResultCard(line) {
     const data = line.statData || {};
     const entries = Array.isArray(data.entries) ? data.entries : [];
@@ -1373,6 +1472,9 @@
     return `${innings.total}${wickets}${declared}${overs}`;
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateSquadSelectors() {
     if (els.athleteSelect) {
       const availableAthletes = state.allAthletes
@@ -1420,6 +1522,9 @@
     }
   }
 
+  /**
+   * Normalizes roster array data across current API and legacy nested shapes.
+   */
   function normalizeRosterArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.assignments)) return payload.assignments;
@@ -1430,6 +1535,9 @@
     return [];
   }
 
+  /**
+   * Normalizes staff array data across current API and legacy nested shapes.
+   */
   function normalizeStaffArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.assignments)) return payload.assignments;
@@ -1440,6 +1548,9 @@
     return [];
   }
 
+  /**
+   * Normalizes competitions array data across current API and legacy nested shapes.
+   */
   function normalizeCompetitionsArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.competitions)) return payload.competitions;
@@ -1448,6 +1559,9 @@
     return [];
   }
 
+  /**
+   * Normalizes results array data across current API and legacy nested shapes.
+   */
   function normalizeResultsArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.results)) return payload.results;
@@ -1456,6 +1570,9 @@
     return [];
   }
 
+  /**
+   * Normalizes stat lines array data across current API and legacy nested shapes.
+   */
   function normalizeStatLinesArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.statLines)) return payload.statLines;
@@ -1464,6 +1581,9 @@
     return [];
   }
 
+  /**
+   * Normalizes athletes array data across current API and legacy nested shapes.
+   */
   function normalizeAthletesArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.athletes)) return payload.athletes;
@@ -1472,6 +1592,9 @@
     return [];
   }
 
+  /**
+   * Normalizes coaches array data across current API and legacy nested shapes.
+   */
   function normalizeCoachesArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.coaches)) return payload.coaches;
@@ -1515,6 +1638,9 @@
     }) || null;
   }
 
+  /**
+   * Builds coach name from shared state so markup and payload labels stay consistent.
+   */
   function buildCoachName(coach) {
     if (!coach) return "";
     const fullName = String(coach.fullName || "").trim();
@@ -1522,6 +1648,9 @@
     return `${coach.firstName || ""} ${coach.lastName || ""}`.trim();
   }
 
+  /**
+   * Builds athlete name from shared state so markup and payload labels stay consistent.
+   */
   function buildAthleteName(athlete) {
     if (!athlete) return "";
     const fullName = String(athlete.fullName || "").trim();
@@ -1565,6 +1694,9 @@
     return match ? match.name : raw;
   }
 
+  /**
+   * Normalizes campus data across current API and legacy nested shapes.
+   */
   function normalizeCampus(value) {
     return APP.normalizeCampus(value);
   }
@@ -1637,6 +1769,9 @@
     return String(result.value || result.result || "—");
   }
 
+  /**
+   * Normalizes text data across current API and legacy nested shapes.
+   */
   function normalizeText(value) {
     return String(value || "").trim().toLowerCase();
   }
@@ -1676,6 +1811,9 @@
     }
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage(node) {
     if (!node) return;
     node.className = "message";
@@ -1697,6 +1835,9 @@
     return String(document.getElementById(id)?.value || "").trim();
   }
 
+  /**
+   * Normalizes status data across current API and legacy nested shapes.
+   */
   function normalizeStatus(value) {
     return String(value || "").toLowerCase().includes("inactive") ? "inactive" : "active";
   }

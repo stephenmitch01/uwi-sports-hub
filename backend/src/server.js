@@ -102,6 +102,9 @@ function createRateLimiter({ windowMs, max }) {
 
 const authRateLimit = createRateLimiter(AUTH_RATE_LIMIT);
 
+/**
+ * Converts body-parser failures into consistent API errors before requests reach route handlers.
+ */
 function handleMalformedJson(error, _req, res, next) {
   if (error?.type === "entity.parse.failed") return sendError(res, 400, "Malformed JSON payload");
   if (error?.type === "entity.too.large") return sendError(res, 413, "Request payload is too large");

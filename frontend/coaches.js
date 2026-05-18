@@ -80,6 +80,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     bindEvents();
     bindInsightActions();
@@ -112,6 +115,9 @@
     }
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     els.role.addEventListener("change", function () {
       const isOther = els.role.value === "other";
@@ -162,6 +168,9 @@
     bindWorkflowClose();
   }
 
+  /**
+   * Binds the workflow close interactions once so rerenders do not duplicate listeners.
+   */
   function bindWorkflowClose() {
     const workflows = document.getElementById("coachWorkflows");
     [els.createCoachSection, els.assignmentSection].forEach(function (panel) {
@@ -176,6 +185,9 @@
     });
   }
 
+  /**
+   * Handles the filter change workflow and keeps side effects inside the intended API/action path.
+   */
   function handleFilterChange() {
     const panel = document.getElementById("coachRegistryPanel");
     if (hasActiveRegistryFilter() && panel) panel.open = true;
@@ -191,6 +203,9 @@
     renderAll();
   }
 
+  /**
+   * Fetches teams used to resolve relationship IDs into display labels and links.
+   */
   async function loadTeams() {
   const data = await APP.apiGet("/teams?includeArchived=true", true);
 
@@ -204,6 +219,9 @@
   populateTeamSelects();
 }
 
+  /**
+   * Loads coaches data required by later normalization and rendering steps.
+   */
   async function loadCoaches() {
   const data = await APP.apiGet("/coaches?includeArchived=true", true);
 
@@ -217,6 +235,9 @@
   populateCoachSelect();
 }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateSports() {
     SPORTS.forEach(function (sportName) {
       appendOption(els.sport, sportName, sportName);
@@ -224,6 +245,9 @@
     });
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateTeamSelects() {
     clearSelectOptions(els.teamId, 1);
     clearSelectOptions(els.assignmentTeamId, 1);
@@ -235,6 +259,9 @@
     });
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateCoachSelect() {
     clearSelectOptions(els.assignmentCoachId, 1);
 
@@ -256,6 +283,9 @@
     }
   }
 
+  /**
+   * Handles the create coach workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleCreateCoach(event) {
     event.preventDefault();
     clearMessage(els.coachFormMessage);
@@ -348,6 +378,9 @@
     els.assignmentRoleWrap.classList.add("hidden");
   }
 
+  /**
+   * Handles the create assignment workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleCreateAssignment(event) {
     event.preventDefault();
     clearMessage(els.assignmentMessage);
@@ -378,6 +411,9 @@
     }
   }
 
+  /**
+   * Renders coach summary, assignment lists, and registry rows from the current campus-scoped state.
+   */
   function renderAll() {
     state.filteredCoaches = getFilteredCoaches();
     renderStats();
@@ -385,6 +421,9 @@
     renderCoachTable();
   }
 
+  /**
+   * Renders the operational summary section from normalized page state without mutating backend data.
+   */
   function renderOperationalSummary() {
     const coaches = state.coaches.filter((coach) => !APP.isArchivedRecord(coach));
     const unassigned = coaches.filter((coach) => !getAssignments(coach).length);
@@ -454,6 +493,9 @@
     });
   }
 
+  /**
+   * Renders the stats section from normalized page state without mutating backend data.
+   */
   function renderStats() {
     const coaches = state.coaches.filter((coach) => !APP.isArchivedRecord(coach));
     const total = coaches.length;
@@ -484,6 +526,9 @@
     els.unassignedStaffStat.textContent = String(unassigned);
   }
 
+  /**
+   * Renders the coach table section from normalized page state without mutating backend data.
+   */
   function renderCoachTable() {
     els.coachTableBody.innerHTML = "";
 
@@ -584,6 +629,9 @@
     });
   }
 
+  /**
+   * Normalizes campus data across current API and legacy nested shapes.
+   */
   function normalizeCampus(value) {
     return String(value || "").trim().toLowerCase().replace(/\s+/g, "");
   }
@@ -643,6 +691,9 @@
     element.textContent = message;
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage(element) {
     element.className = "message";
     element.textContent = "";
@@ -679,6 +730,9 @@
       .replace(/'/g, "&#039;");
   }
 
+  /**
+   * Renders the insight list section from normalized page state without mutating backend data.
+   */
   function renderInsightList(node, rows, emptyText) {
     if (!node) return;
     const activeRows = rows.filter((row) => Number(row.value) > 0);
@@ -694,6 +748,9 @@
     `).join("");
   }
 
+  /**
+   * Binds the insight actions interactions once so rerenders do not duplicate listeners.
+   */
   function bindInsightActions() {
     document.addEventListener("click", function (event) {
       const action = event.target.closest(".insight-action[data-target]");
@@ -710,6 +767,9 @@
     });
   }
 
+  /**
+   * Renders the activity list section from normalized page state without mutating backend data.
+   */
   function renderActivityList(node, records) {
     if (!node) return;
     if (!records.length) {
@@ -736,6 +796,9 @@
     return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || "") || 0;
   }
 
+  /**
+   * Renders the quality section from normalized page state without mutating backend data.
+   */
   function renderQuality(scoreNode, barNode, copyNode, score, copy) {
     if (scoreNode) scoreNode.textContent = `${score}%`;
     if (barNode) barNode.style.width = `${Math.max(0, Math.min(100, score))}%`;
@@ -765,6 +828,9 @@
     APP.saveRecentSearch(scope, label, values);
   }
 
+  /**
+   * Mounts the recent searches feature after required context has loaded.
+   */
   function mountRecentSearches(scope) {
     if (!APP.renderRecentSearches || !els.coachSearchButton?.parentElement) return;
     document.querySelector(`[data-recent-searches='${scope}']`)?.remove();

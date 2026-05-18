@@ -12,6 +12,9 @@
   const els = { msg: document.getElementById("pageMessage"), tabs: document.getElementById("competitionTabs"), season: document.getElementById("seasonFilter"), outcome: document.getElementById("outcomeFilter"), opponent: document.getElementById("opponentFilter"), searchButton: document.getElementById("resultsSearchButton"), count: document.getElementById("resultCount"), grid: document.getElementById("resultsGrid") };
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "Basketball Results" });
     if (!session) return;
@@ -27,12 +30,18 @@
     }
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild markup without duplicating listeners.
+   */
   function bind() {
     [els.season, els.outcome, els.opponent].forEach((el) => el.addEventListener("input", () => { state.searchApplied = false; }));
     els.searchButton?.addEventListener("click", () => { state.searchApplied = true; saveCurrentSearch(); mountRecentSearches(); render(); });
     mountRecentSearches();
   }
 
+  /**
+   * Builds filter controls from available backend records so searches reflect saved data.
+   */
   function renderFilters() {
     const basketballCompetitions = state.competitions.filter((competition) => scorecardsFor(competition.id).length);
     els.tabs.innerHTML = `<button class="result-tab ${state.activeCompetitionId ? "" : "active"}" type="button" data-competition="">Matches (${state.scorecards.length})</button>${basketballCompetitions.map((competition) => `<button class="result-tab ${String(competition.id) === String(state.activeCompetitionId) ? "active" : ""}" type="button" data-competition="${escapeHtml(competition.id)}">${escapeHtml(competition.title || competition.name || "Competition")} (${scorecardsFor(competition.id).length})</button>`).join("")}`;
@@ -41,6 +50,9 @@
     els.season.innerHTML = `<option value="">All seasons</option>${seasons.map((season) => `<option value="${escapeHtml(season)}">${escapeHtml(season)}</option>`).join("")}`;
   }
 
+  /**
+   * Renders the current state into the page without mutating backend data.
+   */
   function render() {
     if (!state.searchApplied) {
       els.count.textContent = "Choose filters, then click Search.";
@@ -63,6 +75,9 @@
     return true;
   }
 
+  /**
+   * Renders one result card from normalized stat data while preserving links to view/edit workflows.
+   */
   function renderCard(line) {
     const data = line.statData || {};
     const competition = competitionFor(line.competitionId);
@@ -97,6 +112,9 @@
     return sorted[0] || null;
   }
 
+  /**
+   * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
+   */
   function normalizeLine(row) {
     const data = row?.statData && typeof row.statData === "object" ? row.statData : row?.data?.statData && typeof row.data.statData === "object" ? row.data.statData : row?.data && typeof row.data === "object" ? row.data : {};
     return { ...row, ...data, id: row.id, competitionId: row.competitionId || data.competitionId, teamId: row.teamId || data.teamId || data.uwiTeamId, sport: row.sport || data.sport, sportSlug: row.sportSlug || data.sportSlug, eventType: row.eventType || data.eventType, eventName: row.eventName || data.eventName || data.title, date: row.date || data.date || row.createdAt, season: row.season || data.season, statData: data };
@@ -120,6 +138,9 @@
   function compactUwiResultLabel(value) { const text = String(value || "").trim(); if (!text) return ""; return text.replace(/\bUWI\s+Blackbirds(?:\s+[A-Za-z& -]+?)?\s+Team\b/gi, "Blackbirds").replace(/\bUWI\s+Blackbirds\b/gi, "Blackbirds"); }
   function compactUwiTeamLabel(value, fallback = "Blackbirds") { const text = compactUwiResultLabel(value); return text || fallback; }
   function opponentLabel(data) { return String(data?.opponentName || data?.opponentTeamName || data?.opponent?.name || "Opponent").trim() || "Opponent"; }
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload) { if (Array.isArray(payload)) return payload; if (Array.isArray(payload?.data)) return payload.data; return []; }
   function saveCurrentSearch() {
     if (!APP.saveRecentSearch) return;
@@ -127,6 +148,9 @@
     const label = [values.opponent, values.season, values.outcome].filter(Boolean).join(" / ") || "Basketball results";
     APP.saveRecentSearch("basketball-results", label, values);
   }
+  /**
+   * Mounts the recent searches feature after required context has loaded.
+   */
   function mountRecentSearches() {
     if (!APP.renderRecentSearches || !els.searchButton?.parentElement) return;
     document.querySelector("[data-recent-searches='basketball-results']")?.remove();

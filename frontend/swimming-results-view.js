@@ -20,6 +20,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "View Swimming Results" });
     if (!session) return;
@@ -42,6 +45,9 @@
     }
   }
 
+  /**
+   * Renders the current state into the page without mutating backend data.
+   */
   function render(data) {
     const lanes = Array.isArray(data.lanes) ? data.lanes : [];
     els.body.innerHTML = `
@@ -65,6 +71,9 @@
     `;
   }
 
+  /**
+   * Renders the lane section from normalized page state without mutating backend data.
+   */
   function renderLane(row) {
     return `<tr>
       <td>${escapeHtml(row.lane ?? "")}</td>
@@ -86,6 +95,9 @@
     return id ? `<a href="athlete-view.html?athleteId=${encodeURIComponent(id)}">${safeName}</a>` : safeName;
   }
 
+  /**
+   * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
+   */
   function normalizeLine(row) {
     const data = row?.statData && typeof row.statData === "object" ? row.statData : row?.data?.statData && typeof row.data.statData === "object" ? row.data.statData : row?.data && typeof row.data === "object" ? row.data : {};
     return { ...row, ...data, id: row.id, competitionId: row.competitionId || data.competitionId, eventName: row.eventName || data.eventName || data.title, date: row.date || data.date || row.createdAt, statData: data };

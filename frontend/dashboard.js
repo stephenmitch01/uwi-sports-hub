@@ -36,6 +36,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     clearMessage();
     try {
@@ -52,6 +55,9 @@
     }
   }
 
+  /**
+   * Renders the user section from normalized page state without mutating backend data.
+   */
   function renderUser(user) {
     const campusLabel = UWISportsHub.getCampusMeta(user.campus).name;
     const roleLabel = formatRole(user.role);
@@ -67,6 +73,9 @@
     if (permissionValue) permissionValue.textContent = describePermissions(user.role);
   }
 
+  /**
+   * Aggregates campus-scoped record counts for dashboard display without editing source data.
+   */
   async function renderCampusSummary(user) {
     const [athletesResult, coachesResult, teamsResult, competitionsResult] = await Promise.allSettled([
       APP.apiGet("/athletes", true),
@@ -111,6 +120,9 @@
     }
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(result) {
     const source = result?.status === "fulfilled" ? result.value : null;
     if (Array.isArray(source)) return source;
@@ -184,11 +196,17 @@
     return String(role || "viewer").replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (m) => m.toUpperCase());
   }
 
+  /**
+   * Displays recoverable workflow errors near the relevant form or result section.
+   */
   function showError(message) {
     dashboardMessage.className = "message error";
     dashboardMessage.textContent = message;
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     dashboardMessage.className = "message";
     dashboardMessage.textContent = "";

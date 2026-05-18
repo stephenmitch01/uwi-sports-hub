@@ -70,6 +70,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "Cricket Scorecard" });
     if (!session) return;
@@ -110,6 +113,9 @@
     }
   }
 
+  /**
+   * Builds the initial page UI from loaded campus-scoped data and default workflow state.
+   */
   function renderPage() {
     const title = state.competition?.title || state.competition?.name || "Cricket Competition";
     els.heading.textContent = `${title} Scorecard`;
@@ -129,6 +135,9 @@
     renderInningsSet();
   }
 
+  /**
+   * Prefills edit mode from the saved stat line so staff can complete missing scorecard data later.
+   */
   function applyExistingScorecard() {
     const row = state.scorecard || {};
     const data = row.statData || row.data?.statData || {};
@@ -152,6 +161,9 @@
     updateDerivedFields();
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     APP.trackUnsavedChanges(els.form);
     els.teamSelect.addEventListener("change", () => {
@@ -174,6 +186,9 @@
     });
   }
 
+  /**
+   * Renders the starting xi section from normalized page state without mutating backend data.
+   */
   function renderStartingXi() {
     const roster = getRosterAthletes();
     els.xiGrid.innerHTML = Array.from({ length: 11 }, (_, index) => {
@@ -189,11 +204,17 @@
     }).join("");
   }
 
+  /**
+   * Renders the innings set section from normalized page state without mutating backend data.
+   */
   function renderInningsSet() {
     els.inningsWrap.innerHTML = Array.from({ length: state.inningsCount }, (_, index) => `<section id="innings${index + 1}"></section>`).join("");
     for (let index = 1; index <= state.inningsCount; index += 1) renderInnings(index);
   }
 
+  /**
+   * Renders the innings section from normalized page state without mutating backend data.
+   */
   function renderInnings(index) {
     const container = document.getElementById(`innings${index}`);
     if (!container) return;
@@ -291,6 +312,9 @@
     els.result.value = deriveResult();
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateInningsDerived(index) {
     const side = valueOf(`innings${index}Side`);
     let battingRuns = 0;
@@ -328,6 +352,9 @@
     setValue(`innings${index}TeamLabel`, side === "uwi" ? getUwiTeamName() : opponentName(), false);
   }
 
+  /**
+   * Derives target from entered data so downstream display stays consistent.
+   */
   function deriveTarget(index) {
     if (index <= 1) return "";
     if (state.inningsCount > 2) {
@@ -346,6 +373,9 @@
     return targetBase >= 0 ? String(targetBase + 1) : "";
   }
 
+  /**
+   * Derives did not bat from entered data so downstream display stays consistent.
+   */
   function deriveDidNotBat(index) {
     if (valueOf(`innings${index}Side`) !== "uwi") return "";
     const selected = new Set();
@@ -359,6 +389,9 @@
       .join(", ");
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateBowlingWickets(index) {
     const credits = new Map();
     for (let row = 1; row <= 11; row += 1) {
@@ -380,6 +413,9 @@
     }
   }
 
+  /**
+   * Builds result text from score inputs while leaving manual corrections possible before save.
+   */
   function deriveResult() {
     const sides = { uwi: 0, opponent: 0 };
     const scoredSides = new Set();
@@ -426,6 +462,9 @@
     return count;
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateOpponentLabels() {
     document.querySelectorAll(".opponent-name").forEach((input) => {
       if (input.dataset.edited === "true") return;
@@ -445,6 +484,9 @@
     });
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateDismissalPartyState(id, dismissal) {
     const bowlerSelect = document.getElementById(`${id}BowlerAthleteId`);
     const bowlerInput = document.getElementById(`${id}BowlerName`);
@@ -565,6 +607,9 @@
     }
   }
 
+  /**
+   * Serializes one cricket innings into statData for downstream batting/bowling/report projections.
+   */
   function readInnings(index) {
     const side = valueOf(`innings${index}Side`);
     const uwiBatting = side === "uwi";
@@ -587,6 +632,9 @@
     };
   }
 
+  /**
+   * Reads batting values into the structured payload consumed by reports and result views.
+   */
   function readBatting(innings, row, uwiPlayer) {
     const id = `i${innings}bat${row}`;
     const dismissalMode = valueOf(`${id}Dismissal`);
@@ -611,6 +659,9 @@
     };
   }
 
+  /**
+   * Reads bowling values into the structured payload consumed by reports and result views.
+   */
   function readBowling(innings, row, uwiPlayer) {
     const id = `i${innings}bowl${row}`;
     return {
@@ -624,6 +675,9 @@
     };
   }
 
+  /**
+   * Reads player values into the structured payload consumed by reports and result views.
+   */
   function readPlayer(prefix, uwiPlayer, role) {
     if (!uwiPlayer) return { athleteId: null, name: valueOf(`${prefix}Name`), side: "opponent", role };
     const athleteId = valueOf(`${prefix}AthleteId`);
@@ -631,17 +685,26 @@
     return { athleteId, name: athleteId ? displayName(athlete) : "", side: "uwi", role };
   }
 
+  /**
+   * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
+   */
   function getRosterAthletes() {
     const teamId = els.teamSelect.value;
     if (!teamId) return state.athletes.filter((athlete) => APP.athleteHasSport(athlete, "cricket"));
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  /**
+   * Reads selected cricket XI athletes used to constrain player dropdowns and stat linkage.
+   */
   function selectedXiAthletes() {
     const ids = Array.from(document.querySelectorAll("[data-xi-select]")).map((select) => select.value).filter((value) => value && value !== "__quick_add__");
     return ids.map((id) => state.athletes.find((athlete) => String(athlete.id) === String(id))).filter(Boolean);
   }
 
+  /**
+   * Supports quick-add from the cricket XI selector while keeping scorecard IDs consistent.
+   */
   async function handleXiSelectChange(select) {
     if (select.value !== "__quick_add__") {
       refreshUwiPlayerOptions();
@@ -663,11 +726,17 @@
     refreshUwiPlayerOptions();
   }
 
+  /**
+   * Resolves the selected UWI team label from backend data for saved statData and display.
+   */
   function getUwiTeamName() {
     const team = state.teams.find((item) => String(item.id) === String(els.teamSelect.value));
     return team?.name || team?.teamName || "UWI Team";
   }
 
+  /**
+   * Returns the typed opponent label, falling back only when staff did not enter one.
+   */
   function opponentName() {
     return els.opponentName.value.trim() || "Opponent";
   }
@@ -684,6 +753,9 @@
     return index % 2 === 1 ? "uwi" : "opponent";
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.data)) return payload.data;
@@ -737,21 +809,33 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  /**
+   * Displays blocking load errors without throwing away the signed-in shell.
+   */
   function showPageError(text) {
     els.pageMessage.className = "message error is-visible";
     els.pageMessage.textContent = text;
   }
 
+  /**
+   * Displays recoverable workflow errors near the relevant form or result section.
+   */
   function showError(text) {
     els.message.className = "message error is-visible";
     els.message.textContent = text;
   }
 
+  /**
+   * Confirms successful backend persistence without changing page state unexpectedly.
+   */
   function showSuccess(text) {
     els.message.className = "message success is-visible";
     els.message.textContent = text;
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     els.message.className = "message";
     els.message.textContent = "";

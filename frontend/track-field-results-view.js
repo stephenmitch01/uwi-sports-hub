@@ -21,6 +21,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "View Track and Field Results" });
     if (!session) return;
@@ -43,6 +46,9 @@
     }
   }
 
+  /**
+   * Renders the current state into the page without mutating backend data.
+   */
   function render(data) {
     if (data.resultType === "field") {
       renderField(data);
@@ -51,6 +57,9 @@
     renderTrack(data);
   }
 
+  /**
+   * Renders the track section from normalized page state without mutating backend data.
+   */
   function renderTrack(data) {
     const entries = Array.isArray(data.entries) ? data.entries : [];
     els.body.innerHTML = `
@@ -68,6 +77,9 @@
     `;
   }
 
+  /**
+   * Renders the field section from normalized page state without mutating backend data.
+   */
   function renderField(data) {
     const entries = Array.isArray(data.entries) ? data.entries : [];
     els.body.innerHTML = `
@@ -85,6 +97,9 @@
     `;
   }
 
+  /**
+   * Renders the meta section from normalized page state without mutating backend data.
+   */
   function renderMeta(data) {
     const wind = data.resultType === "track" ? [data.track?.windDirection, data.track?.wind].filter((value) => value !== null && value !== undefined && value !== "").join(" ") : data.field?.wind;
     return `<div class="tf-result-meta">
@@ -95,6 +110,9 @@
     </div>`;
   }
 
+  /**
+   * Renders the track row section from normalized page state without mutating backend data.
+   */
   function renderTrackRow(row) {
     return `<tr>
       <td>${escapeHtml(row.place ?? "")}</td>
@@ -109,6 +127,9 @@
     </tr>`;
   }
 
+  /**
+   * Renders the field row section from normalized page state without mutating backend data.
+   */
   function renderFieldRow(row) {
     const attempts = Array.isArray(row.attempts) ? row.attempts : [];
     return `<tr>
@@ -131,6 +152,9 @@
     return id ? `<a href="athlete-view.html?athleteId=${encodeURIComponent(id)}">${safeName}</a>` : safeName;
   }
 
+  /**
+   * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
+   */
   function normalizeLine(row) {
     const data = row?.statData && typeof row.statData === "object" ? row.statData : row?.data?.statData && typeof row.data.statData === "object" ? row.data.statData : row?.data && typeof row.data === "object" ? row.data : {};
     return { ...row, ...data, id: row.id, competitionId: row.competitionId || data.competitionId, eventName: row.eventName || data.eventName || data.title, date: row.date || data.date || row.createdAt, statData: data };

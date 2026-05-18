@@ -42,6 +42,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "Football Score Sheet" });
     if (!session) return;
@@ -77,6 +80,9 @@
     }
   }
 
+  /**
+   * Builds the initial page UI from loaded campus-scoped data and default workflow state.
+   */
   function renderPage() {
     const title = state.competition?.title || state.competition?.name || "Football Competition";
     els.heading.textContent = `${title} Score Sheet`;
@@ -95,6 +101,9 @@
     renderGoalEvents();
   }
 
+  /**
+   * Prefills edit mode from the saved stat line so staff can complete missing scorecard data later.
+   */
   function applyExistingScorecard() {
     const row = state.scorecard || {};
     const data = row.statData || row.data?.statData || {};
@@ -148,6 +157,9 @@
     updateDerivedFields();
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     APP.trackUnsavedChanges(els.form);
     els.teamSelect.addEventListener("change", () => {
@@ -168,6 +180,9 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  /**
+   * Renders the squad section from normalized page state without mutating backend data.
+   */
   function renderSquad() {
     const roster = getRosterAthletes();
     els.squadGrid.innerHTML = Array.from({ length: 18 }, (_, index) => {
@@ -183,6 +198,9 @@
     }).join("");
   }
 
+  /**
+   * Renders the player rows section from normalized page state without mutating backend data.
+   */
   function renderPlayerRows() {
     els.playerRows.innerHTML = Array.from({ length: 18 }, (_, index) => playerRow(index + 1)).join("");
   }
@@ -196,6 +214,9 @@
     </tr>`;
   }
 
+  /**
+   * Renders the goal events section from normalized page state without mutating backend data.
+   */
   function renderGoalEvents() {
     els.goalEvents.innerHTML = Array.from({ length: 10 }, (_, index) => {
       const row = index + 1;
@@ -244,6 +265,9 @@
     setValue("scorecardResult", deriveResult(uwiTotal, opponentTotal), false);
   }
 
+  /**
+   * Builds result text from score inputs while leaving manual corrections possible before save.
+   */
   function deriveResult(uwiTotal, opponentTotal) {
     const uwiName = getUwiTeamName();
     const oppName = opponentName();
@@ -313,6 +337,9 @@
     }
   }
 
+  /**
+   * Serializes one player row with athlete IDs so individual reports can aggregate performance.
+   */
   function readPlayerStat(row) {
     const id = `p${row}`;
     const athleteId = valueOf(`${id}PlayerAthleteId`);
@@ -335,6 +362,9 @@
     };
   }
 
+  /**
+   * Serializes team/opponent match metrics separately from player rows for report aggregation.
+   */
   function readMatchStats() {
     return {
       uwi: readTeamMatchStats("uwi"),
@@ -342,6 +372,9 @@
     };
   }
 
+  /**
+   * Reads team match stats values into the structured payload consumed by reports and result views.
+   */
   function readTeamMatchStats(prefix) {
     const ids = {
       possession: `${prefix}Possession`,
@@ -378,6 +411,9 @@
     Object.entries(ids).forEach(([key, id]) => setValue(id, stats[key], false));
   }
 
+  /**
+   * Reads goal event values into the structured payload consumed by reports and result views.
+   */
   function readGoalEvent(row) {
     const scorerId = valueOf(`goal${row}ScorerAthleteId`);
     const assistId = valueOf(`goal${row}AssistAthleteId`);
@@ -400,17 +436,26 @@
     return Boolean(row.minute !== null || row.scorerAthleteId || row.assistAthleteId);
   }
 
+  /**
+   * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
+   */
   function getRosterAthletes() {
     const teamId = els.teamSelect.value;
     if (!teamId) return state.athletes.filter((athlete) => APP.athleteHasSport(athlete, "football"));
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  /**
+   * Reads selected squad athletes used to constrain player dropdowns and stat linkage.
+   */
   function selectedSquadAthletes() {
     const ids = Array.from(document.querySelectorAll("[data-squad-select]")).map((select) => select.value).filter((value) => value && value !== "__quick_add__");
     return ids.map((id) => state.athletes.find((athlete) => String(athlete.id) === String(id))).filter(Boolean);
   }
 
+  /**
+   * Supports quick-add from squad selectors while keeping scorecard IDs consistent.
+   */
   async function handleSquadSelectChange(select) {
     if (select.value !== "__quick_add__") {
       refreshSquadPlayerOptions();
@@ -432,15 +477,24 @@
     refreshSquadPlayerOptions();
   }
 
+  /**
+   * Resolves the selected UWI team label from backend data for saved statData and display.
+   */
   function getUwiTeamName() {
     const team = state.teams.find((item) => String(item.id) === String(els.teamSelect.value));
     return els.homeTeamLabel.value.trim() || team?.name || team?.teamName || "UWI Team";
   }
 
+  /**
+   * Returns the typed opponent label, falling back only when staff did not enter one.
+   */
   function opponentName() {
     return els.opponentName.value.trim() || "Opponent";
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.teams)) return payload.teams;
@@ -493,21 +547,33 @@
     return date.toISOString().slice(0, 10);
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     els.message.className = "message";
     els.message.textContent = "";
   }
 
+  /**
+   * Displays blocking load errors without throwing away the signed-in shell.
+   */
   function showPageError(text) {
     els.pageMessage.className = "message error is-visible";
     els.pageMessage.textContent = text;
   }
 
+  /**
+   * Displays recoverable workflow errors near the relevant form or result section.
+   */
   function showError(text) {
     els.message.className = "message error is-visible";
     els.message.textContent = text;
   }
 
+  /**
+   * Confirms successful backend persistence without changing page state unexpectedly.
+   */
   function showSuccess(text) {
     els.message.className = "message success is-visible";
     els.message.textContent = text;

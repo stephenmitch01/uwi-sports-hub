@@ -27,6 +27,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({
       active: "audit",
@@ -42,6 +45,9 @@
     await loadAuditLogs();
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     els.searchButton?.addEventListener("click", loadAuditLogs);
     [els.action, els.entityType, els.limit].forEach((input) => {
@@ -54,6 +60,9 @@
     });
   }
 
+  /**
+   * Loads audit logs data required by later normalization and rendering steps.
+   */
   async function loadAuditLogs() {
     setLoading(true);
     APP.clearMessage?.(els.message);
@@ -88,6 +97,9 @@
     els.searchButton.textContent = isLoading ? "Searching..." : "Search";
   }
 
+  /**
+   * Renders the logs section from normalized page state without mutating backend data.
+   */
   function renderLogs() {
     if (!state.logs.length) {
       renderEmpty("No audit records match the current filters.");
@@ -117,6 +129,9 @@
     `;
   }
 
+  /**
+   * Renders the log row section from normalized page state without mutating backend data.
+   */
   function renderLogRow(log) {
     const action = String(log.action || "activity").toLowerCase();
     const details = flattenDetails(log.data || log.details || {});
@@ -135,6 +150,9 @@
     `;
   }
 
+  /**
+   * Renders the empty section from normalized page state without mutating backend data.
+   */
   function renderEmpty(message) {
     if (els.resultSummary) els.resultSummary.textContent = message;
     if (els.tableWrap) {
@@ -162,6 +180,9 @@
     return String(value);
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(response, keys, fallback) {
     if (Array.isArray(response)) return response;
     for (const key of keys) {

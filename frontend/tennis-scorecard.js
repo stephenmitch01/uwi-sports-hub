@@ -31,6 +31,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "Tennis Score Sheet" });
     if (!session) return;
@@ -59,6 +62,9 @@
     }
   }
 
+  /**
+   * Builds the initial page UI from loaded campus-scoped data and default workflow state.
+   */
   function renderPage() {
     const title = state.competition?.title || state.competition?.name || "Tennis Competition";
     els.heading.textContent = `${title} Score Sheet`;
@@ -72,6 +78,9 @@
     renderMatches();
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     APP.trackUnsavedChanges(els.form);
     els.teamSelect.addEventListener("change", renderMatches);
@@ -84,12 +93,18 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  /**
+   * Renders the matches section from normalized page state without mutating backend data.
+   */
   function renderMatches() {
     els.matchList.innerHTML = MATCHES.map((match, index) => renderMatch(index + 1, match)).join("");
     els.matchList.querySelectorAll(".tennis-match").forEach(togglePair);
     updateDerivedFields();
   }
 
+  /**
+   * Renders the match section from normalized page state without mutating backend data.
+   */
   function renderMatch(number, match) {
     const rosterOptions = getRosterAthletes().map((athlete) => `<option value="${escapeHtml(athlete.id)}">${escapeHtml(displayName(athlete))}</option>`).join("");
     return `
@@ -134,6 +149,9 @@
     }
   }
 
+  /**
+   * Recalculates derived display values from editable fields without saving until submit.
+   */
   function updateDerivedFields() {
     const matches = readMatches();
     const summary = summarizeMatches(matches);
@@ -154,6 +172,9 @@
     setValue("durationMinutes", deriveDuration(), false);
   }
 
+  /**
+   * Validates and persists the workflow payload through the shared API helper.
+   */
   async function handleSubmit(event) {
     event.preventDefault();
     clearMessage();
@@ -202,6 +223,9 @@
     }
   }
 
+  /**
+   * Reads matches values into the structured payload consumed by reports and result views.
+   */
   function readMatches() {
     return MATCHES.map((template, index) => {
       const number = index + 1;
@@ -251,6 +275,9 @@
     return summary;
   }
 
+  /**
+   * Reads uwi players for match values into the structured payload consumed by reports and result views.
+   */
   function readUwiPlayersForMatch(number, type) {
     return [1, 2].map((slot) => {
       if (slot === 2 && type !== "doubles") return null;
@@ -260,6 +287,9 @@
     }).filter(Boolean);
   }
 
+  /**
+   * Reads opponent players for match values into the structured payload consumed by reports and result views.
+   */
   function readOpponentPlayersForMatch(number, type) {
     return [1, 2].map((slot) => {
       if (slot === 2 && type !== "doubles") return null;
@@ -268,6 +298,9 @@
     }).filter(Boolean);
   }
 
+  /**
+   * Handles the player select change workflow and keeps side effects inside the intended API/action path.
+   */
   async function handlePlayerSelectChange(select) {
     if (select.value !== "__quick_add__") return;
     const athlete = await APP.quickAddAthleteForTeam({ teamId: els.teamSelect.value, teamName: getUwiTeamName(), sportSlug: "lawn-tennis" });
@@ -282,17 +315,26 @@
     if (target) target.value = athlete.id;
   }
 
+  /**
+   * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
+   */
   function getRosterAthletes() {
     const teamId = els.teamSelect.value;
     if (!teamId) return state.athletes.filter((athlete) => APP.athleteHasSport(athlete, "lawn-tennis"));
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  /**
+   * Resolves the selected UWI team label from backend data for saved statData and display.
+   */
   function getUwiTeamName() {
     const team = state.teams.find((item) => String(item.id) === String(els.teamSelect.value));
     return team?.name || team?.teamName || "UWI Tennis";
   }
 
+  /**
+   * Derives duration from entered data so downstream display stays consistent.
+   */
   function deriveDuration() {
     const start = valueOf("startTime");
     const finish = valueOf("finishTime");
@@ -305,6 +347,9 @@
     return minutes;
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload, key) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.[key])) return payload[key];
@@ -339,21 +384,33 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     els.message.className = "message";
     els.message.textContent = "";
   }
 
+  /**
+   * Displays blocking load errors without throwing away the signed-in shell.
+   */
   function showPageError(text) {
     els.pageMessage.className = "message error is-visible";
     els.pageMessage.textContent = text;
   }
 
+  /**
+   * Displays recoverable workflow errors near the relevant form or result section.
+   */
   function showError(text) {
     els.message.className = "message error is-visible";
     els.message.textContent = text;
   }
 
+  /**
+   * Confirms successful backend persistence without changing page state unexpectedly.
+   */
   function showSuccess(text) {
     els.message.className = "message success is-visible";
     els.message.textContent = text;

@@ -29,6 +29,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "Badminton Match Sheet" });
     if (!session) return;
@@ -57,6 +60,9 @@
     }
   }
 
+  /**
+   * Builds the initial page UI from loaded campus-scoped data and default workflow state.
+   */
   function renderPage() {
     const title = state.competition?.title || state.competition?.name || "Badminton Competition";
     els.heading.textContent = `${title} Match Sheet`;
@@ -71,6 +77,9 @@
     updateMatchType();
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     APP.trackUnsavedChanges(els.form);
     els.teamSelect.addEventListener("change", renderPlayerOptions);
@@ -86,6 +95,9 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  /**
+   * Renders the player options section from normalized page state without mutating backend data.
+   */
   function renderPlayerOptions() {
     ["uwiPlayer1AthleteId", "uwiPlayer2AthleteId"].forEach((id) => {
       const select = document.getElementById(id);
@@ -96,6 +108,9 @@
     updateSideLabels();
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateMatchType() {
     const doubles = els.matchType.value === "doubles";
     document.getElementById("uwiPlayer2Wrap").style.display = doubles ? "" : "none";
@@ -107,11 +122,17 @@
     updateSideLabels();
   }
 
+  /**
+   * Updates derived UI state from the current form/model values without persisting changes directly.
+   */
   function updateSideLabels() {
     setText("uwiSideLabel", sideName("uwi") || "UWI");
     setText("opponentSideLabel", sideName("opponent") || "Opponent");
   }
 
+  /**
+   * Recalculates derived display values from editable fields without saving until submit.
+   */
   function updateDerivedFields() {
     updateSideLabels();
     const games = readGames();
@@ -129,6 +150,9 @@
     setValue("durationMinutes", deriveDuration(), false);
   }
 
+  /**
+   * Validates and persists the workflow payload through the shared API helper.
+   */
   async function handleSubmit(event) {
     event.preventDefault();
     clearMessage();
@@ -196,6 +220,9 @@
     }
   }
 
+  /**
+   * Reads games values into the structured payload consumed by reports and result views.
+   */
   function readGames() {
     return [1, 2, 3].map((game) => ({
       game,
@@ -204,6 +231,9 @@
     })).filter((game) => game.uwi || game.opponent);
   }
 
+  /**
+   * Reads uwi players values into the structured payload consumed by reports and result views.
+   */
   function readUwiPlayers() {
     return ["uwiPlayer1AthleteId", "uwiPlayer2AthleteId"].map((id) => {
       const athleteId = valueOf(id);
@@ -212,10 +242,16 @@
     }).filter(Boolean);
   }
 
+  /**
+   * Reads opponent players values into the structured payload consumed by reports and result views.
+   */
   function readOpponentPlayers() {
     return ["opponentPlayer1", "opponentPlayer2"].map((id) => valueOf(id)).filter(Boolean).map((name) => ({ name }));
   }
 
+  /**
+   * Derives winner from entered data so downstream display stays consistent.
+   */
   function deriveWinner(uwiGames, oppGames) {
     if (els.status.value === "walkover") return sideName("uwi") || "UWI";
     if (uwiGames > oppGames) return sideName("uwi") || "UWI";
@@ -223,6 +259,9 @@
     return "";
   }
 
+  /**
+   * Builds result text from score inputs while leaving manual corrections possible before save.
+   */
   function deriveResult(uwiGames, oppGames) {
     const winner = deriveWinner(uwiGames, oppGames);
     if (!winner) return "";
@@ -231,6 +270,9 @@
     return `${winner} won ${winnerGames}-${loserGames}`;
   }
 
+  /**
+   * Derives duration from entered data so downstream display stays consistent.
+   */
   function deriveDuration() {
     const start = valueOf("startTime");
     const finish = valueOf("finishTime");
@@ -243,6 +285,9 @@
     return minutes;
   }
 
+  /**
+   * Handles the player select change workflow and keeps side effects inside the intended API/action path.
+   */
   async function handlePlayerSelectChange(select) {
     if (select.value !== "__quick_add__") return;
     const athlete = await APP.quickAddAthleteForTeam({ teamId: els.teamSelect.value, teamName: getUwiTeamName(), sportSlug: "badminton" });
@@ -261,17 +306,26 @@
     return readOpponentPlayers().map((player) => player.name).join(" / ") || "Opponent";
   }
 
+  /**
+   * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
+   */
   function getRosterAthletes() {
     const teamId = els.teamSelect.value;
     if (!teamId) return state.athletes.filter((athlete) => APP.athleteHasSport(athlete, "badminton"));
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  /**
+   * Resolves the selected UWI team label from backend data for saved statData and display.
+   */
   function getUwiTeamName() {
     const team = state.teams.find((item) => String(item.id) === String(els.teamSelect.value));
     return team?.name || team?.teamName || "UWI Badminton";
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload, key) {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.[key])) return payload[key];
@@ -311,21 +365,33 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     els.message.className = "message";
     els.message.textContent = "";
   }
 
+  /**
+   * Displays blocking load errors without throwing away the signed-in shell.
+   */
   function showPageError(text) {
     els.pageMessage.className = "message error is-visible";
     els.pageMessage.textContent = text;
   }
 
+  /**
+   * Displays recoverable workflow errors near the relevant form or result section.
+   */
   function showError(text) {
     els.message.className = "message error is-visible";
     els.message.textContent = text;
   }
 
+  /**
+   * Confirms successful backend persistence without changing page state unexpectedly.
+   */
   function showSuccess(text) {
     els.message.className = "message success is-visible";
     els.message.textContent = text;

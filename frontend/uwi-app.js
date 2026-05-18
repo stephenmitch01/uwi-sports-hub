@@ -209,10 +209,16 @@
     if (text) node.classList.add(type || "success", "is-visible");
   }
 
+  /**
+   * Confirms successful backend persistence without changing page state unexpectedly.
+   */
   function showSuccess(node, text) {
     showMessage(node, text, "success");
   }
 
+  /**
+   * Displays recoverable workflow errors near the relevant form or result section.
+   */
   function showError(node, text) {
     showMessage(node, text, "error");
   }
@@ -221,6 +227,9 @@
     showMessage(node, text, "warning");
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage(node) {
     if (!node) return;
     node.textContent = "";
@@ -232,6 +241,9 @@
     return `id_${Math.random().toString(36).slice(2, 10)}`;
   }
 
+  /**
+   * Normalizes campus data across current API and legacy nested shapes.
+   */
   function normalizeCampus(value) {
     const raw = String(value || "").trim().toLowerCase().replace(/[_\s]+/g, "").replace(/-/g, "");
     if (raw in CAMPUS_META) return raw;
@@ -247,6 +259,9 @@
     return CAMPUS_META[slug] || CAMPUS_META.cavehill;
   }
 
+  /**
+   * Normalizes role data across current API and legacy nested shapes.
+   */
   function normalizeRole(value) {
     return String(value || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
   }
@@ -293,6 +308,9 @@
     return aliases[collapsed] || aliases[raw.replace(/[-\s]/g, "")] || collapsed;
   }
 
+  /**
+   * Normalizes sport slug data across current API and legacy nested shapes.
+   */
   function normalizeSportSlug(value) {
     return canonicalSportSlug(value);
   }
@@ -428,6 +446,9 @@
     return session;
   }
 
+  /**
+   * Builds signed in shell html from shared state so markup and payload labels stay consistent.
+   */
   function buildSignedInShellHtml(session, options) {
     const campusMeta = getCampusMeta(session.campus);
     const active = String(options?.active || "").toLowerCase();
@@ -582,6 +603,9 @@
     return Number.isFinite(number) ? number : null;
   }
 
+  /**
+   * Normalizes attempts data across current API and legacy nested shapes.
+   */
   function normalizeAttempts(value) {
     if (!Array.isArray(value)) return [];
     return value.map((item) => {
@@ -592,6 +616,9 @@
     });
   }
 
+  /**
+   * Normalizes progression data across current API and legacy nested shapes.
+   */
   function normalizeProgression(value) {
     if (!Array.isArray(value)) return [];
     return value.map((entry) => ({
@@ -600,6 +627,9 @@
     }));
   }
 
+  /**
+   * Normalizes splits data across current API and legacy nested shapes.
+   */
   function normalizeSplits(value) {
     if (!value) return {};
     if (Array.isArray(value)) {
@@ -617,6 +647,9 @@
     return {};
   }
 
+  /**
+   * Normalizes track and field stat payloads across current API and legacy nested shapes.
+   */
   function normalizeTrackFieldStatData(eventType, input) {
     const data = input && typeof input === "object" ? input : {};
     if (eventType === "track" || eventType === "relay") {
@@ -656,6 +689,9 @@
     return data;
   }
 
+  /**
+   * Normalizes event type data across current API and legacy nested shapes.
+   */
   function normalizeEventType(value) {
     const raw = String(value || "").trim().toLowerCase();
     if (["horizontal jump", "horizontal-jump", "jump-horizontal"].includes(raw)) return "horizontal-jump";
@@ -667,10 +703,16 @@
     return raw;
   }
 
+  /**
+   * Resolves the canonical stat schema used by scorecards, leaderboards, and report summaries.
+   */
   function getSportSchema(sportSlug) {
     return STAT_SCHEMAS[normalizeSportSlug(sportSlug)] || null;
   }
 
+  /**
+   * Infers the track and field discipline from the event name when older records lack eventType.
+   */
   function getTrackFieldEventType(eventName) {
     const label = String(eventName || "").trim();
     if (!label) return "track";
@@ -803,6 +845,9 @@
     }, {});
   }
 
+  /**
+   * Computes track and field summary from normalized data rather than duplicating stored summary fields.
+   */
   function computeTrackAndFieldSummary(statLines) {
     const groups = groupTrackFieldStatsByEvent(statLines);
     return Object.keys(groups)
@@ -820,6 +865,9 @@
       .sort((a, b) => a.eventName.localeCompare(b.eventName));
   }
 
+  /**
+   * Computes track derived metrics from normalized data rather than duplicating stored summary fields.
+   */
   function computeTrackDerivedMetrics(statLines) {
     const normalized = Array.isArray(statLines)
       ? statLines.map((line) => normalizeStatLine(line, { sport: "track-and-field" }))
@@ -844,6 +892,9 @@
     return value === null ? "—" : String(value);
   }
 
+  /**
+   * Normalizes comparable name data across current API and legacy nested shapes.
+   */
   function normalizeComparableName(value) {
     return String(value || "")
       .normalize("NFKD")
@@ -1001,6 +1052,9 @@
     localStorage.setItem(key, JSON.stringify([entry].concat(existing).slice(0, 5)));
   }
 
+  /**
+   * Reads recent searches values into the structured payload consumed by reports and result views.
+   */
   function readRecentSearches(scope) {
     try {
       const key = `uwi_recent_searches_${String(scope || "general")}`;
@@ -1011,6 +1065,9 @@
     }
   }
 
+  /**
+   * Renders the recent searches section from normalized page state without mutating backend data.
+   */
   function renderRecentSearches(scope, onApply) {
     const items = readRecentSearches(scope);
     if (!items.length) return "";

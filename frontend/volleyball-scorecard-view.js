@@ -19,6 +19,9 @@
   };
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     const session = await APP.mountSignedInShell({ active: "competitions", contextLabel: "View Volleyball Scoresheet" });
     if (!session) return;
@@ -41,6 +44,9 @@
     }
   }
 
+  /**
+   * Renders the current state into the page without mutating backend data.
+   */
   function render(data) {
     const rows = Array.isArray(data.playerStats) ? data.playerStats : [];
     const sets = Array.isArray(data.sets) ? data.sets : [];
@@ -62,6 +68,9 @@
     `;
   }
 
+  /**
+   * Renders the player row section from normalized page state without mutating backend data.
+   */
   function renderPlayerRow(row) {
     return `<tr><td>${escapeHtml(row.serveOrder || "")}</td><td>${playerLink(row.athleteId, row.name)}</td><td>${escapeHtml(row.number ?? "")}</td><td>${escapeHtml(row.kills ?? "")}</td><td>${escapeHtml(row.aces ?? "")}</td><td>${escapeHtml(row.blocks ?? "")}</td><td>${escapeHtml(row.assists ?? "")}</td><td>${escapeHtml(row.digs ?? "")}</td><td>${escapeHtml(row.serveReceive ?? "")}</td><td>${escapeHtml(row.errors ?? "")}</td><td>${escapeHtml(row.substitutions ?? "")}</td><td>${escapeHtml(row.timeouts ?? "")}</td><td>${row.captain ? "Yes" : ""}</td><td>${row.libero ? "Yes" : ""}</td></tr>`;
   }
@@ -71,6 +80,9 @@
     return id ? `<a href="athlete-view.html?athleteId=${encodeURIComponent(id)}">${safeName}</a>` : safeName;
   }
 
+  /**
+   * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
+   */
   function normalizeLine(row) {
     const data = row?.statData && typeof row.statData === "object" ? row.statData : row?.data?.statData && typeof row.data.statData === "object" ? row.data.statData : row?.data && typeof row.data === "object" ? row.data : {};
     return { ...row, ...data, id: row.id, competitionId: row.competitionId || data.competitionId, eventName: row.eventName || data.eventName || data.title, date: row.date || data.date || row.createdAt, statData: data };

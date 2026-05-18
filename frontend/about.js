@@ -17,6 +17,9 @@
     }
   });
 
+  /**
+   * Mounts the signed in utility view feature after required context has loaded.
+   */
   async function mountSignedInUtilityView(activeLabel) {
     const session = await APP.apiGet("/auth/session", true);
     const user = session?.user || session?.session || session;

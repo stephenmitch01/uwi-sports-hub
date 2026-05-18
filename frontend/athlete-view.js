@@ -75,6 +75,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     try {
       const session = await APP.mountSignedInShell({
@@ -103,6 +106,9 @@
     }
   }
 
+  /**
+   * Loads athlete view data required by later normalization and rendering steps.
+   */
   async function loadAthleteView() {
     const athlete = await getAthlete(state.athleteId);
     state.athlete = normalizeAthlete(athlete);
@@ -123,6 +129,9 @@
     renderAll();
   }
 
+  /**
+   * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
+   */
   function normalizeArray(payload, keys) {
     if (Array.isArray(payload)) return payload;
     if (!payload || typeof payload !== "object") return [];
@@ -171,6 +180,9 @@
     return output;
   }
 
+  /**
+   * Normalizes athlete/profile fields so multi-sport and assignment logic can share one shape.
+   */
   function normalizeAthlete(raw) {
     const athlete = raw?.athlete || raw || {};
     const profile = athlete.profile && typeof athlete.profile === "object" ? athlete.profile : {};
@@ -240,6 +252,9 @@
     };
   }
 
+  /**
+   * Normalizes stat line data across current API and legacy nested shapes.
+   */
   function normalizeStatLine(raw) {
     return {
       id: raw.id || cryptoRandomId(),
@@ -288,6 +303,9 @@
     state.athlete.squadName = state.athlete.squadName || association?.squadName || association?.squad || association?.division || team?.division || team?.squadName || state.athlete.teamName || team?.name || team?.teamName || "";
   }
 
+  /**
+   * Normalizes personal-best records from current and legacy shapes for display and stat comparisons.
+   */
   function normalizePB(raw) {
     return {
       id: raw.id || cryptoRandomId(),
@@ -301,6 +319,9 @@
     };
   }
 
+  /**
+   * Renders every athlete profile section from the normalized state without mutating backend data.
+   */
   function renderAll() {
     renderHero();
     renderBodyInfo();
@@ -313,6 +334,9 @@
     populateEditForm();
   }
 
+  /**
+   * Binds the edit workflow interactions once so rerenders do not duplicate listeners.
+   */
   function bindEditWorkflow() {
     if (state.editBound) return;
     state.editBound = true;
@@ -331,6 +355,9 @@
     mountArchiveButton("athlete", els.editAthleteBtn, state.athleteId, () => state.athlete, "athletes.html");
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateEditForm() {
     if (!els.athleteEditForm || !state.athlete) return;
     const athlete = state.athlete;
@@ -372,6 +399,9 @@
     setField("editAthleteCaptain", "false");
   }
 
+  /**
+   * Handles the edit athlete submit workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleEditAthleteSubmit(event) {
     event.preventDefault();
     const message = els.athleteEditMessage;
@@ -441,6 +471,9 @@
     }
   }
 
+  /**
+   * Adds archive behavior after data load so warnings can include the current record context.
+   */
   function mountArchiveButton(recordType, anchor, id, getRecord, returnUrl) {
     if (!anchor || !id || document.getElementById(`${recordType}ArchiveBtn`)) return;
     const button = document.createElement("button");
@@ -457,6 +490,9 @@
     anchor.insertAdjacentElement("afterend", button);
   }
 
+  /**
+   * Renders the hero section from normalized page state without mutating backend data.
+   */
   function renderHero() {
     if (!state.athlete) return;
 
@@ -524,6 +560,9 @@
     }
   }
 
+  /**
+   * Renders the body info section from normalized page state without mutating backend data.
+   */
   function renderBodyInfo() {
     if (!state.athlete || !els.athleteBodyInfo) return;
 
@@ -608,6 +647,9 @@
     return `<div class="${wrapperClass}"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
+  /**
+   * Renders the stats overview section from normalized page state without mutating backend data.
+   */
   function renderStatsOverview() {
     if (!els.athleteStatsOverview) return;
 
@@ -646,6 +688,9 @@
     `;
   }
 
+  /**
+   * Renders the athlete info section from normalized page state without mutating backend data.
+   */
   function renderAthleteInfo() {
     if (!state.athlete || !els.athleteInfo) return;
 
@@ -687,6 +732,9 @@
     `;
   }
 
+  /**
+   * Renders the stats section from normalized page state without mutating backend data.
+   */
   function renderStatsSection() {
     if (!els.athleteStatsSection) return;
 
@@ -839,6 +887,9 @@
     }
   }
 
+  /**
+   * Renders the personal bests section from normalized page state without mutating backend data.
+   */
   function renderPersonalBests() {
     if (!els.athletePersonalBests) return;
 
@@ -889,6 +940,9 @@
     `;
   }
 
+  /**
+   * Renders the stat entry section from normalized page state without mutating backend data.
+   */
   function renderStatEntry() {
     if (!els.athleteStatEntry) return;
 
@@ -1021,6 +1075,9 @@
     }
   }
 
+  /**
+   * Renders the history section from normalized page state without mutating backend data.
+   */
   function renderHistory() {
     if (!els.athleteHistory) return;
 
@@ -1049,6 +1106,9 @@
     `;
   }
 
+  /**
+   * Renders the teams section from normalized page state without mutating backend data.
+   */
   function renderTeams() {
     if (!els.athleteTeams) return;
 
@@ -1145,6 +1205,9 @@
       .map((slug) => APP.getSportName?.(slug) || formatSportName(slug));
   }
 
+  /**
+   * Renders the sport stats buttons section from normalized page state without mutating backend data.
+   */
   function renderSportStatsButtons() {
     const links = getAthleteSportSlugs()
       .map((slug) => ATHLETE_STAT_PAGES[slug] ? { ...ATHLETE_STAT_PAGES[slug], slug } : null)
@@ -1169,6 +1232,9 @@
       .filter(Boolean)));
   }
 
+  /**
+   * Renders the records section from normalized page state without mutating backend data.
+   */
   function renderRecords() {
     if (!els.athleteRecords) return;
 
@@ -1213,6 +1279,9 @@
     `;
   }
 
+  /**
+   * Renders the missing selection section from normalized page state without mutating backend data.
+   */
   function renderMissingSelection() {
     const message = `
       <div class="empty-state">
@@ -1236,6 +1305,9 @@
     if (els.athleteRecords) els.athleteRecords.innerHTML = message;
   }
 
+  /**
+   * Renders the load failure section from normalized page state without mutating backend data.
+   */
   function renderLoadFailure(error) {
     const text = escapeHtml(error?.message || "Failed to load athlete view.");
     const block = `<div class="message error">${text}</div>`;
@@ -1251,6 +1323,9 @@
     if (els.athleteRecords) els.athleteRecords.innerHTML = block;
   }
 
+  /**
+   * Handles the stat entry submit workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleStatEntrySubmit(event) {
     event.preventDefault();
 
@@ -1417,6 +1492,9 @@
     return combined;
   }
 
+  /**
+   * Derives personal bests from stats from entered data so downstream display stays consistent.
+   */
   function derivePersonalBestsFromStats() {
     const sportSlug = APP.normalizeSportSlug(state.athlete?.sport || state.athlete?.primarySport || "");
     if (sportSlug === "cricket") {
@@ -1449,6 +1527,9 @@
     }));
   }
 
+  /**
+   * Derives cricket personal bests from entered data so downstream display stays consistent.
+   */
   function deriveCricketPersonalBests() {
     const batting = state.stats.filter((line) => line.sport === "cricket" || line.sportSlug === "cricket").filter((line) => line.eventType === "batting");
     const bowling = state.stats.filter((line) => line.sport === "cricket" || line.sportSlug === "cricket").filter((line) => line.eventType === "bowling" || line.eventType === "dismissal-bowling");
@@ -1477,6 +1558,9 @@
     return rows;
   }
 
+  /**
+   * Derives football personal bests from entered data so downstream display stays consistent.
+   */
   function deriveFootballPersonalBests() {
     const matches = state.stats
       .filter((line) => APP.normalizeSportSlug(line.sport || line.sportSlug) === "football")
@@ -1543,6 +1627,9 @@
     };
   }
 
+  /**
+   * Derives track field personal bests from entered data so downstream display stays consistent.
+   */
   function deriveTrackFieldPersonalBests() {
     const rows = state.stats.filter((line) => APP.normalizeSportSlug(line.sport || line.sportSlug) === "track-and-field");
     const trackRows = rows.filter((line) => {
@@ -1679,6 +1766,9 @@
     return age >= 0 && age < 120 ? String(age) : "";
   }
 
+  /**
+   * Normalizes gender data across current API and legacy nested shapes.
+   */
   function normalizeGender(value) {
     const raw = String(value || "").trim().toLowerCase();
     if (raw === "m" || raw === "male") return "male";
@@ -1742,6 +1832,9 @@
     return `ath-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
+  /**
+   * Binds the summary button interactions once so rerenders do not duplicate listeners.
+   */
   function bindSummaryButton() {
     if (!els.downloadSummaryBtn) return;
 

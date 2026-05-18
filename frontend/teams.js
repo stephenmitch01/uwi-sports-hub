@@ -65,6 +65,9 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  /**
+   * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
+   */
   async function init() {
     bindEvents();
     bindInsightActions();
@@ -97,6 +100,9 @@
     }
   }
 
+  /**
+   * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
+   */
   function bindEvents() {
     if (els.createForm) {
       els.createForm.addEventListener("submit", handleCreateTeam);
@@ -121,6 +127,9 @@
     mountRecentSearches("teams");
   }
 
+  /**
+   * Handles the filter change workflow and keeps side effects inside the intended API/action path.
+   */
   function handleFilterChange() {
     const panel = document.getElementById("teamsListPanel");
     if (hasActiveRegistryFilter() && panel) panel.open = true;
@@ -136,6 +145,9 @@
     renderTeamsTable();
   }
 
+  /**
+   * Binds the workflow links interactions once so rerenders do not duplicate listeners.
+   */
   function bindWorkflowLinks() {
     document.querySelectorAll("a[href='#teamWorkflows']").forEach(function (link) {
       link.addEventListener("click", function () {
@@ -148,6 +160,9 @@
     });
   }
 
+  /**
+   * Binds the workflow close interactions once so rerenders do not duplicate listeners.
+   */
   function bindWorkflowClose() {
     const panel = document.getElementById("teamWorkflows");
     if (!panel) return;
@@ -163,6 +178,9 @@
     });
   }
 
+  /**
+   * Populates editable controls from loaded backend data while preserving record IDs and relationships.
+   */
   function populateSportSelects() {
     const sportOptions = SPORT_REGISTRY.map(function (sport) {
       return `<option value="${escapeHtml(sport.slug)}">${escapeHtml(sport.name)}</option>`;
@@ -214,6 +232,9 @@
     renderTeamsTable();
   }
 
+  /**
+   * Renders the hero stats section from normalized page state without mutating backend data.
+   */
   function renderHeroStats() {
     const teams = getFilteredCampusTeams();
     const rosterCounts = teams.map((team) => getTeamAthletes(team.id).length);
@@ -229,6 +250,9 @@
     if (els.teamsWithoutCoachStat) els.teamsWithoutCoachStat.textContent = String(withoutCoach);
   }
 
+  /**
+   * Renders the operational summary section from normalized page state without mutating backend data.
+   */
   function renderOperationalSummary() {
     const teams = getFilteredCampusTeams();
     const withoutCoach = teams.filter((team) => !getTeamCoaches(team.id).length);
@@ -261,6 +285,9 @@
     return Math.round((checks.filter(Boolean).length / checks.length) * 100);
   }
 
+  /**
+   * Handles the create team workflow and keeps side effects inside the intended API/action path.
+   */
   async function handleCreateTeam(event) {
     event.preventDefault();
     clearMessage();
@@ -299,6 +326,9 @@
     setMessage("Team created successfully.", "success");
   }
 
+  /**
+   * Persists team edits used by roster, staff, competition, and result projections.
+   */
   async function handleEditTeam(event) {
     event.preventDefault();
     clearMessage();
@@ -348,6 +378,9 @@
     }
   }
 
+  /**
+   * Renders the team edit select section from normalized page state without mutating backend data.
+   */
   function renderTeamEditSelect(selectedTeamId) {
     if (!els.editTeamSelect) return;
 
@@ -376,6 +409,9 @@
     }
   }
 
+  /**
+   * Loads selected team into form data required by later normalization and rendering steps.
+   */
   function loadSelectedTeamIntoForm(teamId) {
     const team = state.teams.find(function (item) {
       return String(item.id) === String(teamId);
@@ -408,6 +444,9 @@
     if (els.editTeamStatus) els.editTeamStatus.value = "active";
   }
 
+  /**
+   * Renders the teams table section from normalized page state without mutating backend data.
+   */
   function renderTeamsTable() {
     if (!els.teamsTableBody) return;
 
@@ -550,14 +589,23 @@
     return sport ? sport.name : slug;
   }
 
+  /**
+   * Normalizes status data across current API and legacy nested shapes.
+   */
   function normalizeStatus(value) {
     return String(value || "ACTIVE").toLowerCase().includes("inactive") ? "inactive" : "active";
   }
 
+  /**
+   * Normalizes outgoing status data across current API and legacy nested shapes.
+   */
   function normalizeOutgoingStatus(value) {
     return String(value || "").toLowerCase() === "inactive" ? "INACTIVE" : "ACTIVE";
   }
 
+  /**
+   * Normalizes campus data across current API and legacy nested shapes.
+   */
   function normalizeCampus(value) {
     return APP.normalizeCampus(value);
   }
@@ -573,6 +621,9 @@
     if (type) els.pageMessageEl.classList.add(type);
   }
 
+  /**
+   * Resets message state before a new fetch or submit attempt.
+   */
   function clearMessage() {
     if (!els.pageMessageEl) return;
     els.pageMessageEl.className = "message";
@@ -590,6 +641,9 @@
       .replace(/'/g, "&#039;");
   }
 
+  /**
+   * Renders the insight list section from normalized page state without mutating backend data.
+   */
   function renderInsightList(node, rows, emptyText) {
     if (!node) return;
     const activeRows = rows.filter((row) => Number(row.value) > 0);
@@ -605,6 +659,9 @@
     `).join("");
   }
 
+  /**
+   * Binds the insight actions interactions once so rerenders do not duplicate listeners.
+   */
   function bindInsightActions() {
     document.addEventListener("click", function (event) {
       const action = event.target.closest(".insight-action[data-target]");
@@ -621,6 +678,9 @@
     });
   }
 
+  /**
+   * Renders the activity list section from normalized page state without mutating backend data.
+   */
   function renderActivityList(node, records) {
     if (!node) return;
     if (!records.length) {
@@ -647,6 +707,9 @@
     return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || "") || 0;
   }
 
+  /**
+   * Renders the quality section from normalized page state without mutating backend data.
+   */
   function renderQuality(scoreNode, barNode, copyNode, score, copy) {
     if (scoreNode) scoreNode.textContent = `${score}%`;
     if (barNode) barNode.style.width = `${Math.max(0, Math.min(100, score))}%`;
@@ -676,6 +739,9 @@
     APP.saveRecentSearch(scope, label, values);
   }
 
+  /**
+   * Mounts the recent searches feature after required context has loaded.
+   */
   function mountRecentSearches(scope) {
     if (!APP.renderRecentSearches || !els.teamSearchButton?.parentElement) return;
     document.querySelector(`[data-recent-searches='${scope}']`)?.remove();
