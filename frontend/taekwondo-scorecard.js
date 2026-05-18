@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Taekwondo score sheet engine.
+   *
+   * Stores athlete-linked bout/division data, round scores, deductions, method,
+   * and ranking context for athlete combat-sport summaries and result cards.
+   */
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const JUDGE_COUNT = 5;

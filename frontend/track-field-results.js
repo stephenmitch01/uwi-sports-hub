@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Track and field result sheet engine.
+   *
+   * Event rows can represent linked UWI athletes or manually typed opponents.
+   * Saved sheets power athlete PBs, team summaries, event leaderboards, reports,
+   * and competition archives without requiring a separate team scorecard.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
@@ -199,6 +206,12 @@
     return `<select class="select" id="${prefix}Id" data-athlete-select><option value="">Select athlete</option>${options}<option value="__quick_add__">Quick Add New Athlete</option></select>`;
   }
 
+  /**
+   * Recalculates event summaries from the active track or field sheet.
+   *
+   * Field events rank by best legal mark, track events rank by parsed time, and
+   * DNS/DNF/DQ/NM-style values are preserved instead of forced into numbers.
+   */
   function updateDerivedFields() {
     updateMode();
     const kind = getKind();
@@ -230,6 +243,9 @@
     });
   }
 
+  /**
+   * Saves or updates a track/field result sheet as a competition stat line.
+   */
   async function handleSubmit(event) {
     event.preventDefault();
     clearMessage();

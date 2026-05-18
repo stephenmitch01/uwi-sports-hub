@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Lawn tennis score sheet engine.
+   *
+   * Match rows capture singles/doubles participants, set scores, tiebreaks, and
+   * typed opponents. UWI athlete IDs are retained for downstream player reports.
+   */
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const MATCHES = [

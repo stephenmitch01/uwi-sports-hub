@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only volleyball scoresheet renderer.
+   *
+   * Presents set scores and saved result text from the backend stat line without
+   * duplicating the edit workflow.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

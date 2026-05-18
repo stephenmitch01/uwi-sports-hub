@@ -1,6 +1,14 @@
 (function () {
   "use strict";
 
+  /**
+   * Shared frontend runtime for USH signed-in pages.
+   *
+   * This file deliberately centralizes campus metadata, sport schemas, API
+   * transport, session mounting, duplicate checks, and scorecard validation so
+   * page modules can stay focused on their own workflow. Keep cross-page rules
+   * here when they affect reports, leaderboards, team views, or athlete profiles.
+   */
   const API_BASE = window.__UWI_API_BASE || window.UWI_API_BASE || "";
   let currentSession = null;
 
@@ -312,6 +320,15 @@
     });
   }
 
+  /**
+   * Shared fetch wrapper for backend-backed pages.
+   *
+   * The wrapper enforces frontend role checks before mutating requests, sends
+   * cookies for the server-side session, normalizes JSON error handling, and
+   * redirects expired signed-in sessions to the public sign-in page. Soft-fail
+   * mode exists for dashboards and summaries where one unavailable endpoint
+   * should not blank the entire page.
+   */
   async function apiFetch(pathOrUrl, options) {
     const opts = options || {};
     const method = (opts.method || "GET").toUpperCase();
@@ -375,6 +392,13 @@
   const apiPatch = (pathOrUrl, body, options) => apiFetch(pathOrUrl, Object.assign({}, options, { method: "PATCH", body }));
   const apiDelete = (pathOrUrl, body, options) => apiFetch(pathOrUrl, Object.assign({}, options, { method: "DELETE", body }));
 
+  /**
+   * Loads the authenticated user profile from the backend session endpoint.
+   *
+   * The backend owns the true auth state; the frontend only caches the returned
+   * session so later helper calls can apply campus theme and role-aware UI
+   * guards without refetching on every interaction.
+   */
   async function getSession() {
     const data = await apiGet("/auth/session", true);
     if (!data) return null;
@@ -453,6 +477,13 @@
     };
   }
 
+  /**
+   * Synchronizes pre-rendered shell markup with the active signed-in session.
+   *
+   * Most pages include the same top bar/nav skeleton in HTML for fast first
+   * paint. This function updates campus, active navigation, audit-log link
+   * compatibility, and sign-out behavior without replacing page content.
+   */
   function syncSignedInShell(topBar, shellNav, session, options) {
     const campusMeta = getCampusMeta(session.campus);
     const active = String(options?.active || "").toLowerCase();
@@ -523,6 +554,12 @@
     }
   }
 
+  /**
+   * Standard page entrypoint for signed-in modules.
+   *
+   * Pages should call this before fetching campus-scoped data. A null return
+   * means auth failed and the helper has already started the redirect flow.
+   */
   async function mountSignedInShell(options) {
     const session = await requireSession();
     if (!session) return null;
@@ -650,6 +687,14 @@
     return normalizeEventType(explicitEventType) || "match";
   }
 
+  /**
+   * Converts backend, legacy, and sport-specific stat-line shapes into one
+   * comparable object used by leaderboards, reports, and athlete/team views.
+   *
+   * Scorecard pages save rich nested `statData`; older records may expose the
+   * same facts as top-level fields. This compatibility layer lets downstream
+   * views consume both without rewriting each page.
+   */
   function normalizeStatLine(raw, options) {
     const item = raw && typeof raw === "object" ? raw : {};
     const sport = normalizeSportSlug(item.sport || item.sportSlug || options?.sport || "");
@@ -724,6 +769,13 @@
     return ["all"].concat(values);
   }
 
+  /**
+   * Selects the best record according to the sport schema, not simple max/min.
+   *
+   * Track times are better when lower, field marks are better when higher, and
+   * team-match sports may not have a single primary metric. Keeping that logic
+   * schema-driven prevents reports from hard-coding sport assumptions.
+   */
   function getPersonalBest(statLines, options) {
     const list = Array.isArray(statLines) ? statLines.map((line) => normalizeStatLine(line, options)) : [];
     if (!list.length) return null;
@@ -836,6 +888,13 @@
     return String(record?.status || data.status || "").trim().toLowerCase() === "archived" || data.archived === true || Boolean(data.archivedAt);
   }
 
+  /**
+   * Finds likely duplicate records before create flows persist new data.
+   *
+   * The comparison intentionally includes sport and, for competitions, a date
+   * window so distinct events with similar names are not blocked. Archive-aware
+   * filtering keeps hidden historical records from interrupting active work.
+   */
   function findSimilarRecord(records, candidate, options = {}) {
     const threshold = options.threshold ?? 0.82;
     const candidateName = recordDisplayName(candidate);
@@ -875,6 +934,13 @@
     return !hasLinkedData || window.confirm("This will update standings and reports connected to this record. Continue?");
   }
 
+  /**
+   * Shared archive warning used by record-management pages.
+   *
+   * Archiving is a visibility change, not a delete. The warning explicitly
+   * calls out reports/selection workflows because archived records remain
+   * linked to historical scorecards and audit data.
+   */
   function confirmArchive(recordType, record) {
     const linked = Array.isArray(record?.linkedDataSummary) && record.linkedDataSummary.length
       ? `\n\nLinked data will be preserved:\n${record.linkedDataSummary.map((item) => `- ${item.count} ${item.label}`).join("\n")}`
@@ -888,6 +954,13 @@
     );
   }
 
+  /**
+   * Adds page-local unsaved-change protection without owning form submission.
+   *
+   * Scorecards and management workflows often have long forms. This helper
+   * warns on navigation but clears itself during submit so normal saves are not
+   * mistaken for abandoned edits.
+   */
   function trackUnsavedChanges(form) {
     if (!form) return { markClean() {}, markDirty() {}, isDirty: () => false };
     let dirty = false;
@@ -949,6 +1022,13 @@
     `;
   }
 
+  /**
+   * Creates a minimal athlete from inside a scorecard roster selector.
+   *
+   * The record is intentionally marked incomplete: the scorecard needs an ID so
+   * stats propagate immediately, while athlete-profile staff can complete body,
+   * contact, and eligibility fields later.
+   */
   async function quickAddAthleteForTeam(options = {}) {
     const teamId = options.teamId || "";
     const sportSlug = normalizeSportSlug(options.sportSlug || options.sport || "");
@@ -975,6 +1055,13 @@
     });
   }
 
+  /**
+   * Resolves all sports attached to an athlete across current and legacy shapes.
+   *
+   * Multi-sport athletes may be linked through profile data, direct fields, or
+   * roster/team assignments. Scorecard dropdowns and profile reports rely on
+   * this helper to avoid creating duplicate athlete records per sport.
+   */
   function getAthleteSports(athlete) {
     return Array.from(new Set([
       athlete?.profile?.sportSlug,
@@ -1006,6 +1093,13 @@
     return assignments.some((assignment) => String(assignment?.teamId || assignment?.team?.id || "") === target);
   }
 
+  /**
+   * Final client-side sanity check before sport scorecards hit the API.
+   *
+   * Backend validation remains authoritative, but this catches impossible
+   * negatives/max violations and asks for confirmation on unusual outliers so
+   * incomplete or extraordinary scorecards can still be saved deliberately.
+   */
   function confirmScorecardValues(form, sportSlug) {
     if (!form) return true;
     const values = Array.from(form.querySelectorAll("input[type='number']")).map((input) => {

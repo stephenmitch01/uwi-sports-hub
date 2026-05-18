@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Football results archive.
+   *
+   * Displays saved match sheets with typed opponent names, scorelines, and goal
+   * events as a read projection of competition stat lines.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const state = { competitions: [], scorecards: [], activeCompetitionId: params.get("competitionId") || "", teamId: params.get("teamId") || "", searchApplied: false };

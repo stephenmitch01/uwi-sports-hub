@@ -6,6 +6,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Coach/staff detail workflow.
+   *
+   * This view normalizes embedded and endpoint-loaded staff assignments into a
+   * single table, avoiding duplicate display when backend responses include
+   * both current relationship data and legacy nested shapes.
+   */
   const APP = window.UWISportsHub;
 
   const state = {

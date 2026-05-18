@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only football score sheet renderer.
+   *
+   * Renders saved score, player rows, and goal events from statData so the view
+   * matches what reports and result cards consume.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

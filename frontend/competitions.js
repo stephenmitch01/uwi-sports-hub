@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Competition registry workflow.
+   *
+   * Competitions are the entry point for official stats. Users create or select
+   * a competition, then open the sport-specific scorecard/result workflow that
+   * saves data for reports, leaderboards, athlete profiles, and team pages.
+   */
   const APP = window.UWISportsHub;
   const state = {
     session: null,

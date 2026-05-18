@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Reports workflow.
+   *
+   * Reports are read-only projections of campus-scoped athletes, teams,
+   * competitions, assignments, and stat lines. Missing-data messaging should
+   * reflect actual unavailable fields, not normalization gaps.
+   */
   const APP = window.UWISportsHub;
 
   const state = {

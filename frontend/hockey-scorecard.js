@@ -1,5 +1,12 @@
 (function () {
   "use strict";
+  /**
+   * Hockey score sheet engine.
+   *
+   * Stores period scoring, roster-linked player stats, cards, shots, saves, and
+   * opponent/team labels in one stat line so match results and athlete summaries
+   * can be rendered from the same saved source.
+   */
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const state = { session: null, competition: null, athletes: [], teams: [] };

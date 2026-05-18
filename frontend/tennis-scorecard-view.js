@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only lawn tennis score sheet renderer.
+   *
+   * Shows saved match rows and scores without recalculating or editing the
+   * source stat line.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

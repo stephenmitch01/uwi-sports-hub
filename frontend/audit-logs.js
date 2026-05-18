@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Audit log review workflow.
+   *
+   * Audit logs are operational history for campus-scoped mutations. This page is
+   * read-only and preserves backend actor/entity context for traceability.
+   */
   const APP = window.UWISportsHub;
 
   const state = {

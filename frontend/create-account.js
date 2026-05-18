@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Account creation workflow.
+   *
+   * This public mutation creates the identity/profile bridge needed by the
+   * signed-in app. Campus and role values are normalized again by the backend,
+   * so frontend validation is guidance rather than authority.
+   */
   const APP = window.UWISportsHub;
   const inviteStatus = document.getElementById("inviteStatus");
   const createAccountForm = document.getElementById("createAccountForm");

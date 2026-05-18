@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Team detail workflow.
+   *
+   * The team page aggregates roster, staff, competition activity, and saved
+   * scorecards. Relationship data may arrive from direct fields or nested
+   * assignment arrays, so renderers normalize before display.
+   */
   const APP = window.UWISportsHub;
   const SPORT_REGISTRY = APP.SPORT_REGISTRY || [];
   const apiGet = APP.apiGet.bind(APP);

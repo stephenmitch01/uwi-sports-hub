@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Football score sheet engine.
+   *
+   * The page links a match squad to athlete IDs, captures team/opponent match
+   * stats, and preserves goal events so reports can aggregate both team results
+   * and individual contributions.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
@@ -216,6 +223,10 @@
     });
   }
 
+  /**
+   * Recomputes final score, team totals, and result text from entered scores and
+   * player stats while preserving manually typed opponent names for display.
+   */
   function updateDerivedFields() {
     const uwiTotal = sum(["homeH1", "homeH2", "homeOT"]);
     const opponentTotal = sum(["awayH1", "awayH2", "awayOT"]);
@@ -242,6 +253,9 @@
     return `Draw ${uwiTotal}-${opponentTotal}`;
   }
 
+  /**
+   * Saves or updates the football stat line consumed by archives and reports.
+   */
   async function handleSubmit(event) {
     event.preventDefault();
     clearMessage();

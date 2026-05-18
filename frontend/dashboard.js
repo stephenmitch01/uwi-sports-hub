@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Dashboard composition layer.
+   *
+   * The dashboard is intentionally explanatory and aggregate-focused: it mounts
+   * the signed-in shell, fetches campus-scoped core records, and summarizes how
+   * competition data flows into operational pages and reports.
+   */
   const APP = window.UWISportsHub;
   const dashboardMessage = document.getElementById("dashboardMessage");
   const roleEyebrow = document.getElementById("roleEyebrow");

@@ -1,5 +1,11 @@
 import "dotenv/config";
 
+/**
+ * Splits comma-delimited origin configuration for CORS.
+ *
+ * The API supports local and deployed frontends; keeping origins configurable
+ * avoids hard-coding environment-specific URLs into route logic.
+ */
 function splitOrigins(value) {
   return String(value || "")
     .split(",")
@@ -7,6 +13,12 @@ function splitOrigins(value) {
     .filter(Boolean);
 }
 
+/**
+ * Central backend configuration.
+ *
+ * Values are read once at process start so auth, CORS, and account bootstrap
+ * behavior stay consistent across route modules.
+ */
 export const config = {
   port: Number(process.env.PORT || 4000),
   nodeEnv: process.env.NODE_ENV || "development",
@@ -18,6 +30,9 @@ export const config = {
   firstAdminEmail: String(process.env.FIRST_ADMIN_EMAIL || "").trim().toLowerCase()
 };
 
+/**
+ * Fails fast for environment variables required to operate backend auth.
+ */
 export function requireEnv(name, value) {
   if (!value) {
     throw new Error(`${name} is required`);

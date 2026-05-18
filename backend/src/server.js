@@ -29,6 +29,14 @@ const MAX_BODY_KEYS = 1500;
 const MAX_STRING_LENGTH = 12000;
 const MAX_ARRAY_LENGTH = 600;
 
+/**
+ * Express API for the operational USH application.
+ *
+ * Routes are campus-scoped by default, use Supabase-backed sessions, and store
+ * flexible sport metadata in `data` JSON while keeping common relational fields
+ * available for reporting. Avoid moving sport-specific interpretation into this
+ * file unless it affects persistence, permissions, or cross-page propagation.
+ */
 app.use(helmet());
 app.use(createRateLimiter(GENERAL_RATE_LIMIT));
 app.use(express.json({ limit: "2mb" }));
@@ -64,6 +72,12 @@ function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 }
 
+/**
+ * Lightweight in-memory limiter used to protect public and auth endpoints.
+ *
+ * It is process-local by design for this deployment shape; if the API is scaled
+ * horizontally, replace this with a shared store so limits remain consistent.
+ */
 function createRateLimiter({ windowMs, max }) {
   const hits = new Map();
   return (req, res, next) => {
@@ -94,6 +108,13 @@ function handleMalformedJson(error, _req, res, next) {
   next(error);
 }
 
+/**
+ * Sanitizes request bodies before route logic sees them.
+ *
+ * Scorecard payloads are intentionally nested and sport-specific, so the
+ * sanitizer limits depth/size and strips control characters without rejecting
+ * valid scorecard structures such as innings, attempts, and player rows.
+ */
 function sanitizeRequestInput(req, res, next) {
   try {
     if (req.body && typeof req.body === "object") {
@@ -150,10 +171,24 @@ function getRecordCampus(req, body) {
   return normalizeCampus(body.campus || body.campusSlug || body.campusOwner || currentCampus(req));
 }
 
+/**
+ * Applies the campus boundary used throughout the API.
+ *
+ * Any list/detail mutation that should respect the signed-in campus should
+ * compose its Prisma `where` clause through this helper instead of accepting a
+ * campus from the client.
+ */
 function scopedWhere(req, extra = {}) {
   return { campus: currentCampus(req), ...extra };
 }
 
+/**
+ * Best-effort audit logging for operational changes.
+ *
+ * Audit writes must never block a user save. If logging fails, the API records
+ * the server error and still returns the primary mutation result so scorecards
+ * and roster updates do not get lost.
+ */
 async function writeAuditLog(req, details = {}) {
   try {
     const campus = normalizeCampus(details.campus || req?.auth?.profile?.campus || currentCampus(req));
@@ -199,6 +234,13 @@ function visibleRows(req, rows) {
   return flattened.filter((row) => !isArchivedRecord(row));
 }
 
+/**
+ * Optimistic concurrency guard for edit workflows.
+ *
+ * Pages pass their last known `updatedAt` when available. A mismatch prevents
+ * silent overwrites when two staff members edit the same athlete, team,
+ * competition, or scorecard-related record.
+ */
 function assertVersionFresh(res, existing, body) {
   const expected = body.updatedAt || body.lastKnownUpdatedAt || body.versionUpdatedAt;
   if (!expected) return true;

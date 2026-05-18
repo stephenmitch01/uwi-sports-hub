@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * About page behavior.
+   *
+   * The page explains platform data flow for users and reviewers. Dynamic logic
+   * should remain informational and should not create records or bypass the
+   * signed-in operational workflows.
+   */
   const APP = window.UWISportsHub;
 
   document.addEventListener("DOMContentLoaded", async function () {

@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Support page workflow.
+   *
+   * Support runs inside the signed-in shell but does not mutate sports records.
+   * Keep it operationally separate from scorecard and profile workflows so help
+   * requests cannot interfere with campus-scoped data.
+   */
   const APP = window.UWISportsHub;
   const supportForm = document.getElementById("supportForm");
   const supportMessageBox = document.getElementById("supportMessageBox");

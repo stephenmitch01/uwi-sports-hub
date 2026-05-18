@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Athlete basketball stats projection.
+   *
+   * Reads linked score sheet rows and converts them into aggregate and game-log
+   * views without changing the source competition stat lines.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const athleteId = params.get("athleteId") || params.get("id") || "";

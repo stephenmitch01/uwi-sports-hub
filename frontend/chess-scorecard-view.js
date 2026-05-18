@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only chess score sheet renderer.
+   *
+   * Presents saved board, result, and move-score detail without deriving a new
+   * outcome from display-only fields.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

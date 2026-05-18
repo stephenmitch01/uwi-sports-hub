@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only hockey score sheet renderer.
+   *
+   * Uses persisted scorecard data for result review so display stays aligned
+   * with team views, recent results, and reports.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

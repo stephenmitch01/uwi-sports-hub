@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Legal page behavior.
+   *
+   * This module is intentionally lightweight and utility-focused. It can mount
+   * signed-in context when present while keeping legal content reachable without
+   * depending on sport data fetches.
+   */
   const APP = window.UWISportsHub;
 
   document.addEventListener("DOMContentLoaded", async function () {

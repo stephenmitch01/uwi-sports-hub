@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Basketball results archive.
+   *
+   * Filters saved score sheets and links to view/edit workflows. Player leaders
+   * are derived from saved statData rather than stored separately.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const state = { competitions: [], scorecards: [], activeCompetitionId: params.get("competitionId") || "", teamId: params.get("teamId") || "", searchApplied: false };

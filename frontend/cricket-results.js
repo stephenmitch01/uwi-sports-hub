@@ -1,5 +1,12 @@
 (function(){
   "use strict";
+  /**
+   * Cricket results archive.
+   *
+   * Reads saved scorecard stat lines and renders filterable result cards without
+   * modifying source data. Display normalization handles legacy innings labels
+   * while leaving the persisted statData untouched.
+   */
   const APP=window.UWISportsHub;
   const params=new URLSearchParams(window.location.search);
   const state={competitions:[],scorecards:[],activeCompetitionId:params.get("competitionId")||"",teamId:params.get("teamId")||"",searchApplied:false};

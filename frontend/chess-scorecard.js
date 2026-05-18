@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Chess score sheet engine.
+   *
+   * Captures board, color, result, opponent, opening, and move score. The saved
+   * summary is preserved because chess outcomes are not simple numeric totals.
+   */
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const MOVE_ROWS = 60;

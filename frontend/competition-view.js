@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Competition detail and stat-entry hub.
+   *
+   * This page links competition metadata to sport-specific entry pages, recent
+   * scorecards, participants, and stat lines. It must tolerate legacy and nested
+   * scorecard shapes because reports and result cards read the same saved data.
+   */
   const APP = window.UWISportsHub;
 
   const state = {

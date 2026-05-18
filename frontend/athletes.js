@@ -1,6 +1,13 @@
 (() => {
   "use strict";
 
+  /**
+   * Athlete registry workflow.
+   *
+   * This page owns create/edit/search interactions while preserving the
+   * multi-sport/team model consumed by scorecards, team views, athlete reports,
+   * leaderboards, and profile completeness summaries.
+   */
   const APP = window.UWISportsHub;
 
   const state = {

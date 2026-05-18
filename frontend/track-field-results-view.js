@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Read-only track and field result renderer.
+   *
+   * Presents official event rows without recalculating the saved result sheet,
+   * preserving typed opponent entries and linked UWI athlete rows for review.
+   */
   const APP = window.UWISportsHub;
   const resultId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

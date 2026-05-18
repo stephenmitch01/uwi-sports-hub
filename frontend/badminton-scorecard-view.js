@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only badminton match sheet renderer.
+   *
+   * Keeps match and game detail visible from the same saved payload used by
+   * reports, while edits remain centralized in the entry workflow.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

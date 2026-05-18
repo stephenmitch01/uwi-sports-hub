@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only taekwondo score sheet renderer.
+   *
+   * Keeps bout and scoring detail visible from persisted statData for technical
+   * review and report traceability.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

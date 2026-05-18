@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only basketball score sheet renderer.
+   *
+   * Displays the saved stat line used by team, athlete, and competition pages;
+   * edit actions route back to the score sheet engine.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

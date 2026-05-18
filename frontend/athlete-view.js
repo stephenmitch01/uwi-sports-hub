@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Athlete profile detail workflow.
+   *
+   * The page merges identity/profile fields, roster assignments, and linked
+   * sport-specific stat lines so one athlete can appear correctly across
+   * multiple teams, sports, reports, and scorecard-derived summaries.
+   */
   const APP = window.UWISportsHub;
 
   const state = {

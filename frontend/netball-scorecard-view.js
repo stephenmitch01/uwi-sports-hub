@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only netball score sheet renderer.
+   *
+   * Displays saved quarters, result, and player rows for operational review
+   * without mutating the stat line.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

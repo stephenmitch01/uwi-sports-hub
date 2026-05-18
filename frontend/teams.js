@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Team registry workflow.
+   *
+   * Teams bridge athlete assignments, staff assignments, and competition
+   * results. Create/edit actions save backend records that downstream pages can
+   * join by stable team IDs.
+   */
   const APP = window.UWISportsHub;
   if (!APP) throw new Error("APP not initialized");
   const SPORT_REGISTRY = APP.SPORT_REGISTRY || [];

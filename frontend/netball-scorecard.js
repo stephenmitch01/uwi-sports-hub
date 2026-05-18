@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Netball score sheet engine.
+   *
+   * Captures quarter scoring, roster-linked player rows, and match stats in a
+   * backend stat line so athlete reports and team/competition views read from
+   * the same official sheet.
+   */
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const POSITIONS = ["GS", "GA", "WA", "C", "WD", "GD", "GK"];

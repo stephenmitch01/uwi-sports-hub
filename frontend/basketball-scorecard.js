@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Basketball score sheet engine.
+   *
+   * Roster selections link rows to athlete IDs while period scores, possession,
+   * and player stat columns remain editable. Saved stat lines feed recent
+   * results, athlete summaries, team views, reports, and archives.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
@@ -205,6 +212,10 @@
     });
   }
 
+  /**
+   * Derives team totals, player totals, and result text from period/player rows.
+   * Overtime and incomplete rows remain editable for later score sheet updates.
+   */
   function updateDerivedFields() {
     els.visitTeamLabel.value = opponentName();
     setValue("homePeriodLabel", getUwiTeamName(), false);
@@ -237,6 +248,9 @@
     return Array.from({ length: 18 }, (_, index) => (index % 2 === 0 ? start : other)).join(" -> ");
   }
 
+  /**
+   * Saves or updates the basketball stat line used across the platform.
+   */
   async function handleSubmit(event) {
     event.preventDefault();
     clearMessage();

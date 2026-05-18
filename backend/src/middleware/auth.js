@@ -7,6 +7,12 @@ const REFRESH_COOKIE = "ush_refresh_token";
 const SESSION_COOKIE = "ush_session_id";
 const memorySessions = new Map();
 
+/**
+ * Cookie policy for the API-managed Supabase session bridge.
+ *
+ * Local development uses lax, non-secure cookies so localhost works; production
+ * uses secure cross-site cookies for deployed frontend/backend origins.
+ */
 export function cookieOptions(req) {
   const production = process.env.NODE_ENV === "production";
   if (!production) {
@@ -45,6 +51,12 @@ export function clearSessionCookies(res) {
   res.clearCookie(REFRESH_COOKIE, { path: "/" });
 }
 
+/**
+ * Ensures every authenticated Supabase user has a campus-scoped USH profile.
+ *
+ * Supabase is the identity provider, while this profile stores application
+ * permissions and campus ownership used by route scoping and signed-in shell UI.
+ */
 export async function findOrCreateProfile(authUser, defaults = {}) {
   const email = String(authUser.email || defaults.email || "").trim().toLowerCase();
   if (!email) return null;
@@ -88,6 +100,12 @@ export async function findOrCreateProfile(authUser, defaults = {}) {
   });
 }
 
+/**
+ * Authenticates API requests and attaches both identity and USH profile data.
+ *
+ * Routes should read `req.auth.profile` for role/campus decisions instead of
+ * trusting client-provided campus or role values.
+ */
 export async function requireAuth(req, res, next) {
   const sessionId = req.cookies?.[SESSION_COOKIE];
   const memorySession = sessionId ? memorySessions.get(sessionId) : null;
@@ -109,6 +127,9 @@ export async function requireAuth(req, res, next) {
   next();
 }
 
+/**
+ * Mutation guard for records that can affect reports, leaderboards, and teams.
+ */
 export function requireManager(req, res, next) {
   if (!canManage(req.auth?.profile?.role)) {
     return sendError(res, 403, "Your role does not permit this action");

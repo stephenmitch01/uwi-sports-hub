@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Badminton match sheet engine.
+   *
+   * Supports singles/doubles-style participant capture, manual opponent entries,
+   * and game-level scoring while preserving UWI athlete IDs for reporting.
+   */
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const state = { competition: null, athletes: [], teams: [] };

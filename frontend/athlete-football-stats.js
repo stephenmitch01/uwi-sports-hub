@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Athlete football stats projection.
+   *
+   * Uses athlete-linked football score sheet rows to present goals, assists,
+   * minutes, cards, saves, and match logs for the selected player.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const athleteId = params.get("athleteId") || params.get("id") || "";

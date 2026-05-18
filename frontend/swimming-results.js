@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Swimming result sheet engine.
+   *
+   * Records lane-level results with UWI athlete IDs or manual opponent entries.
+   * Times, DQ flags, and splits are preserved for PBs, archives, team summaries,
+   * and competition reports.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";

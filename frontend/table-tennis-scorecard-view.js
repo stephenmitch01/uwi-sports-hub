@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only table tennis score sheet renderer.
+   *
+   * Displays rubber-level saved data for review while reports aggregate from the
+   * same statData structure.
+   */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

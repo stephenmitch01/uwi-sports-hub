@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Coach and staff registry workflow.
+   *
+   * Coach records are campus-scoped operational records. Team assignments are
+   * linked by ID so team views and reports can show staff without duplicating
+   * the same person in separate role-specific records.
+   */
   const APP = window.UWISportsHub;
 
   const SPORTS = APP.SPORT_REGISTRY.map(function (sport) { return sport.name; });

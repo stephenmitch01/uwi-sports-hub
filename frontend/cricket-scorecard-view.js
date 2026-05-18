@@ -1,5 +1,11 @@
 (function(){
   "use strict";
+  /**
+   * Read-only cricket scorecard renderer.
+   *
+   * Presents saved innings and player detail from statData; edits belong in the
+   * entry page so archives and reports keep one source of truth.
+   */
   const APP=window.UWISportsHub;
   const scorecardId=new URLSearchParams(window.location.search).get("scorecardId")||new URLSearchParams(window.location.search).get("id")||"";
   const els={msg:document.getElementById("pageMessage"),title:document.getElementById("scorecardTitle"),meta:document.getElementById("scorecardMeta"),back:document.getElementById("backLink"),result:document.getElementById("resultText"),venue:document.getElementById("venueText"),body:document.getElementById("scorecardBody")};

@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Leaderboard workflow.
+   *
+   * Leaderboards consume normalized stat lines from scorecards and personal-best
+   * entries. Metric filters intentionally narrow visible columns so users can
+   * compare selected stats without mixing unrelated sport-specific fields.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const state = {

@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Table tennis score sheet engine.
+   *
+   * Rubber rows preserve UWI athlete IDs, typed opponent players, games, points,
+   * and match winner so reports can summarize both team and player outcomes.
+   */
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const RUBBERS = [

@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Athlete track and field stats projection.
+   *
+   * Aggregates saved event result sheets into track/field appearances, marks,
+   * event breakdowns, and personal-best style summaries for one athlete.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const athleteId = params.get("athleteId") || params.get("id") || "";

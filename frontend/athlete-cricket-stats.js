@@ -1,6 +1,12 @@
 (function () {
   "use strict";
 
+  /**
+   * Athlete cricket stats projection.
+   *
+   * Aggregates cricket scorecard rows for one athlete into batting, bowling, and
+   * fielding summaries. The page depends on athlete IDs saved in scorecards.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const athleteId = params.get("athleteId") || params.get("id") || "";

@@ -1,6 +1,14 @@
 (function () {
   "use strict";
 
+  /**
+   * Cricket scorecard engine.
+   *
+   * Lifecycle: competition -> UWI team -> starting XI -> innings rows -> saved
+   * competition stat line. Athlete IDs in batting, bowling, and fielding rows
+   * allow scorecards to propagate into athlete reports, team views, result
+   * cards, leaderboards, and campus reports.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
@@ -272,6 +280,10 @@
     return `<select class="select" id="${id}AthleteId" data-uwi-player-control><option value="">Select ${escapeHtml(label.toLowerCase())}</option>${selectedXiAthletes().map((athlete) => `<option value="${escapeHtml(athlete.id)}">${escapeHtml(displayName(athlete))}</option>`).join("")}</select>`;
   }
 
+  /**
+   * Recomputes totals, wickets, targets, run rates, and result text from innings
+   * rows while allowing incomplete scorecards to be saved and edited later.
+   */
   function updateDerivedFields() {
     for (let index = 1; index <= state.inningsCount; index += 1) {
       updateInningsDerived(index);
@@ -461,6 +473,12 @@
     }
   }
 
+  /**
+   * Persists the complete match structure as a backend stat line.
+   *
+   * The nested payload preserves score, innings, and player-level details so
+   * downstream reports do not need to infer official stats from display text.
+   */
   async function handleSubmit(event) {
     event.preventDefault();
     clearMessage();

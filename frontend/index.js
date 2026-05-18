@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Public sign-in workflow.
+   *
+   * Public pages do not mount the signed-in shell. Successful authentication is
+   * delegated to the backend session endpoint, after which signed-in pages load
+   * campus and role information through `mountSignedInShell`.
+   */
   const APP = window.UWISportsHub;
 
   const signInForm = document.getElementById("signInForm");

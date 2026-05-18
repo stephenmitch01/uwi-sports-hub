@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Read-only swimming result sheet renderer.
+   *
+   * Displays saved lane results, linked UWI athletes, and manual opponent rows
+   * from the same statData consumed by reports and athlete summaries.
+   */
   const APP = window.UWISportsHub;
   const resultId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
   const els = {

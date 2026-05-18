@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  /**
+   * Volleyball scoresheet engine.
+   *
+   * Set scores and player-stat rows are saved together to support recent result
+   * cards, team summaries, and athlete performance views. Manual opponent data
+   * remains displayable when no opponent team record exists.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";

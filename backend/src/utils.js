@@ -1,3 +1,9 @@
+/**
+ * Canonical campus slug normalizer shared by auth and route scoping.
+ *
+ * Unknown values intentionally fall back to Cave Hill for legacy records and
+ * local development defaults; new UI should still send an explicit campus.
+ */
 export function normalizeCampus(value) {
   const raw = String(value || "").trim().toLowerCase().replace(/[_\s-]+/g, "");
   if (raw === "mona") return "mona";
@@ -33,6 +39,13 @@ export function sendError(res, status, message, details) {
   res.status(status).json(cleanObject({ error: message, details }));
 }
 
+/**
+ * Merges JSON `data` fields onto API responses for frontend compatibility.
+ *
+ * The database keeps flexible sport/profile metadata in `data`, while older
+ * pages often expect top-level properties. Flattening preserves both during the
+ * migration toward backend-backed records.
+ */
 export function flattenRecord(record) {
   if (!record) return null;
   const data = record.data && typeof record.data === "object" ? record.data : {};

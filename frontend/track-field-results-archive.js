@@ -1,5 +1,11 @@
 (function () {
   "use strict";
+  /**
+   * Track and field results archive.
+   *
+   * Lists saved event sheets and exposes view/edit links. Filters read event
+   * metadata from statData so official marks stay tied to the original entry.
+   */
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const state = { competitions: [], scorecards: [], activeCompetitionId: params.get("competitionId") || "", teamId: params.get("teamId") || "", searchApplied: false };
