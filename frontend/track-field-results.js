@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Track and field result sheet engine.
    *
@@ -9,12 +10,15 @@
    * and competition archives without requiring a separate team scorecard.
    */
   const APP = window.UWISportsHub;
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
   const scorecardId = params.get("scorecardId") || "";
   const TRACK_ROW_COUNT = 8;
   const FIELD_ROW_COUNT = 12;
+  // Scorecard State
   const state = { competition: null, scorecard: null, athletes: [], teams: [] };
+  // Scorecard Fields
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("resultsHeading"),
@@ -39,6 +43,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -77,6 +82,7 @@
     }
   }
 
+  // Page Layout
   /**
    * Builds the initial page UI from loaded campus-scoped data and default workflow state.
    */
@@ -94,6 +100,7 @@
     renderFieldRows();
   }
 
+  // Edit Form Prefill
   /**
    * Prefills edit mode from the saved result sheet while preserving linked athlete/opponent rows.
    */
@@ -121,6 +128,7 @@
     renderFieldRowsFrom(data.entries || []);
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -147,6 +155,7 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  // Derived Mode
   /**
    * Updates derived UI state from the current form/model values without persisting changes directly.
    */
@@ -158,6 +167,7 @@
     els.fieldEventLabel.textContent = buildEventLabel() || "Field Event";
   }
 
+  // Track Rows
   /**
    * Renders the track rows section from normalized page state without mutating backend data.
    */
@@ -166,6 +176,7 @@
     els.trackRows.innerHTML = Array.from({ length: TRACK_ROW_COUNT }, (_, index) => trackRow(index + 1, previous[index] || {})).join("");
   }
 
+  // Field Rows
   /**
    * Renders the field rows section from normalized page state without mutating backend data.
    */
@@ -174,6 +185,7 @@
     els.fieldRows.innerHTML = Array.from({ length: FIELD_ROW_COUNT }, (_, index) => fieldRow(index + 1, previous[index] || {})).join("");
   }
 
+  // Track Rows
   /**
    * Renders track rows rows from normalized page state without mutating backend data.
    */
@@ -181,6 +193,7 @@
     els.trackRows.innerHTML = Array.from({ length: TRACK_ROW_COUNT }, (_, index) => trackRow(index + 1, entries[index] || {})).join("");
   }
 
+  // Field Rows
   /**
    * Renders field rows rows from normalized page state without mutating backend data.
    */
@@ -233,6 +246,7 @@
     return `<select class="select" id="${prefix}Id" data-athlete-select><option value="">Select athlete</option>${options}<option value="__quick_add__">Quick Add New Athlete</option></select>`;
   }
 
+  // Derived Fields
   /**
    * Recalculates event summaries from the active track or field sheet.
    *
@@ -258,6 +272,7 @@
     setValue("winnerResult", winner ? `${winner.name || "Winner"} - ${kind === "track" ? winner.time : winner.best}` : "");
   }
 
+  // Field Totals
   /**
    * Updates derived UI state from the current form/model values without persisting changes directly.
    */
@@ -276,6 +291,7 @@
     });
   }
 
+  // Save Workflow
   /**
    * Saves or updates a track/field result sheet as a competition stat line.
    */
@@ -336,6 +352,7 @@
     }
   }
 
+  // Collect Track Meta
   /**
    * Reads track meta values into the structured payload consumed by reports and result views.
    */
@@ -349,6 +366,7 @@
     };
   }
 
+  // Collect Field Meta
   /**
    * Reads field meta values into the structured payload consumed by reports and result views.
    */
@@ -361,6 +379,7 @@
     };
   }
 
+  // Collect Track Results
   /**
    * Serializes track rows, preserving manual opponent entries and linked UWI athlete IDs.
    */
@@ -388,6 +407,7 @@
     });
   }
 
+  // Collect Field Results
   /**
    * Serializes field rows and legal marks so PB/report logic can use official attempts.
    */
@@ -439,6 +459,7 @@
     return legal.reduce((best, item) => item.number > best.number ? item : best, legal[0]);
   }
 
+  // Workflow: Athlete Select Change
   /**
    * Supports quick-add from score sheets when an eligible athlete record is missing.
    */
@@ -457,6 +478,7 @@
     if (target) target.value = selectedId;
   }
 
+  // Lookup Roster Athletes
   /**
    * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
    */
@@ -466,6 +488,7 @@
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  // Lookup UWI Team Name
   /**
    * Resolves the selected UWI team label from backend data for saved statData and display.
    */
@@ -474,6 +497,7 @@
     return team?.name || team?.teamName || "UWI Track and Field";
   }
 
+  // Build Event Label
   /**
    * Builds event label from shared state so markup and payload labels stay consistent.
    */
@@ -505,6 +529,7 @@
     return `${number}${suffix}`;
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -541,6 +566,7 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -549,6 +575,7 @@
     els.message.textContent = "";
   }
 
+  // Messages and UI State
   /**
    * Displays blocking load errors without throwing away the signed-in shell.
    */
@@ -557,6 +584,7 @@
     els.pageMessage.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -565,6 +593,7 @@
     els.message.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */

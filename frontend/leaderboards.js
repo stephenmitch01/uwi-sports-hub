@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Leaderboard workflow.
    *
@@ -9,7 +10,9 @@
    * compare selected stats without mixing unrelated sport-specific fields.
    */
   const APP = window.UWISportsHub;
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
+  // Page State
   const state = {
     scope: params.get("scope") || "team",
     teamId: params.get("teamId") || "",
@@ -33,6 +36,7 @@
     { key: "other", label: "Other Formats" }
   ];
 
+  // Page Elements
   const els = {
     heading: document.getElementById("leaderboardHeading"),
     subtitle: document.getElementById("leaderboardSubtitle"),
@@ -50,6 +54,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -91,6 +96,7 @@
     render();
   }
 
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -168,6 +174,7 @@
     }
   }
 
+  // Build Rows
   /**
    * Builds rows from shared state so markup and payload labels stay consistent.
    */
@@ -451,6 +458,7 @@
     return APP.normalizeSportSlug(state.team?.sportSlug || state.team?.sport || state.competition?.sportSlug || state.competition?.sport || state.statLines[0]?.sportSlug || state.statLines[0]?.sport);
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -462,6 +470,7 @@
     return [];
   }
 
+  // Normalize Stat Line
   /**
    * Normalizes stat line data across current API and legacy nested shapes.
    */
@@ -527,6 +536,7 @@
     });
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -593,6 +603,7 @@
     return inningOvers.length ? Math.max(...inningOvers) : 0;
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */

@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Team registry workflow.
    *
@@ -10,11 +11,13 @@
    */
   const APP = window.UWISportsHub;
   if (!APP) throw new Error("APP not initialized");
+  // Shared Registries
   const SPORT_REGISTRY = APP.SPORT_REGISTRY || [];
   const apiGet = APP.apiGet.bind(APP);
   const apiPost = APP.apiPost.bind(APP);
   const apiPatch = APP.apiPatch.bind(APP);
 
+  // Page State
   const state = {
     session: null,
     teams: [],
@@ -23,6 +26,7 @@
     registrySearchApplied: false
   };
 
+  // Page Elements
   const els = {
     campusNameNodes: Array.from(document.querySelectorAll("[data-campus-name]")),
 
@@ -65,6 +69,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -100,6 +105,7 @@
     }
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -127,6 +133,7 @@
     mountRecentSearches("teams");
   }
 
+  // Workflow: Filter Change
   /**
    * Handles the filter change workflow and keeps side effects inside the intended API/action path.
    */
@@ -145,6 +152,7 @@
     renderTeamsTable();
   }
 
+  // Event Wiring
   /**
    * Binds the workflow links interactions once so rerenders do not duplicate listeners.
    */
@@ -160,6 +168,7 @@
     });
   }
 
+  // Event Wiring
   /**
    * Binds the workflow close interactions once so rerenders do not duplicate listeners.
    */
@@ -178,6 +187,7 @@
     });
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -232,6 +242,7 @@
     renderTeamsTable();
   }
 
+  // Hero Stats
   /**
    * Renders the hero stats section from normalized page state without mutating backend data.
    */
@@ -250,6 +261,7 @@
     if (els.teamsWithoutCoachStat) els.teamsWithoutCoachStat.textContent = String(withoutCoach);
   }
 
+  // Operational Summary
   /**
    * Renders the operational summary section from normalized page state without mutating backend data.
    */
@@ -285,6 +297,7 @@
     return Math.round((checks.filter(Boolean).length / checks.length) * 100);
   }
 
+  // Workflow: Create Team
   /**
    * Handles the create team workflow and keeps side effects inside the intended API/action path.
    */
@@ -326,6 +339,7 @@
     setMessage("Team created successfully.", "success");
   }
 
+  // Workflow: Edit Team
   /**
    * Persists team edits used by roster, staff, competition, and result projections.
    */
@@ -378,6 +392,7 @@
     }
   }
 
+  // Team Edit Select
   /**
    * Renders the team edit select section from normalized page state without mutating backend data.
    */
@@ -409,6 +424,7 @@
     }
   }
 
+  // Data Loading
   /**
    * Loads selected team into form data required by later normalization and rendering steps.
    */
@@ -444,6 +460,7 @@
     if (els.editTeamStatus) els.editTeamStatus.value = "active";
   }
 
+  // Teams Table
   /**
    * Renders the teams table section from normalized page state without mutating backend data.
    */
@@ -589,6 +606,7 @@
     return sport ? sport.name : slug;
   }
 
+  // Normalize Status
   /**
    * Normalizes status data across current API and legacy nested shapes.
    */
@@ -596,6 +614,7 @@
     return String(value || "ACTIVE").toLowerCase().includes("inactive") ? "inactive" : "active";
   }
 
+  // Normalize Outgoing Status
   /**
    * Normalizes outgoing status data across current API and legacy nested shapes.
    */
@@ -603,6 +622,7 @@
     return String(value || "").toLowerCase() === "inactive" ? "INACTIVE" : "ACTIVE";
   }
 
+  // Normalize Campus
   /**
    * Normalizes campus data across current API and legacy nested shapes.
    */
@@ -621,6 +641,7 @@
     if (type) els.pageMessageEl.classList.add(type);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -641,6 +662,7 @@
       .replace(/'/g, "&#039;");
   }
 
+  // Insight List
   /**
    * Renders the insight list section from normalized page state without mutating backend data.
    */
@@ -659,6 +681,7 @@
     `).join("");
   }
 
+  // Event Wiring
   /**
    * Binds the insight actions interactions once so rerenders do not duplicate listeners.
    */
@@ -678,6 +701,7 @@
     });
   }
 
+  // Activity List
   /**
    * Renders the activity list section from normalized page state without mutating backend data.
    */
@@ -707,6 +731,7 @@
     return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || "") || 0;
   }
 
+  // Quality
   /**
    * Renders the quality section from normalized page state without mutating backend data.
    */
@@ -739,6 +764,7 @@
     APP.saveRecentSearch(scope, label, values);
   }
 
+  // Shared UI Mounting
   /**
    * Mounts the recent searches feature after required context has loaded.
    */

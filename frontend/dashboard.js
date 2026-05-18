@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Dashboard composition layer.
    *
@@ -36,6 +37,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -55,6 +57,7 @@
     }
   }
 
+  // User
   /**
    * Renders the user section from normalized page state without mutating backend data.
    */
@@ -73,6 +76,7 @@
     if (permissionValue) permissionValue.textContent = describePermissions(user.role);
   }
 
+  // Campus Summary
   /**
    * Aggregates campus-scoped record counts for dashboard display without editing source data.
    */
@@ -120,6 +124,7 @@
     }
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -196,6 +201,7 @@
     return String(role || "viewer").replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (m) => m.toUpperCase());
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -204,6 +210,7 @@
     dashboardMessage.textContent = message;
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */

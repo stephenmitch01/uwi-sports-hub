@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Read-only track and field result renderer.
    *
@@ -9,6 +10,7 @@
    */
   const APP = window.UWISportsHub;
   const resultId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
+  // Page Elements
   const els = {
     msg: document.getElementById("pageMessage"),
     title: document.getElementById("resultsTitle"),
@@ -21,6 +23,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -46,6 +49,7 @@
     }
   }
 
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -57,6 +61,7 @@
     renderTrack(data);
   }
 
+  // Track
   /**
    * Renders the track section from normalized page state without mutating backend data.
    */
@@ -77,6 +82,7 @@
     `;
   }
 
+  // Field
   /**
    * Renders the field section from normalized page state without mutating backend data.
    */
@@ -97,6 +103,7 @@
     `;
   }
 
+  // Meta
   /**
    * Renders the meta section from normalized page state without mutating backend data.
    */
@@ -110,6 +117,7 @@
     </div>`;
   }
 
+  // Track Row
   /**
    * Renders the track row section from normalized page state without mutating backend data.
    */
@@ -127,6 +135,7 @@
     </tr>`;
   }
 
+  // Field Row
   /**
    * Renders the field row section from normalized page state without mutating backend data.
    */
@@ -152,6 +161,7 @@
     return id ? `<a href="athlete-view.html?athleteId=${encodeURIComponent(id)}">${safeName}</a>` : safeName;
   }
 
+  // Normalize Line
   /**
    * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
    */

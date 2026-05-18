@@ -1,6 +1,7 @@
 (() => {
   "use strict";
 
+  // Shared App Access
   /**
    * Athlete registry workflow.
    *
@@ -10,6 +11,7 @@
    */
   const APP = window.UWISportsHub;
 
+  // Page State
   const state = {
     session: null,
     athletes: [],
@@ -18,6 +20,7 @@
     registrySearchApplied: false
   };
 
+  // Page Elements
   const els = {
     pageMessage: document.getElementById("athletePageMessage"),
     athletesTableBody: document.getElementById("athletesTableBody"),
@@ -107,6 +110,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -158,6 +162,7 @@
     renderAll(selectedAthleteId);
   }
 
+  // Event Wiring
   /**
    * Binds the filters interactions once so rerenders do not duplicate listeners.
    */
@@ -171,6 +176,7 @@
     mountRecentSearches("athletes");
   }
 
+  // Workflow: Filter Change
   /**
    * Handles the filter change workflow and keeps side effects inside the intended API/action path.
    */
@@ -198,6 +204,7 @@
     renderAthletesTable();
   }
 
+  // Event Wiring
   /**
    * Binds the workflow links interactions once so rerenders do not duplicate listeners.
    */
@@ -213,6 +220,7 @@
     });
   }
 
+  // Event Wiring
   /**
    * Binds the workflow close interactions once so rerenders do not duplicate listeners.
    */
@@ -224,6 +232,7 @@
     });
   }
 
+  // Event Wiring
   /**
    * Binds the create form interactions once so rerenders do not duplicate listeners.
    */
@@ -265,6 +274,7 @@
     });
   }
 
+  // Event Wiring
   /**
    * Binds the edit form interactions once so rerenders do not duplicate listeners.
    */
@@ -310,6 +320,7 @@
     });
   }
 
+  // Full Page Render
   /**
    * Renders the registry table and summary widgets from the current campus-scoped athlete state.
    */
@@ -319,6 +330,7 @@
     renderAthletesTable();
   }
 
+  // Operational Summary
   /**
    * Renders the operational summary section from normalized page state without mutating backend data.
    */
@@ -367,6 +379,7 @@
     return Math.round((checks.filter(Boolean).length / checks.length) * 100);
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -377,6 +390,7 @@
     });
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -393,6 +407,7 @@
     if (els.athleteSportFilter) els.athleteSportFilter.innerHTML = filterOptions;
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -417,6 +432,7 @@
     }
   }
 
+  // Athlete Edit Select
   /**
    * Renders the athlete edit select section from normalized page state without mutating backend data.
    */
@@ -444,6 +460,7 @@
     }
   }
 
+  // Data Loading
   /**
    * Loads selected athlete into form data required by later normalization and rendering steps.
    */
@@ -532,6 +549,7 @@
     populateCampusTeamSelects("");
   }
 
+  // Athletes Table
   /**
    * Renders the athletes table section from normalized page state without mutating backend data.
    */
@@ -597,6 +615,7 @@
     updateBulkActionBar(athletes);
   }
 
+  // Event Wiring
   /**
    * Binds the bulk actions interactions once so rerenders do not duplicate listeners.
    */
@@ -623,6 +642,7 @@
     }
   }
 
+  // Event Wiring
   /**
    * Binds the row selection controls interactions once so rerenders do not duplicate listeners.
    */
@@ -638,6 +658,7 @@
     });
   }
 
+  // Workflow: Bulk Assign Team
   /**
    * Handles the bulk assign team workflow and keeps side effects inside the intended API/action path.
    */
@@ -685,6 +706,7 @@
     });
   }
 
+  // Derived Bulk Action Bar
   /**
    * Updates derived UI state from the current form/model values without persisting changes directly.
    */
@@ -756,6 +778,7 @@
     return payload;
   }
 
+  // Build Athlete Record
   /**
    * Builds athlete record from shared state so markup and payload labels stay consistent.
    */
@@ -896,6 +919,7 @@
     }
   }
 
+  // Normalize Collection
   /**
    * Normalizes collection data across current API and legacy nested shapes.
    */
@@ -913,6 +937,7 @@
     return [];
   }
 
+  // Normalize Team Record
   /**
    * Normalizes team record data across current API and legacy nested shapes.
    */
@@ -927,6 +952,7 @@
     };
   }
 
+  // Normalize Athlete Record
   /**
    * Normalizes athlete record data across current API and legacy nested shapes.
    */
@@ -1070,6 +1096,7 @@
     return age >= 0 && age < 120 ? String(age) : "";
   }
 
+  // Normalize Gender
   /**
    * Normalizes gender data across current API and legacy nested shapes.
    */
@@ -1087,6 +1114,7 @@
     return "Not recorded";
   }
 
+  // Normalize Status
   /**
    * Normalizes status data across current API and legacy nested shapes.
    */
@@ -1094,6 +1122,7 @@
     return String(value || "").trim().toLowerCase() === "inactive" ? "inactive" : "active";
   }
 
+  // Normalize Campus
   /**
    * Normalizes campus data across current API and legacy nested shapes.
    */
@@ -1122,6 +1151,7 @@
     APP.showMessage?.(els.pageMessage, message, "error");
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -1137,6 +1167,7 @@
     if (node) node.textContent = String(value);
   }
 
+  // Insight List
   /**
    * Renders the insight list section from normalized page state without mutating backend data.
    */
@@ -1155,6 +1186,7 @@
     `).join("");
   }
 
+  // Event Wiring
   /**
    * Binds the insight actions interactions once so rerenders do not duplicate listeners.
    */
@@ -1175,6 +1207,7 @@
     });
   }
 
+  // Activity List
   /**
    * Renders the activity list section from normalized page state without mutating backend data.
    */
@@ -1204,6 +1237,7 @@
     return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || record.date || "") || 0;
   }
 
+  // Quality
   /**
    * Renders the quality section from normalized page state without mutating backend data.
    */
@@ -1218,6 +1252,7 @@
     return `<div class="completeness-cell"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
+  // Collect File As Data Url
   /**
    * Reads file as data url values into the structured payload consumed by reports and result views.
    */
@@ -1244,6 +1279,7 @@
     APP.saveRecentSearch(scope, label, values);
   }
 
+  // Shared UI Mounting
   /**
    * Mounts the recent searches feature after required context has loaded.
    */

@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Public sign-in workflow.
    *
@@ -36,6 +37,7 @@
     }
   }
 
+  // Workflow: Sign In
   /**
    * Handles the sign in workflow and keeps side effects inside the intended API/action path.
    */

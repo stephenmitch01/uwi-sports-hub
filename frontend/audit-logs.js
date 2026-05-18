@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Audit log review workflow.
    *
@@ -9,11 +10,13 @@
    */
   const APP = window.UWISportsHub;
 
+  // Page State
   const state = {
     session: null,
     logs: []
   };
 
+  // Page Elements
   const els = {
     action: document.getElementById("auditAction"),
     entityType: document.getElementById("auditEntityType"),
@@ -27,6 +30,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -45,6 +49,7 @@
     await loadAuditLogs();
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -60,6 +65,7 @@
     });
   }
 
+  // Data Loading
   /**
    * Loads audit logs data required by later normalization and rendering steps.
    */
@@ -67,6 +73,7 @@
     setLoading(true);
     APP.clearMessage?.(els.message);
     try {
+      // URL Parameters
       const params = new URLSearchParams();
       appendParam(params, "action", els.action?.value);
       appendParam(params, "entityType", els.entityType?.value);
@@ -97,6 +104,7 @@
     els.searchButton.textContent = isLoading ? "Searching..." : "Search";
   }
 
+  // Logs
   /**
    * Renders the logs section from normalized page state without mutating backend data.
    */
@@ -129,6 +137,7 @@
     `;
   }
 
+  // Log Row
   /**
    * Renders the log row section from normalized page state without mutating backend data.
    */
@@ -150,6 +159,7 @@
     `;
   }
 
+  // Empty State
   /**
    * Renders the empty section from normalized page state without mutating backend data.
    */
@@ -180,6 +190,7 @@
     return String(value);
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */

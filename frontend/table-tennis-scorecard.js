@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Table tennis score sheet engine.
    *
@@ -17,7 +18,9 @@
     { label: "#1 Pairing", type: "doubles" },
     { label: "#2 Pairing", type: "doubles" }
   ];
+  // Scorecard State
   const state = { competition: null, athletes: [], teams: [] };
+  // Scorecard Fields
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("scorecardHeading"),
@@ -36,6 +39,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -67,6 +71,7 @@
     }
   }
 
+  // Page Layout
   /**
    * Builds the initial page UI from loaded campus-scoped data and default workflow state.
    */
@@ -83,6 +88,7 @@
     renderRubbers();
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -98,6 +104,7 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  // Rubbers
   /**
    * Renders the rubbers section from normalized page state without mutating backend data.
    */
@@ -107,6 +114,7 @@
     updateDerivedFields();
   }
 
+  // Rubber
   /**
    * Renders the rubber section from normalized page state without mutating backend data.
    */
@@ -156,6 +164,7 @@
     }
   }
 
+  // Derived Fields
   /**
    * Recalculates derived display values from editable fields without saving until submit.
    */
@@ -193,6 +202,7 @@
     setValue("durationMinutes", deriveDuration(), false);
   }
 
+  // Save Workflow
   /**
    * Validates and persists the workflow payload through the shared API helper.
    */
@@ -242,6 +252,7 @@
     }
   }
 
+  // Collect Rubbers
   /**
    * Reads rubbers values into the structured payload consumed by reports and result views.
    */
@@ -290,6 +301,7 @@
     return summary;
   }
 
+  // Collect UWI Players For Rubber
   /**
    * Reads uwi players for rubber values into the structured payload consumed by reports and result views.
    */
@@ -302,6 +314,7 @@
     }).filter(Boolean);
   }
 
+  // Collect Opponent Players For Rubber
   /**
    * Reads opponent players for rubber values into the structured payload consumed by reports and result views.
    */
@@ -313,6 +326,7 @@
     }).filter(Boolean);
   }
 
+  // Workflow: Player Select Change
   /**
    * Handles the player select change workflow and keeps side effects inside the intended API/action path.
    */
@@ -330,6 +344,7 @@
     if (target) target.value = athlete.id;
   }
 
+  // Lookup Roster Athletes
   /**
    * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
    */
@@ -339,6 +354,7 @@
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  // Lookup UWI Team Name
   /**
    * Resolves the selected UWI team label from backend data for saved statData and display.
    */
@@ -347,6 +363,7 @@
     return team?.name || team?.teamName || "UWI Table Tennis";
   }
 
+  // Derived Duration
   /**
    * Derives duration from entered data so downstream display stays consistent.
    */
@@ -362,6 +379,7 @@
     return minutes;
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -399,6 +417,7 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -407,6 +426,7 @@
     els.message.textContent = "";
   }
 
+  // Messages and UI State
   /**
    * Displays blocking load errors without throwing away the signed-in shell.
    */
@@ -415,6 +435,7 @@
     els.pageMessage.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -423,6 +444,7 @@
     els.message.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */

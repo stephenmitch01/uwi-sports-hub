@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Netball score sheet engine.
    *
@@ -11,7 +12,9 @@
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const POSITIONS = ["GS", "GA", "WA", "C", "WD", "GD", "GK"];
+  // Scorecard State
   const state = { competition: null, athletes: [], teams: [] };
+  // Scorecard Fields
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("scorecardHeading"),
@@ -33,6 +36,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -64,6 +68,7 @@
     }
   }
 
+  // Page Layout
   /**
    * Builds the initial page UI from loaded campus-scoped data and default workflow state.
    */
@@ -83,6 +88,7 @@
     renderSubRows();
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -103,6 +109,7 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  // Squad
   /**
    * Renders the squad section from normalized page state without mutating backend data.
    */
@@ -121,6 +128,7 @@
     }).join("");
   }
 
+  // Starting Seven
   /**
    * Renders the starting seven section from normalized page state without mutating backend data.
    */
@@ -128,6 +136,7 @@
     els.startingGrid.innerHTML = POSITIONS.map((position) => `<div><label for="start${position}">${position}</label>${playerControl(`start${position}`, `Select ${position}`)}</div>`).join("");
   }
 
+  // Player Rows
   /**
    * Renders the player rows section from normalized page state without mutating backend data.
    */
@@ -148,6 +157,7 @@
     </tr>`;
   }
 
+  // Sub Rows
   /**
    * Renders the sub rows section from normalized page state without mutating backend data.
    */
@@ -178,6 +188,7 @@
     });
   }
 
+  // Derived Fields
   /**
    * Recalculates derived display values from editable fields without saving until submit.
    */
@@ -200,6 +211,7 @@
     setValue("teamPenalties", sumPlayerField("Penalties"));
   }
 
+  // Derived Result
   /**
    * Builds result text from score inputs while leaving manual corrections possible before save.
    */
@@ -210,6 +222,7 @@
     return `Draw ${uwiTotal}-${opponentTotal}`;
   }
 
+  // Save Workflow
   /**
    * Validates and persists the workflow payload through the shared API helper.
    */
@@ -264,6 +277,7 @@
     }
   }
 
+  // Collect Score
   /**
    * Reads score values into the structured payload consumed by reports and result views.
    */
@@ -274,6 +288,7 @@
     };
   }
 
+  // Collect Starting Position
   /**
    * Reads starting position values into the structured payload consumed by reports and result views.
    */
@@ -282,6 +297,7 @@
     return { position, athleteId, name: athleteId ? displayName(state.athletes.find((athlete) => String(athlete.id) === String(athleteId))) : "" };
   }
 
+  // Collect Player Stat
   /**
    * Serializes one player row with athlete IDs so individual reports can aggregate performance.
    */
@@ -310,6 +326,7 @@
     };
   }
 
+  // Collect Substitution
   /**
    * Reads substitution values into the structured payload consumed by reports and result views.
    */
@@ -335,6 +352,7 @@
     return Boolean(row.period || row.playerOffAthleteId || row.playerOnAthleteId || row.position || row.notes);
   }
 
+  // Lookup Roster Athletes
   /**
    * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
    */
@@ -344,6 +362,7 @@
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  // Selected Squad Athletes
   /**
    * Reads selected squad athletes used to constrain player dropdowns and stat linkage.
    */
@@ -352,6 +371,7 @@
     return ids.map((id) => state.athletes.find((athlete) => String(athlete.id) === String(id))).filter(Boolean);
   }
 
+  // Workflow: Squad Select Change
   /**
    * Supports quick-add from squad selectors while keeping scorecard IDs consistent.
    */
@@ -372,6 +392,7 @@
     refreshSquadPlayerOptions();
   }
 
+  // Lookup UWI Team Name
   /**
    * Resolves the selected UWI team label from backend data for saved statData and display.
    */
@@ -380,6 +401,7 @@
     return team?.name || team?.teamName || "UWI Netball";
   }
 
+  // Opponent Name
   /**
    * Returns the typed opponent label, falling back only when staff did not enter one.
    */
@@ -387,6 +409,7 @@
     return els.opponentName.value.trim() || "Opponent";
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -438,6 +461,7 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -446,6 +470,7 @@
     els.message.textContent = "";
   }
 
+  // Messages and UI State
   /**
    * Displays blocking load errors without throwing away the signed-in shell.
    */
@@ -454,6 +479,7 @@
     els.pageMessage.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -462,6 +488,7 @@
     els.message.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */

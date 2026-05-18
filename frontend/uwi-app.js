@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // API Helper
   /**
    * Shared frontend runtime for USH signed-in pages.
    *
@@ -12,6 +13,7 @@
   const API_BASE = window.__UWI_API_BASE || window.UWI_API_BASE || "";
   let currentSession = null;
 
+  // Shared Registries
   const CAMPUS_META = {
     mona: { name: "Mona", color: "#c62828", light: "rgba(198,40,40,0.12)", border: "rgba(198,40,40,0.24)" },
     staugustine: { name: "St Augustine", color: "#1565c0", light: "rgba(21,101,192,0.12)", border: "rgba(21,101,192,0.24)" },
@@ -209,6 +211,7 @@
     if (text) node.classList.add(type || "success", "is-visible");
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */
@@ -216,6 +219,7 @@
     showMessage(node, text, "success");
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -227,6 +231,7 @@
     showMessage(node, text, "warning");
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -241,6 +246,7 @@
     return `id_${Math.random().toString(36).slice(2, 10)}`;
   }
 
+  // Normalize Campus
   /**
    * Normalizes campus data across current API and legacy nested shapes.
    */
@@ -259,6 +265,7 @@
     return CAMPUS_META[slug] || CAMPUS_META.cavehill;
   }
 
+  // Normalize Role
   /**
    * Normalizes role data across current API and legacy nested shapes.
    */
@@ -308,6 +315,7 @@
     return aliases[collapsed] || aliases[raw.replace(/[-\s]/g, "")] || collapsed;
   }
 
+  // Normalize Sport Slug
   /**
    * Normalizes sport slug data across current API and legacy nested shapes.
    */
@@ -338,6 +346,7 @@
     });
   }
 
+  // API Helper
   /**
    * Shared fetch wrapper for backend-backed pages.
    *
@@ -410,6 +419,7 @@
   const apiPatch = (pathOrUrl, body, options) => apiFetch(pathOrUrl, Object.assign({}, options, { method: "PATCH", body }));
   const apiDelete = (pathOrUrl, body, options) => apiFetch(pathOrUrl, Object.assign({}, options, { method: "DELETE", body }));
 
+  // Lookup Session
   /**
    * Loads the authenticated user profile from the backend session endpoint.
    *
@@ -446,6 +456,7 @@
     return session;
   }
 
+  // Build Signed In Shell HTML
   /**
    * Builds signed in shell html from shared state so markup and payload labels stay consistent.
    */
@@ -498,6 +509,7 @@
     };
   }
 
+  // Sync Signed In Shell
   /**
    * Synchronizes pre-rendered shell markup with the active signed-in session.
    *
@@ -575,6 +587,7 @@
     }
   }
 
+  // Shared UI Mounting
   /**
    * Standard page entrypoint for signed-in modules.
    *
@@ -603,6 +616,7 @@
     return Number.isFinite(number) ? number : null;
   }
 
+  // Normalize Attempts
   /**
    * Normalizes attempts data across current API and legacy nested shapes.
    */
@@ -616,6 +630,7 @@
     });
   }
 
+  // Normalize Progression
   /**
    * Normalizes progression data across current API and legacy nested shapes.
    */
@@ -627,6 +642,7 @@
     }));
   }
 
+  // Normalize Splits
   /**
    * Normalizes splits data across current API and legacy nested shapes.
    */
@@ -647,6 +663,7 @@
     return {};
   }
 
+  // Normalize Track Field Stat Data
   /**
    * Normalizes track and field stat payloads across current API and legacy nested shapes.
    */
@@ -689,6 +706,7 @@
     return data;
   }
 
+  // Normalize Event Type
   /**
    * Normalizes event type data across current API and legacy nested shapes.
    */
@@ -703,6 +721,7 @@
     return raw;
   }
 
+  // Lookup Sport Schema
   /**
    * Resolves the canonical stat schema used by scorecards, leaderboards, and report summaries.
    */
@@ -710,6 +729,7 @@
     return STAT_SCHEMAS[normalizeSportSlug(sportSlug)] || null;
   }
 
+  // Lookup Track Field Event Type
   /**
    * Infers the track and field discipline from the event name when older records lack eventType.
    */
@@ -729,6 +749,7 @@
     return normalizeEventType(explicitEventType) || "match";
   }
 
+  // Normalize Stat Line
   /**
    * Converts backend, legacy, and sport-specific stat-line shapes into one
    * comparable object used by leaderboards, reports, and athlete/team views.
@@ -811,6 +832,7 @@
     return ["all"].concat(values);
   }
 
+  // Lookup Personal Best
   /**
    * Selects the best record according to the sport schema, not simple max/min.
    *
@@ -845,6 +867,7 @@
     }, {});
   }
 
+  // Derived Track And Field Summary
   /**
    * Computes track and field summary from normalized data rather than duplicating stored summary fields.
    */
@@ -865,6 +888,7 @@
       .sort((a, b) => a.eventName.localeCompare(b.eventName));
   }
 
+  // Track Metrics
   /**
    * Computes track derived metrics from normalized data rather than duplicating stored summary fields.
    */
@@ -892,6 +916,7 @@
     return value === null ? "—" : String(value);
   }
 
+  // Normalize Comparable Name
   /**
    * Normalizes comparable name data across current API and legacy nested shapes.
    */
@@ -939,6 +964,7 @@
     return String(record?.status || data.status || "").trim().toLowerCase() === "archived" || data.archived === true || Boolean(data.archivedAt);
   }
 
+  // Lookup Similar Record
   /**
    * Finds likely duplicate records before create flows persist new data.
    *
@@ -985,6 +1011,7 @@
     return !hasLinkedData || window.confirm("This will update standings and reports connected to this record. Continue?");
   }
 
+  // Archive Workflow
   /**
    * Shared archive warning used by record-management pages.
    *
@@ -1005,6 +1032,7 @@
     );
   }
 
+  // Track Unsaved Changes
   /**
    * Adds page-local unsaved-change protection without owning form submission.
    *
@@ -1052,6 +1080,7 @@
     localStorage.setItem(key, JSON.stringify([entry].concat(existing).slice(0, 5)));
   }
 
+  // Collect Recent Searches
   /**
    * Reads recent searches values into the structured payload consumed by reports and result views.
    */
@@ -1065,6 +1094,7 @@
     }
   }
 
+  // Recent Searches
   /**
    * Renders the recent searches section from normalized page state without mutating backend data.
    */
@@ -1079,6 +1109,7 @@
     `;
   }
 
+  // Quick Add Athlete For Team
   /**
    * Creates a minimal athlete from inside a scorecard roster selector.
    *
@@ -1112,6 +1143,7 @@
     });
   }
 
+  // Lookup Athlete Sports
   /**
    * Resolves all sports attached to an athlete across current and legacy shapes.
    *
@@ -1150,6 +1182,7 @@
     return assignments.some((assignment) => String(assignment?.teamId || assignment?.team?.id || "") === target);
   }
 
+  // Confirm Scorecard Values
   /**
    * Final client-side sanity check before sport scorecards hit the API.
    *

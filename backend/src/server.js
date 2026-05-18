@@ -18,6 +18,7 @@ import {
 } from "./middleware/auth.js";
 import { cleanObject, flattenMany, flattenRecord, normalizeCampus, normalizeRole, sendError, toDate } from "./utils.js";
 
+// Backend Setup
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,6 +30,7 @@ const MAX_BODY_KEYS = 1500;
 const MAX_STRING_LENGTH = 12000;
 const MAX_ARRAY_LENGTH = 600;
 
+// Middleware Setup
 /**
  * Express API for the operational USH application.
  *
@@ -72,6 +74,7 @@ function asyncRoute(handler) {
   return (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 }
 
+// Rate Limiting
 /**
  * Lightweight in-memory limiter used to protect public and auth endpoints.
  *
@@ -102,6 +105,7 @@ function createRateLimiter({ windowMs, max }) {
 
 const authRateLimit = createRateLimiter(AUTH_RATE_LIMIT);
 
+// Workflow: Malformed Json
 /**
  * Converts body-parser failures into consistent API errors before requests reach route handlers.
  */
@@ -111,6 +115,7 @@ function handleMalformedJson(error, _req, res, next) {
   next(error);
 }
 
+// Sanitize Request Input
 /**
  * Sanitizes request bodies before route logic sees them.
  *
@@ -174,6 +179,7 @@ function getRecordCampus(req, body) {
   return normalizeCampus(body.campus || body.campusSlug || body.campusOwner || currentCampus(req));
 }
 
+// Scoped Where
 /**
  * Applies the campus boundary used throughout the API.
  *
@@ -185,6 +191,7 @@ function scopedWhere(req, extra = {}) {
   return { campus: currentCampus(req), ...extra };
 }
 
+// Write Audit Log
 /**
  * Best-effort audit logging for operational changes.
  *
@@ -237,6 +244,7 @@ function visibleRows(req, rows) {
   return flattened.filter((row) => !isArchivedRecord(row));
 }
 
+// Assert Version Fresh
 /**
  * Optimistic concurrency guard for edit workflows.
  *

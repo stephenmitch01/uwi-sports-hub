@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Chess score sheet engine.
    *
@@ -10,7 +11,9 @@
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const MOVE_ROWS = 60;
+  // Scorecard State
   const state = { competition: null, athletes: [], teams: [] };
+  // Scorecard Fields
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("scorecardHeading"),
@@ -28,6 +31,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -56,6 +60,7 @@
     }
   }
 
+  // Page Layout
   /**
    * Builds the initial page UI from loaded campus-scoped data and default workflow state.
    */
@@ -73,6 +78,7 @@
     renderMoveGrid();
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -85,6 +91,7 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  // Player Options
   /**
    * Renders the player options section from normalized page state without mutating backend data.
    */
@@ -94,6 +101,7 @@
     els.playerSelect.value = previous;
   }
 
+  // Move Grid
   /**
    * Renders the move grid section from normalized page state without mutating backend data.
    */
@@ -110,6 +118,7 @@
     els.moveGrid.innerHTML = first + rows;
   }
 
+  // Derived Fields
   /**
    * Recalculates derived display values from editable fields without saving until submit.
    */
@@ -122,6 +131,7 @@
     document.getElementById("colorText").textContent = els.color.value === "white" ? "White" : "Black";
   }
 
+  // Save Workflow
   /**
    * Validates and persists the workflow payload through the shared API helper.
    */
@@ -174,6 +184,7 @@
     }
   }
 
+  // Collect Moves
   /**
    * Reads moves values into the structured payload consumed by reports and result views.
    */
@@ -215,6 +226,7 @@
     };
   }
 
+  // Workflow: Player Select Change
   /**
    * Handles the player select change workflow and keeps side effects inside the intended API/action path.
    */
@@ -230,6 +242,7 @@
     els.playerSelect.value = athlete.id;
   }
 
+  // Lookup Roster Athletes
   /**
    * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
    */
@@ -239,6 +252,7 @@
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  // Lookup UWI Team Name
   /**
    * Resolves the selected UWI team label from backend data for saved statData and display.
    */
@@ -247,6 +261,7 @@
     return team?.name || team?.teamName || "UWI Chess";
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -271,6 +286,7 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -279,6 +295,7 @@
     els.message.textContent = "";
   }
 
+  // Messages and UI State
   /**
    * Displays blocking load errors without throwing away the signed-in shell.
    */
@@ -287,6 +304,7 @@
     els.pageMessage.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -295,6 +313,7 @@
     els.message.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */

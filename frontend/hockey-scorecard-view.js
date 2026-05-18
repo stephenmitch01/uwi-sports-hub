@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  // Shared App Access
   /**
    * Read-only hockey score sheet renderer.
    *
@@ -8,6 +9,7 @@
    */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
+  // Scorecard Fields
   const els = {
     msg: document.getElementById("pageMessage"),
     title: document.getElementById("scorecardTitle"),
@@ -19,6 +21,7 @@
   };
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -44,6 +47,7 @@
     }
   }
 
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -66,6 +70,7 @@
     `;
   }
 
+  // Goal
   /**
    * Renders the goal section from normalized page state without mutating backend data.
    */
@@ -73,6 +78,7 @@
     return `<tr><td>${escapeHtml(row.number ?? "")}</td><td>${playerLink(row.scorerAthleteId, row.scorerName)}</td><td>${escapeHtml(row.side || "")}</td><td>${escapeHtml(row.period || "")}</td><td>${escapeHtml(row.goal ?? "")}</td><td>${playerLink(row.assist1AthleteId, row.assist1Name)}</td><td>${playerLink(row.assist2AthleteId, row.assist2Name)}</td></tr>`;
   }
 
+  // Penalty
   /**
    * Renders the penalty section from normalized page state without mutating backend data.
    */
@@ -85,6 +91,7 @@
     return id ? `<a href="athlete-view.html?athleteId=${encodeURIComponent(id)}">${safeName || "Player"}</a>` : safeName;
   }
 
+  // Normalize Line
   /**
    * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
    */

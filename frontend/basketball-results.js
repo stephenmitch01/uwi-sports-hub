@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  // Shared App Access
   /**
    * Basketball results archive.
    *
@@ -7,11 +8,15 @@
    * are derived from saved statData rather than stored separately.
    */
   const APP = window.UWISportsHub;
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
+  // Scorecard State
   const state = { competitions: [], scorecards: [], activeCompetitionId: params.get("competitionId") || "", teamId: params.get("teamId") || "", searchApplied: false };
+  // Scorecard Fields
   const els = { msg: document.getElementById("pageMessage"), tabs: document.getElementById("competitionTabs"), season: document.getElementById("seasonFilter"), outcome: document.getElementById("outcomeFilter"), opponent: document.getElementById("opponentFilter"), searchButton: document.getElementById("resultsSearchButton"), count: document.getElementById("resultCount"), grid: document.getElementById("resultsGrid") };
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -30,6 +35,7 @@
     }
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild markup without duplicating listeners.
    */
@@ -39,6 +45,7 @@
     mountRecentSearches();
   }
 
+  // Filters
   /**
    * Builds filter controls from available backend records so searches reflect saved data.
    */
@@ -50,6 +57,7 @@
     els.season.innerHTML = `<option value="">All seasons</option>${seasons.map((season) => `<option value="${escapeHtml(season)}">${escapeHtml(season)}</option>`).join("")}`;
   }
 
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -75,6 +83,7 @@
     return true;
   }
 
+  // Card
   /**
    * Renders one result card from normalized stat data while preserving links to view/edit workflows.
    */
@@ -112,6 +121,7 @@
     return sorted[0] || null;
   }
 
+  // Normalize Line
   /**
    * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
    */
@@ -138,6 +148,7 @@
   function compactUwiResultLabel(value) { const text = String(value || "").trim(); if (!text) return ""; return text.replace(/\bUWI\s+Blackbirds(?:\s+[A-Za-z& -]+?)?\s+Team\b/gi, "Blackbirds").replace(/\bUWI\s+Blackbirds\b/gi, "Blackbirds"); }
   function compactUwiTeamLabel(value, fallback = "Blackbirds") { const text = compactUwiResultLabel(value); return text || fallback; }
   function opponentLabel(data) { return String(data?.opponentName || data?.opponentTeamName || data?.opponent?.name || "Opponent").trim() || "Opponent"; }
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -148,6 +159,7 @@
     const label = [values.opponent, values.season, values.outcome].filter(Boolean).join(" / ") || "Basketball results";
     APP.saveRecentSearch("basketball-results", label, values);
   }
+  // Shared UI Mounting
   /**
    * Mounts the recent searches feature after required context has loaded.
    */

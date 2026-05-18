@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Account creation workflow.
    *
@@ -18,6 +19,7 @@
     APP?.initNavToggle?.(document);
   });
 
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
   const inviteToken = params.get("token");
   const inviteIsValid = Boolean(inviteToken && inviteToken.trim().length >= 8);
@@ -32,6 +34,7 @@
 
   createAccountForm?.addEventListener("submit", handleSubmit);
 
+  // Save Workflow
   /**
    * Validates and persists the workflow payload through the shared API helper.
    */

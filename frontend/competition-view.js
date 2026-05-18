@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Competition detail and stat-entry hub.
    *
@@ -10,6 +11,7 @@
    */
   const APP = window.UWISportsHub;
 
+  // Page State
   const state = {
     session: null,
     competitionId: null,
@@ -24,9 +26,11 @@
     leaderboardSort: { metric: "", order: "desc" }
   };
 
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
   state.competitionId = params.get("competitionId") || params.get("id");
 
+  // Page Elements
   const els = {
     editCompetitionBtn: document.getElementById("editCompetitionBtn"),
     editCompetitionPanel: document.getElementById("editCompetitionPanel"),
@@ -43,6 +47,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -66,6 +71,7 @@
   await refreshPage();
 }
 
+  // Data Loading
   /**
    * Refreshes all backend data for the page, then rerenders dependent sections from the same normalized state.
    */
@@ -135,6 +141,7 @@
   }
 }
 
+  // Event Wiring
   /**
    * Binds the edit workflow interactions once so rerenders do not duplicate listeners.
    */
@@ -153,6 +160,7 @@
     mountArchiveButton();
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -171,6 +179,7 @@
     setField("editCompetitionStatus", String(state.competition.status || "DRAFT").toUpperCase());
   }
 
+  // Workflow: Edit Competition
   /**
    * Handles the edit competition workflow and keeps side effects inside the intended API/action path.
    */
@@ -202,6 +211,7 @@
     }
   }
 
+  // Archive Workflow
   /**
    * Adds archive behavior after data load so warnings can include the current record context.
    */
@@ -220,6 +230,7 @@
     els.editCompetitionBtn.insertAdjacentElement("afterend", button);
   }
 
+  // Missing Selection
   /**
    * Renders the missing selection section from normalized page state without mutating backend data.
    */
@@ -231,6 +242,7 @@
     setEmpty("competitionAudit", "Activity history will appear here once added.", "Changes, approvals, and updates for this competition will be listed here.");
   }
 
+  // Not Found
   /**
    * Renders the not found section from normalized page state without mutating backend data.
    */
@@ -242,6 +254,7 @@
     setEmpty("competitionAudit", "Activity history unavailable.", "Competition activity will appear here once records exist.");
   }
 
+  // Load Failure
   /**
    * Renders the load failure section from normalized page state without mutating backend data.
    */
@@ -254,6 +267,7 @@
     setEmpty("competitionAudit", "Activity history unavailable.", "The competition audit section could not be loaded.");
   }
 
+  // Meta
   /**
    * Renders the meta section from normalized page state without mutating backend data.
    */
@@ -284,6 +298,7 @@
     `;
   }
 
+  // Structure
   /**
    * Renders the structure section from normalized page state without mutating backend data.
    */
@@ -331,6 +346,7 @@
     `;
   }
 
+  // Participants
   /**
    * Renders the participants section from normalized page state without mutating backend data.
    */
@@ -376,6 +392,7 @@
     `;
   }
 
+  // Results
   /**
    * Renders the results section from normalized page state without mutating backend data.
    */
@@ -435,6 +452,7 @@
     `;
   }
 
+  // Recent Results
   /**
    * Renders the recent results section from normalized page state without mutating backend data.
    */
@@ -490,6 +508,7 @@
     `;
   }
 
+  // Stats Entry
   /**
    * Renders the stat engine section from normalized page state without mutating backend data.
    */
@@ -638,6 +657,7 @@
     }
   }
 
+  // Cricket Stats Entry
   /**
    * Renders the cricket stat engine section from normalized page state without mutating backend data.
    */
@@ -677,6 +697,7 @@
     `;
   }
 
+  // Football Stats Entry
   /**
    * Renders the football stat engine section from normalized page state without mutating backend data.
    */
@@ -716,6 +737,7 @@
     `;
   }
 
+  // Volleyball Stats Entry
   /**
    * Renders the volleyball stat engine section from normalized page state without mutating backend data.
    */
@@ -752,6 +774,7 @@
     `;
   }
 
+  // Hockey Stats Entry
   /**
    * Renders the hockey stat engine section from normalized page state without mutating backend data.
    */
@@ -788,6 +811,7 @@
     `;
   }
 
+  // Basketball Stats Entry
   /**
    * Renders the basketball stat engine section from normalized page state without mutating backend data.
    */
@@ -824,6 +848,7 @@
     `;
   }
 
+  // Swimming Stats Entry
   /**
    * Renders the swimming stat engine section from normalized page state without mutating backend data.
    */
@@ -860,6 +885,7 @@
     `;
   }
 
+  // Track Field Stats Entry
   /**
    * Renders the track field stat engine section from normalized page state without mutating backend data.
    */
@@ -896,6 +922,7 @@
     `;
   }
 
+  // Netball Stats Entry
   /**
    * Renders the netball stat engine section from normalized page state without mutating backend data.
    */
@@ -932,6 +959,7 @@
     `;
   }
 
+  // Badminton Stats Entry
   /**
    * Renders the badminton stat engine section from normalized page state without mutating backend data.
    */
@@ -968,6 +996,7 @@
     `;
   }
 
+  // Table Tennis Stats Entry
   /**
    * Renders the table tennis stat engine section from normalized page state without mutating backend data.
    */
@@ -1002,6 +1031,7 @@
     `;
   }
 
+  // Tennis Stats Entry
   /**
    * Renders the tennis stat engine section from normalized page state without mutating backend data.
    */
@@ -1036,6 +1066,7 @@
     `;
   }
 
+  // Taekwondo Stats Entry
   /**
    * Renders the taekwondo stat engine section from normalized page state without mutating backend data.
    */
@@ -1070,6 +1101,7 @@
     `;
   }
 
+  // Chess Stats Entry
   /**
    * Renders the chess stat engine section from normalized page state without mutating backend data.
    */
@@ -1104,6 +1136,7 @@
     `;
   }
 
+  // Cricket Innings Card
   /**
    * Renders the cricket innings card section from normalized page state without mutating backend data.
    */
@@ -1163,6 +1196,7 @@
     `;
   }
 
+  // Cricket Batting Row
   /**
    * Renders the cricket batting row section from normalized page state without mutating backend data.
    */
@@ -1182,6 +1216,7 @@
     `;
   }
 
+  // Cricket Bowling Row
   /**
    * Renders the cricket bowling row section from normalized page state without mutating backend data.
    */
@@ -1200,6 +1235,7 @@
     `;
   }
 
+    // Audit
     /**
      * Renders the audit section from normalized page state without mutating backend data.
      */
@@ -1246,6 +1282,7 @@
     `;
   }
 
+  // Event Wiring
   /**
    * Binds the dynamic forms interactions once so rerenders do not duplicate listeners.
    */
@@ -1284,6 +1321,7 @@
       statLineForm.addEventListener("submit", handleStatLineSubmit);
     }
 
+    // Edit Form Prefill
     /**
      * Populates editable controls from loaded backend data while preserving record IDs and relationships.
      */
@@ -1296,6 +1334,7 @@
     }
   }
 
+  // Save Workflow
   /**
    * Handles the stat line submit workflow and keeps side effects inside the intended API/action path.
    */
@@ -1389,6 +1428,7 @@
   }
 }
 
+  // Dynamic Stat Fields
   /**
    * Renders the dynamic stat fields section from normalized page state without mutating backend data.
    */
@@ -1483,6 +1523,7 @@
     `;
   }
 
+  // Build Stat Data From Form
   /**
    * Builds stat data from form from shared state so markup and payload labels stay consistent.
    */
@@ -1563,6 +1604,7 @@
     return { valid: true, payload: { value: genericValue } };
   }
 
+  // Build Cricket Scorecard From Form
   /**
    * Builds cricket scorecard from form from shared state so markup and payload labels stay consistent.
    */
@@ -1583,6 +1625,7 @@
     };
   }
 
+  // Collect Cricket Innings
   /**
    * Reads cricket innings values into the structured payload consumed by reports and result views.
    */
@@ -1604,6 +1647,7 @@
     };
   }
 
+  // Collect Cricket Batting Row
   /**
    * Reads cricket batting row values into the structured payload consumed by reports and result views.
    */
@@ -1621,6 +1665,7 @@
     };
   }
 
+  // Collect Cricket Bowling Row
   /**
    * Reads cricket bowling row values into the structured payload consumed by reports and result views.
    */
@@ -1654,6 +1699,7 @@
     );
   }
 
+  // Stat Table
   /**
    * Renders the stat table section from normalized page state without mutating backend data.
    */
@@ -1695,6 +1741,7 @@
     `;
   }
 
+  // Leaderboards
   /**
    * Renders the leaderboards section from normalized page state without mutating backend data.
    */
@@ -1743,6 +1790,7 @@
     `;
   }
 
+  // Event Wiring
   /**
    * Binds the leaderboard controls interactions once so rerenders do not duplicate listeners.
    */
@@ -1773,6 +1821,7 @@
     return [{ key: "wins", label: "Wins" }, { key: "points", label: "Points" }, { key: "entries", label: "Entries" }];
   }
 
+  // Build Leaderboard Rows
   /**
    * Builds leaderboard rows from shared state so markup and payload labels stay consistent.
    */
@@ -1870,6 +1919,7 @@
     return `athlete-view.html?athleteId=${encodeURIComponent(athleteId)}`;
   }
 
+  // Stat Line Event Cell
   /**
    * Renders the stat line event cell section from normalized page state without mutating backend data.
    */
@@ -1956,6 +2006,7 @@
     return String(data?.opponentName || data?.opponentTeamName || data?.opponent?.name || fallback || "Opponent").trim() || "Opponent";
   }
 
+  // Build Participant Rows
   /**
    * Builds participant rows from shared state so markup and payload labels stay consistent.
    */
@@ -2009,6 +2060,7 @@
     }
     return Array.from(ids);
   }
+  // Build Stat Summary
   /**
    * Builds stat summary from shared state so markup and payload labels stay consistent.
    */
@@ -2188,6 +2240,7 @@
     };
   }
 
+  // Sport Specific Primary Controls
   /**
    * Renders the sport specific primary controls section from normalized page state without mutating backend data.
    */
@@ -2274,6 +2327,7 @@
       .filter((x) => x.id);
   }
 
+  // Build Unit Options
   /**
    * Builds unit options from shared state so markup and payload labels stay consistent.
    */
@@ -2290,6 +2344,7 @@
   }
 
   
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -2304,6 +2359,7 @@
     return [];
   }
 
+  // Normalize Stat Line
   /**
    * Normalizes stat line data across current API and legacy nested shapes.
    */
@@ -2355,6 +2411,7 @@
     return String(slug || "Campus");
   }
 
+  // Normalize Sport Slug
   /**
    * Normalizes sport slug data across current API and legacy nested shapes.
    */
@@ -2573,6 +2630,7 @@
     return text || fallback;
   }
 
+  // Result Card
   /**
    * Renders one saved scorecard/result card from statData used by competition and team views.
    */
@@ -2607,6 +2665,7 @@
     `;
   }
 
+  // Football Result Card
   /**
    * Renders the football result card section from normalized page state without mutating backend data.
    */
@@ -2644,6 +2703,7 @@
     `;
   }
 
+  // Volleyball Result Card
   /**
    * Renders the volleyball result card section from normalized page state without mutating backend data.
    */
@@ -2676,6 +2736,7 @@
     `;
   }
 
+  // Hockey Result Card
   /**
    * Renders the hockey result card section from normalized page state without mutating backend data.
    */
@@ -2702,6 +2763,7 @@
     `;
   }
 
+  // Basketball Result Card
   /**
    * Renders the basketball result card section from normalized page state without mutating backend data.
    */
@@ -2728,6 +2790,7 @@
     `;
   }
 
+  // Swimming Result Card
   /**
    * Renders the swimming result card section from normalized page state without mutating backend data.
    */
@@ -2757,6 +2820,7 @@
     `;
   }
 
+  // Track Field Result Card
   /**
    * Renders the track field result card section from normalized page state without mutating backend data.
    */
@@ -2787,6 +2851,7 @@
     `;
   }
 
+  // Netball Result Card
   /**
    * Renders the netball result card section from normalized page state without mutating backend data.
    */
@@ -2813,6 +2878,7 @@
     `;
   }
 
+  // Badminton Result Card
   /**
    * Renders the badminton result card section from normalized page state without mutating backend data.
    */
@@ -2845,6 +2911,7 @@
     `;
   }
 
+  // Table Tennis Result Card
   /**
    * Renders the table tennis result card section from normalized page state without mutating backend data.
    */
@@ -2871,6 +2938,7 @@
     `;
   }
 
+  // Tennis Result Card
   /**
    * Renders the tennis result card section from normalized page state without mutating backend data.
    */
@@ -2897,6 +2965,7 @@
     `;
   }
 
+  // Taekwondo Result Card
   /**
    * Renders the taekwondo result card section from normalized page state without mutating backend data.
    */
@@ -2923,6 +2992,7 @@
     `;
   }
 
+  // Chess Result Card
   /**
    * Renders the chess result card section from normalized page state without mutating backend data.
    */
@@ -2968,6 +3038,7 @@
     return "match";
   }
 
+  // Schema Field Input
   /**
    * Renders the schema field input section from normalized page state without mutating backend data.
    */
@@ -3138,6 +3209,7 @@
     node.innerHTML = `<div class="empty-state"><h3>${escapeHtml(title)}</h3><p>${escapeHtml(text)}</p></div>`;
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */

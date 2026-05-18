@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Legal page behavior.
    *
@@ -17,6 +18,7 @@
     }
   });
 
+  // Shared UI Mounting
   /**
    * Mounts the signed in utility view feature after required context has loaded.
    */

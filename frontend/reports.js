@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Reports workflow.
    *
@@ -10,6 +11,7 @@
    */
   const APP = window.UWISportsHub;
 
+  // Page State
   const state = {
     session: null,
     athletes: [],
@@ -29,6 +31,7 @@
     loadError: ""
   };
 
+  // Page Elements
   const els = {
     reportCampus: document.getElementById("reportCampus"),
     reportSport: document.getElementById("reportSport"),
@@ -80,6 +83,7 @@
     return node;
   }
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -133,6 +137,7 @@
     }
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -166,6 +171,7 @@
     });
   }
 
+  // Workflow: Input Change
   /**
    * Handles the input change workflow and keeps side effects inside the intended API/action path.
    */
@@ -202,6 +208,7 @@
     state.selectedCompetitionId = (els.reportCompetition && els.reportCompetition.value || state.selectedCompetitionId || "").trim();
   }
 
+  // Data Loading
   /**
    * Loads report source data required by later normalization and rendering steps.
    */
@@ -219,6 +226,7 @@
     state.statLines = normalizeArray(athleteStatsRes, ["stats", "statLines", "data"], []).map(normalizeStat);
   }
 
+  // Full Page Render
   /**
    * Renders report selectors, generated output, and guidance from the loaded read-only data snapshot.
    */
@@ -228,6 +236,7 @@
     renderHelp();
   }
 
+  // Selection Controls
   /**
    * Renders the selection controls section from normalized page state without mutating backend data.
    */
@@ -354,6 +363,7 @@
     }
   }
 
+  // Reports
   /**
    * Renders the reports section from normalized page state without mutating backend data.
    */
@@ -366,6 +376,7 @@
     els.reportsList.innerHTML = payload.html;
   }
 
+  // Help
   /**
    * Renders the help section from normalized page state without mutating backend data.
    */
@@ -429,6 +440,7 @@
     `;
   }
 
+  // Build Current Report Payload
   /**
    * Builds current report payload from shared state so markup and payload labels stay consistent.
    */
@@ -488,6 +500,7 @@
     };
   }
 
+  // Athlete Report Content
   /**
    * Renders the athlete report content section from normalized page state without mutating backend data.
    */
@@ -714,6 +727,7 @@
     </div>`;
   }
 
+  // Team Report Content
   /**
    * Renders the team report content section from normalized page state without mutating backend data.
    */
@@ -823,6 +837,7 @@
     </div>`;
   }
 
+  // Competition Report Content
   /**
    * Renders the competition report content section from normalized page state without mutating backend data.
    */
@@ -922,6 +937,7 @@
     </div>`;
   }
 
+  // Campus Summary Content
   /**
    * Renders the campus summary content section from normalized page state without mutating backend data.
    */
@@ -996,6 +1012,7 @@
     </div>`;
   }
 
+  // Report Hero
   /**
    * Renders the report hero section from normalized page state without mutating backend data.
    */
@@ -1034,6 +1051,7 @@
     `;
   }
 
+  // Meta Item
   /**
    * Renders the meta item section from normalized page state without mutating backend data.
    */
@@ -1154,6 +1172,7 @@
     return getAthleteTeamIds(athlete).includes(normalized);
   }
 
+  // Build Athlete Team History Rows
   /**
    * Builds athlete team history rows from shared state so markup and payload labels stay consistent.
    */
@@ -1182,6 +1201,7 @@
     }).filter((row) => row.teamName || row.sportName || row.role || row.season || row.status);
   }
 
+  // Build Athlete Profile Completeness
   /**
    * Builds athlete profile completeness from shared state so markup and payload labels stay consistent.
    */
@@ -1226,6 +1246,7 @@
     }).filter((item) => item.title);
   }
 
+  // Build Athlete Report Notes
   /**
    * Builds athlete report notes from shared state so markup and payload labels stay consistent.
    */
@@ -1364,6 +1385,7 @@
     return Array.from(map.values()).sort((a, b) => String(a.eventName || a.statName || "").localeCompare(String(b.eventName || b.statName || "")));
   }
 
+  // Build Sport Specific Personal Bests
   /**
    * Builds sport specific personal bests from shared state so markup and payload labels stay consistent.
    */
@@ -1381,6 +1403,7 @@
     return [];
   }
 
+  // Build Cricket Personal Bests
   /**
    * Builds cricket personal bests from shared state so markup and payload labels stay consistent.
    */
@@ -1407,6 +1430,7 @@
     return output;
   }
 
+  // Build Track Field Personal Bests
   /**
    * Builds track field personal bests from shared state so markup and payload labels stay consistent.
    */
@@ -1426,6 +1450,7 @@
     }).filter(Boolean);
   }
 
+  // Build Team Sport Personal Bests
   /**
    * Builds team sport personal bests from shared state so markup and payload labels stay consistent.
    */
@@ -1460,6 +1485,7 @@
       .sort((a, b) => b.value - a.value)[0] || null;
   }
 
+  // Build Athlete Competition Rows
   /**
    * Builds athlete competition rows from shared state so markup and payload labels stay consistent.
    */
@@ -1572,6 +1598,7 @@
     ].map(compactId).includes(normalized);
   }
 
+  // Build Athlete Performance Summary
   /**
    * Builds athlete performance summary from shared state so markup and payload labels stay consistent.
    */
@@ -1584,6 +1611,7 @@
     };
   }
 
+  // Build Athlete Sport Summary Rows
   /**
    * Builds athlete sport summary rows from shared state so markup and payload labels stay consistent.
    */
@@ -1596,6 +1624,7 @@
     });
   }
 
+  // Athlete Sport Summary Section
   /**
    * Renders the athlete sport summary section from normalized page state without mutating backend data.
    */
@@ -1625,6 +1654,7 @@
     `;
   }
 
+  // Build Cricket Summary Rows
   /**
    * Builds cricket summary rows from shared state so markup and payload labels stay consistent.
    */
@@ -1663,6 +1693,7 @@
     ].filter((row) => row.appearances);
   }
 
+  // Build Track Field Summary Rows
   /**
    * Builds track field summary rows from shared state so markup and payload labels stay consistent.
    */
@@ -1681,6 +1712,7 @@
     });
   }
 
+  // Build Generic Sport Summary Rows
   /**
    * Builds generic sport summary rows from shared state so markup and payload labels stay consistent.
    */
@@ -1698,6 +1730,7 @@
     }].filter((row) => row.appearances);
   }
 
+  // Build Athlete Season Rows
   /**
    * Builds athlete season rows from shared state so markup and payload labels stay consistent.
    */
@@ -1718,6 +1751,7 @@
     }).sort((a, b) => String(b.season).localeCompare(String(a.season), undefined, { numeric: true }));
   }
 
+  // Athlete Season Section
   /**
    * Renders the athlete season section from normalized page state without mutating backend data.
    */
@@ -1746,6 +1780,7 @@
     `;
   }
 
+  // Build Track Field Summary
   /**
    * Builds track field summary from shared state so markup and payload labels stay consistent.
    */
@@ -1764,6 +1799,7 @@
     };
   }
 
+  // Build Sport Schema Summary
   /**
    * Builds sport schema summary from shared state so markup and payload labels stay consistent.
    */
@@ -1803,6 +1839,7 @@
     });
   }
 
+  // Sport Schema Summary Section
   /**
    * Renders the sport schema summary section from normalized page state without mutating backend data.
    */
@@ -1965,6 +2002,7 @@
     return athlete.fullName || [athlete.firstName, athlete.lastName].filter(Boolean).join(" ").trim() || athlete.name || "Athlete";
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -1982,6 +2020,7 @@
     return fallback || [];
   }
 
+  // Normalize Stat
   /**
    * Normalizes stat data across current API and legacy nested shapes.
    */

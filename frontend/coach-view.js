@@ -6,6 +6,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Coach/staff detail workflow.
    *
@@ -15,6 +16,7 @@
    */
   const APP = window.UWISportsHub;
 
+  // Page State
   const state = {
     session: null,
     coachId: null,
@@ -23,6 +25,7 @@
     staffAssignments: []
   };
 
+  // Page Elements
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     coachNameHeading: document.getElementById("coachNameHeading"),
@@ -64,6 +67,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -97,6 +101,7 @@
     }
   }
 
+  // Event Wiring
   /**
    * Binds one-time page controls that should not be recreated during data refreshes.
    */
@@ -123,10 +128,12 @@
   }
 
   function getCoachIdFromUrl() {
+    // URL Parameters
     const params = new URLSearchParams(window.location.search);
     return (params.get("id") || params.get("coachId") || "").trim();
   }
 
+  // Data Loading
   /**
    * Fetches the selected coach record before assignment normalization and rendering.
    */
@@ -135,6 +142,7 @@
     state.coach = normalizeCoach(data?.coach || data?.data?.coach || data?.data || data || null);
   }
 
+  // Data Loading
   /**
    * Fetches teams used to resolve relationship IDs into display labels and links.
    */
@@ -148,6 +156,7 @@
       [];
   }
 
+  // Data Loading
   /**
    * Loads staff assignment rows so the view can merge embedded and current relationship data.
    */
@@ -165,6 +174,7 @@
     });
   }
 
+  // Normalize Coach
   /**
    * Normalizes coach/profile fields from current and legacy response shapes before display.
    */
@@ -195,6 +205,7 @@
     }
   }
 
+  // Coach View
   /**
    * Renders the coach profile from normalized identity, role, and assignment data.
    */
@@ -252,6 +263,7 @@
     renderAssignments(assignments);
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -279,6 +291,7 @@
     setField("editCoachNotes", coach.notes);
   }
 
+  // Save Workflow
   /**
    * Persists coach edits and active team assignment changes in one operational workflow.
    */
@@ -325,6 +338,7 @@
     }
   }
 
+  // Archive Workflow
   /**
    * Adds archive behavior after data load so warnings can include the current record context.
    */
@@ -387,6 +401,7 @@
     return `<div class="${wrapperClass}"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
+  // Assignments
   /**
    * Renders the assignments section from normalized page state without mutating backend data.
    */
@@ -422,6 +437,7 @@
     els.assignmentTableBody.appendChild(fragment);
   }
 
+  // Teams Summary
   /**
    * Renders the teams summary section from normalized page state without mutating backend data.
    */
@@ -464,6 +480,7 @@
     }) || null;
   }
 
+  // Empty State
   /**
    * Renders the empty state section from normalized page state without mutating backend data.
    */
@@ -554,6 +571,7 @@
     els.pageMessage.textContent = message || "";
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */

@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Athlete cricket stats projection.
    *
@@ -8,6 +9,7 @@
    * fielding summaries. The page depends on athlete IDs saved in scorecards.
    */
   const APP = window.UWISportsHub;
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
   const athleteId = params.get("athleteId") || params.get("id") || "";
   const selectedFormat = params.get("format") || "";
@@ -23,6 +25,7 @@
     other: "Other Formats"
   };
 
+  // Page Elements
   const els = {
     msg: document.getElementById("pageMessage"),
     title: document.getElementById("pageTitle"),
@@ -36,6 +39,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -60,6 +64,7 @@
     render(rows, athlete);
   }
 
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -123,6 +128,7 @@
     ]);
   }
 
+  // Drilldown
   /**
    * Renders the drilldown section from normalized page state without mutating backend data.
    */
@@ -288,6 +294,7 @@
     };
   }
 
+  // Normalize Row
   /**
    * Normalizes row data across current API and legacy nested shapes.
    */
@@ -379,6 +386,7 @@
     Object.entries(overrides || {}).forEach(([key, value]) => next.set(key, value));
     return `athlete-cricket-stats.html?${next.toString()}`;
   }
+  // Event Wiring
   /**
    * Binds the scope filters interactions once so rerenders do not duplicate listeners.
    */
@@ -391,6 +399,7 @@
     });
     document.querySelectorAll("[data-href]").forEach((row) => row.addEventListener("click", () => { window.location.href = row.dataset.href; }));
   }
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */

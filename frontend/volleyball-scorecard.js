@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Volleyball scoresheet engine.
    *
@@ -9,10 +10,13 @@
    * remains displayable when no opponent team record exists.
    */
   const APP = window.UWISportsHub;
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
 
+  // Scorecard State
   const state = { session: null, competition: null, athletes: [], teams: [] };
+  // Scorecard Fields
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("scorecardHeading"),
@@ -34,6 +38,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -67,6 +72,7 @@
     }
   }
 
+  // Page Layout
   /**
    * Builds the initial page UI from loaded campus-scoped data and default workflow state.
    */
@@ -85,6 +91,7 @@
     renderPlayerRows();
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -105,6 +112,7 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  // Roster
   /**
    * Renders the roster section from normalized page state without mutating backend data.
    */
@@ -123,6 +131,7 @@
     }).join("");
   }
 
+  // Player Rows
   /**
    * Renders the player rows section from normalized page state without mutating backend data.
    */
@@ -155,6 +164,7 @@
     });
   }
 
+  // Derived Fields
   /**
    * Recalculates derived display values from editable fields without saving until submit.
    */
@@ -173,6 +183,7 @@
     setValue("teamDigs", sumPlayerField("Digs"));
   }
 
+  // Derived Set Score
   /**
    * Derives set score from entered data so downstream display stays consistent.
    */
@@ -191,6 +202,7 @@
     return { uwiSets, oppSets, setsPlayed };
   }
 
+  // Derived Result
   /**
    * Builds result text from score inputs while leaving manual corrections possible before save.
    */
@@ -201,6 +213,7 @@
     return `Match tied ${score.uwiSets}-${score.oppSets}`;
   }
 
+  // Save Workflow
   /**
    * Validates and persists the workflow payload through the shared API helper.
    */
@@ -267,6 +280,7 @@
     }
   }
 
+  // Collect Set
   /**
    * Reads set values into the structured payload consumed by reports and result views.
    */
@@ -274,6 +288,7 @@
     return { set: index, uwiScore: numberValue(`uwiSet${index}`), opponentScore: numberValue(`oppSet${index}`) };
   }
 
+  // Collect Player Stat
   /**
    * Serializes one player row with athlete IDs so individual reports can aggregate performance.
    */
@@ -304,6 +319,7 @@
     return Boolean(row.athleteId || row.kills !== null || row.aces !== null || row.blocks !== null || row.assists !== null || row.digs !== null);
   }
 
+  // Lookup Roster Athletes
   /**
    * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
    */
@@ -318,6 +334,7 @@
     return ids.map((id) => state.athletes.find((athlete) => String(athlete.id) === String(id))).filter(Boolean);
   }
 
+  // Workflow: Roster Select Change
   /**
    * Handles the roster select change workflow and keeps side effects inside the intended API/action path.
    */
@@ -338,6 +355,7 @@
     refreshRosterPlayerOptions();
   }
 
+  // Lookup UWI Team Name
   /**
    * Resolves the selected UWI team label from backend data for saved statData and display.
    */
@@ -346,6 +364,7 @@
     return els.homeClubLabel.value.trim() || team?.name || team?.teamName || "UWI Team";
   }
 
+  // Opponent Name
   /**
    * Returns the typed opponent label, falling back only when staff did not enter one.
    */
@@ -359,6 +378,7 @@
     return total;
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -403,6 +423,7 @@
     return date.toISOString().slice(0, 10);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -411,6 +432,7 @@
     els.message.textContent = "";
   }
 
+  // Messages and UI State
   /**
    * Displays blocking load errors without throwing away the signed-in shell.
    */
@@ -419,6 +441,7 @@
     els.pageMessage.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -427,6 +450,7 @@
     els.message.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */

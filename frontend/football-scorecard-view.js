@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  // Shared App Access
   /**
    * Read-only football score sheet renderer.
    *
@@ -8,6 +9,7 @@
    */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
+  // Scorecard Fields
   const els = {
     msg: document.getElementById("pageMessage"),
     title: document.getElementById("scorecardTitle"),
@@ -19,6 +21,7 @@
   };
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -44,6 +47,7 @@
     }
   }
 
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -79,6 +83,7 @@
     `;
   }
 
+  // Player Row
   /**
    * Renders the player row section from normalized page state without mutating backend data.
    */
@@ -86,6 +91,7 @@
     return `<tr><td>${escapeHtml(row.number ?? "")}</td><td>${playerLink(row.athleteId, row.name)}</td><td>${escapeHtml(row.shots ?? "")}</td><td>${escapeHtml(row.shotsOnTarget ?? "")}</td><td>${escapeHtml(row.assists ?? "")}</td><td>${escapeHtml(row.goals ?? "")}</td><td>${escapeHtml(row.goalsConceded ?? "")}</td><td>${escapeHtml(row.saves ?? "")}</td><td>${escapeHtml(row.fouls ?? "")}</td><td>${escapeHtml(row.offsides ?? row.offside ?? "")}</td><td>${escapeHtml(row.yellowCards ?? "")}</td><td>${escapeHtml(row.redCards ?? "")}</td><td>${escapeHtml(row.minutes ?? "")}</td></tr>`;
   }
 
+  // Goal
   /**
    * Renders the goal section from normalized page state without mutating backend data.
    */
@@ -147,6 +153,7 @@
     return id ? `<a href="athlete-view.html?athleteId=${encodeURIComponent(id)}">${safeName}</a>` : safeName;
   }
 
+  // Normalize Line
   /**
    * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
    */

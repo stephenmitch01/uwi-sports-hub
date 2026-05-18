@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Competition registry workflow.
    *
@@ -9,6 +10,7 @@
    * saves data for reports, leaderboards, athlete profiles, and team pages.
    */
   const APP = window.UWISportsHub;
+  // Page State
   const state = {
     session: null,
     competitions: [],
@@ -16,6 +18,7 @@
     registrySearchApplied: false
   };
 
+  // Page Elements
   const els = {
     competitionsTableBody: document.getElementById("competitionsTableBody"),
     competitionsEmpty: document.getElementById("competitionsEmpty"),
@@ -39,6 +42,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -62,6 +66,7 @@
     renderCompetitionsTable();
   }
 
+  // Event Wiring
   /**
    * Binds the create panel link interactions once so rerenders do not duplicate listeners.
    */
@@ -77,6 +82,7 @@
     });
   }
 
+  // Event Wiring
   /**
    * Binds the create panel close interactions once so rerenders do not duplicate listeners.
    */
@@ -88,6 +94,7 @@
     });
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -114,6 +121,7 @@
 }
   }
 
+  // Competitions Page Shell
   /**
    * Renders the competitions page shell section from normalized page state without mutating backend data.
    */
@@ -193,6 +201,7 @@
     bindCompetitionCreateForm();
   }
 
+  // Event Wiring
   /**
    * Binds the competition create form interactions once so rerenders do not duplicate listeners.
    */
@@ -266,6 +275,7 @@
     });
   }
 
+  // Event Wiring
   /**
    * Binds the competition filters interactions once so rerenders do not duplicate listeners.
    */
@@ -279,6 +289,7 @@
     mountRecentSearches("competitions");
   }
 
+  // Workflow: Filter Change
   /**
    * Handles the filter change workflow and keeps side effects inside the intended API/action path.
    */
@@ -297,6 +308,7 @@
     renderCompetitionsTable();
   }
 
+  // Data Loading
   /**
    * Loads competitions data required by later normalization and rendering steps.
    */
@@ -318,6 +330,7 @@
     }
   }
 
+  // Competitions Table
   /**
    * Renders the competitions table section from normalized page state without mutating backend data.
    */
@@ -382,6 +395,7 @@
       .join("");
   }
 
+  // Hero Stats
   /**
    * Renders the hero stats section from normalized page state without mutating backend data.
    */
@@ -395,6 +409,7 @@
     if (els.competitionsMissingResultsStat) els.competitionsMissingResultsStat.textContent = String(rows.filter((competition) => !hasCompetitionResults(competition)).length);
   }
 
+  // Operational Summary
   /**
    * Renders the operational summary section from normalized page state without mutating backend data.
    */
@@ -496,6 +511,7 @@
     return map[normalized] || slug || "—";
   }
 
+  // Normalize Campus Filter
   /**
    * Normalizes campus filter data across current API and legacy nested shapes.
    */
@@ -516,6 +532,7 @@
     return map[raw] || raw;
   }
 
+  // Normalize Format Filter
   /**
    * Normalizes format filter data across current API and legacy nested shapes.
    */
@@ -552,6 +569,7 @@
     return UWISportsHub.escapeHtml(value);
   }
 
+  // Insight List
   /**
    * Renders the insight list section from normalized page state without mutating backend data.
    */
@@ -570,6 +588,7 @@
     `).join("");
   }
 
+  // Event Wiring
   /**
    * Binds the insight actions interactions once so rerenders do not duplicate listeners.
    */
@@ -589,6 +608,7 @@
     });
   }
 
+  // Activity List
   /**
    * Renders the activity list section from normalized page state without mutating backend data.
    */
@@ -618,6 +638,7 @@
     return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || record.startDate || "") || 0;
   }
 
+  // Quality
   /**
    * Renders the quality section from normalized page state without mutating backend data.
    */
@@ -649,6 +670,7 @@
     APP.saveRecentSearch(scope, label, values);
   }
 
+  // Shared UI Mounting
   /**
    * Mounts the recent searches feature after required context has loaded.
    */

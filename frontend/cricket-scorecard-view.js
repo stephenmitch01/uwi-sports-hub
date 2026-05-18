@@ -1,5 +1,6 @@
 (function(){
   "use strict";
+  // Shared App Access
   /**
    * Read-only cricket scorecard renderer.
    *
@@ -8,8 +9,10 @@
    */
   const APP=window.UWISportsHub;
   const scorecardId=new URLSearchParams(window.location.search).get("scorecardId")||new URLSearchParams(window.location.search).get("id")||"";
-  const els={msg:document.getElementById("pageMessage"),title:document.getElementById("scorecardTitle"),meta:document.getElementById("scorecardMeta"),back:document.getElementById("backLink"),result:document.getElementById("resultText"),venue:document.getElementById("venueText"),body:document.getElementById("scorecardBody")};
+  // Scorecard Fields
+  const els = {msg:document.getElementById("pageMessage"),title:document.getElementById("scorecardTitle"),meta:document.getElementById("scorecardMeta"),back:document.getElementById("backLink"),result:document.getElementById("resultText"),venue:document.getElementById("venueText"),body:document.getElementById("scorecardBody")};
   document.addEventListener("DOMContentLoaded",init);
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -29,6 +32,7 @@
       render(data);
     }catch(error){show(error?.message||"Scorecard could not be loaded.");}
   }
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -36,21 +40,25 @@
     const innings=Array.isArray(data.innings)?data.innings:[];
     els.body.innerHTML=`<div class="section-title"><div><h2>Scorecard</h2><p>${escapeHtml(data.result||"Saved cricket result")}</p></div></div>${innings.map(renderInnings).join("")||'<div class="empty-state">No innings are attached to this scorecard.</div>'}`;
   }
+  // Innings
   /**
    * Renders the innings section from normalized page state without mutating backend data.
    */
   function renderInnings(innings){
     return `<section class="cricket-entry-section"><div class="cricket-entry-head"><div><h2>${escapeHtml(innings.team||`Innings ${innings.innings}`)}</h2><p>${escapeHtml(formatScore(innings))}${innings.declared?" declared":""}${innings.runRate?` • RR ${escapeHtml(innings.runRate)}`:""}${innings.target?` • Target ${escapeHtml(innings.target)}`:""}</p></div></div><div class="scorecard-table-wrap"><table class="scorecard-table batting-table"><thead><tr><th>Batter</th><th>Dismissal</th><th>Bowler</th><th>Fielder / Keeper</th><th>R</th><th>M</th><th>B</th><th>4s</th><th>6s</th><th>SR</th></tr></thead><tbody>${(innings.batting||[]).map(renderBatting).join("")}</tbody></table></div><div class="scorecard-totals"><div><strong>Extras</strong><br>${escapeHtml(innings.extras||"")}</div><div><strong>Extras Runs</strong><br>${escapeHtml(innings.extrasRuns??"")}</div><div><strong>Total</strong><br>${escapeHtml(innings.total??"")}</div><div><strong>Wickets</strong><br>${escapeHtml(innings.wickets??"")}</div><div><strong>Overs</strong><br>${escapeHtml(innings.overs||"")}</div></div><div class="filter-grid scorecard-notes"><div><strong>Did Not Bat</strong><p>${escapeHtml((innings.didNotBat||[]).join(", ")||"-")}</p></div><div><strong>Fall Of Wickets</strong><p>${escapeHtml((innings.fallOfWickets||[]).join(", ")||"-")}</p></div></div><div class="scorecard-table-wrap"><table class="scorecard-table"><thead><tr><th>Bowler</th><th>O</th><th>M</th><th>R</th><th>W</th><th>Econ</th><th>Notes</th></tr></thead><tbody>${(innings.bowling||[]).map(renderBowling).join("")}</tbody></table></div></section>`;
   }
+  // Batting
   /**
    * Renders the batting section from normalized page state without mutating backend data.
    */
   function renderBatting(row){return`<tr><td>${playerLink(row)}</td><td>${escapeHtml(row.dismissalLabel||row.howOut||"")}</td><td>${escapeHtml(row.bowlerName||"")}</td><td>${escapeHtml(row.fielderName||"")}</td><td>${escapeHtml(row.runs??"")}</td><td>${escapeHtml(row.minutes??"")}</td><td>${escapeHtml(row.balls??"")}</td><td>${escapeHtml(row.fours??"")}</td><td>${escapeHtml(row.sixes??"")}</td><td>${escapeHtml(row.strikeRate||"")}</td></tr>`;}
+  // Bowling
   /**
    * Renders the bowling section from normalized page state without mutating backend data.
    */
   function renderBowling(row){return`<tr><td>${playerLink(row)}</td><td>${escapeHtml(row.overs||"")}</td><td>${escapeHtml(row.maidens??"")}</td><td>${escapeHtml(row.runs??"")}</td><td>${escapeHtml(row.wickets??"")}</td><td>${escapeHtml(row.economy||"")}</td><td>${escapeHtml(row.notes||"")}</td></tr>`;}
   function playerLink(row){const name=escapeHtml(row.name||"");return row.athleteId?`<a href="athlete-view.html?athleteId=${encodeURIComponent(row.athleteId)}">${name}</a>`:name;}
+  // Normalize Line
   /**
    * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
    */

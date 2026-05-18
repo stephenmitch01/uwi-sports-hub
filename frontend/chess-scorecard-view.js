@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  // Shared App Access
   /**
    * Read-only chess score sheet renderer.
    *
@@ -8,6 +9,7 @@
    */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
+  // Scorecard Fields
   const els = {
     msg: document.getElementById("pageMessage"),
     title: document.getElementById("scorecardTitle"),
@@ -19,6 +21,7 @@
   };
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -41,6 +44,7 @@
     }
   }
 
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -72,6 +76,7 @@
     return `<a href="athlete-view.html?athleteId=${encodeURIComponent(player.athleteId)}">${escapeHtml(player.name || "UWI player")}</a>`;
   }
 
+  // Normalize Line
   /**
    * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
    */

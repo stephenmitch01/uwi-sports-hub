@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Taekwondo score sheet engine.
    *
@@ -10,7 +11,9 @@
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
   const JUDGE_COUNT = 5;
+  // Scorecard State
   const state = { competition: null, athletes: [], teams: [] };
+  // Scorecard Fields
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("scorecardHeading"),
@@ -27,6 +30,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -55,6 +59,7 @@
     }
   }
 
+  // Page Layout
   /**
    * Builds the initial page UI from loaded campus-scoped data and default workflow state.
    */
@@ -72,6 +77,7 @@
     renderJudges();
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -83,6 +89,7 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  // Athlete Options
   /**
    * Renders the athlete options section from normalized page state without mutating backend data.
    */
@@ -92,6 +99,7 @@
     els.athleteSelect.value = previous;
   }
 
+  // Judges
   /**
    * Renders the judges section from normalized page state without mutating backend data.
    */
@@ -99,6 +107,7 @@
     els.judgeList.innerHTML = Array.from({ length: JUDGE_COUNT }, (_, index) => renderJudge(index + 1)).join("");
   }
 
+  // Judge
   /**
    * Renders the judge section from normalized page state without mutating backend data.
    */
@@ -136,6 +145,7 @@
     `;
   }
 
+  // Derived Fields
   /**
    * Recalculates derived display values from editable fields without saving until submit.
    */
@@ -157,6 +167,7 @@
     setValue("resultText", rank ? `Rank ${rank} - ${average.toFixed(2)}` : `${average.toFixed(2)} points`, false);
   }
 
+  // Save Workflow
   /**
    * Validates and persists the workflow payload through the shared API helper.
    */
@@ -207,6 +218,7 @@
     }
   }
 
+  // Collect Judges
   /**
    * Reads judges values into the structured payload consumed by reports and result views.
    */
@@ -259,6 +271,7 @@
     };
   }
 
+  // Workflow: Player Select Change
   /**
    * Handles the player select change workflow and keeps side effects inside the intended API/action path.
    */
@@ -274,6 +287,7 @@
     els.athleteSelect.value = athlete.id;
   }
 
+  // Lookup Roster Athletes
   /**
    * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
    */
@@ -283,6 +297,7 @@
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  // Lookup UWI Team Name
   /**
    * Resolves the selected UWI team label from backend data for saved statData and display.
    */
@@ -291,6 +306,7 @@
     return team?.name || team?.teamName || "UWI Taekwondo";
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -332,6 +348,7 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -340,6 +357,7 @@
     els.message.textContent = "";
   }
 
+  // Messages and UI State
   /**
    * Displays blocking load errors without throwing away the signed-in shell.
    */
@@ -348,6 +366,7 @@
     els.pageMessage.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -356,6 +375,7 @@
     els.message.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */

@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Badminton match sheet engine.
    *
@@ -9,7 +10,9 @@
    */
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
+  // Scorecard State
   const state = { competition: null, athletes: [], teams: [] };
+  // Scorecard Fields
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("scorecardHeading"),
@@ -29,6 +32,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -60,6 +64,7 @@
     }
   }
 
+  // Page Layout
   /**
    * Builds the initial page UI from loaded campus-scoped data and default workflow state.
    */
@@ -77,6 +82,7 @@
     updateMatchType();
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -95,6 +101,7 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  // Player Options
   /**
    * Renders the player options section from normalized page state without mutating backend data.
    */
@@ -108,6 +115,7 @@
     updateSideLabels();
   }
 
+  // Derived Match Type
   /**
    * Updates derived UI state from the current form/model values without persisting changes directly.
    */
@@ -122,6 +130,7 @@
     updateSideLabels();
   }
 
+  // Derived Side Labels
   /**
    * Updates derived UI state from the current form/model values without persisting changes directly.
    */
@@ -130,6 +139,7 @@
     setText("opponentSideLabel", sideName("opponent") || "Opponent");
   }
 
+  // Derived Fields
   /**
    * Recalculates derived display values from editable fields without saving until submit.
    */
@@ -150,6 +160,7 @@
     setValue("durationMinutes", deriveDuration(), false);
   }
 
+  // Save Workflow
   /**
    * Validates and persists the workflow payload through the shared API helper.
    */
@@ -220,6 +231,7 @@
     }
   }
 
+  // Collect Games
   /**
    * Reads games values into the structured payload consumed by reports and result views.
    */
@@ -231,6 +243,7 @@
     })).filter((game) => game.uwi || game.opponent);
   }
 
+  // Collect UWI Players
   /**
    * Reads uwi players values into the structured payload consumed by reports and result views.
    */
@@ -242,6 +255,7 @@
     }).filter(Boolean);
   }
 
+  // Collect Opponent Players
   /**
    * Reads opponent players values into the structured payload consumed by reports and result views.
    */
@@ -249,6 +263,7 @@
     return ["opponentPlayer1", "opponentPlayer2"].map((id) => valueOf(id)).filter(Boolean).map((name) => ({ name }));
   }
 
+  // Derived Winner
   /**
    * Derives winner from entered data so downstream display stays consistent.
    */
@@ -259,6 +274,7 @@
     return "";
   }
 
+  // Derived Result
   /**
    * Builds result text from score inputs while leaving manual corrections possible before save.
    */
@@ -270,6 +286,7 @@
     return `${winner} won ${winnerGames}-${loserGames}`;
   }
 
+  // Derived Duration
   /**
    * Derives duration from entered data so downstream display stays consistent.
    */
@@ -285,6 +302,7 @@
     return minutes;
   }
 
+  // Workflow: Player Select Change
   /**
    * Handles the player select change workflow and keeps side effects inside the intended API/action path.
    */
@@ -306,6 +324,7 @@
     return readOpponentPlayers().map((player) => player.name).join(" / ") || "Opponent";
   }
 
+  // Lookup Roster Athletes
   /**
    * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
    */
@@ -315,6 +334,7 @@
     return state.athletes.filter((athlete) => APP.athleteHasTeam(athlete, teamId));
   }
 
+  // Lookup UWI Team Name
   /**
    * Resolves the selected UWI team label from backend data for saved statData and display.
    */
@@ -323,6 +343,7 @@
     return team?.name || team?.teamName || "UWI Badminton";
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -365,6 +386,7 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -373,6 +395,7 @@
     els.message.textContent = "";
   }
 
+  // Messages and UI State
   /**
    * Displays blocking load errors without throwing away the signed-in shell.
    */
@@ -381,6 +404,7 @@
     els.pageMessage.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -389,6 +413,7 @@
     els.message.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */

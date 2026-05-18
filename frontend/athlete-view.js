@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Athlete profile detail workflow.
    *
@@ -10,6 +11,7 @@
    */
   const APP = window.UWISportsHub;
 
+  // Page State
   const state = {
     session: null,
     athleteId: null,
@@ -25,6 +27,7 @@
     editBound: false
   };
 
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
   state.athleteId = params.get("athleteId") || params.get("id");
 
@@ -47,6 +50,7 @@
     }
   };
 
+  // Page Elements
   const els = {
     topBar: document.getElementById("topBar"),
     shellNav: document.getElementById("shellNav"),
@@ -75,6 +79,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -106,6 +111,7 @@
     }
   }
 
+  // Data Loading
   /**
    * Loads athlete view data required by later normalization and rendering steps.
    */
@@ -129,6 +135,7 @@
     renderAll();
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -180,6 +187,7 @@
     return output;
   }
 
+  // Normalize Athlete
   /**
    * Normalizes athlete/profile fields so multi-sport and assignment logic can share one shape.
    */
@@ -252,6 +260,7 @@
     };
   }
 
+  // Normalize Stat Line
   /**
    * Normalizes stat line data across current API and legacy nested shapes.
    */
@@ -303,6 +312,7 @@
     state.athlete.squadName = state.athlete.squadName || association?.squadName || association?.squad || association?.division || team?.division || team?.squadName || state.athlete.teamName || team?.name || team?.teamName || "";
   }
 
+  // Normalize Personal Best
   /**
    * Normalizes personal-best records from current and legacy shapes for display and stat comparisons.
    */
@@ -319,6 +329,7 @@
     };
   }
 
+  // Full Page Render
   /**
    * Renders every athlete profile section from the normalized state without mutating backend data.
    */
@@ -334,6 +345,7 @@
     populateEditForm();
   }
 
+  // Event Wiring
   /**
    * Binds the edit workflow interactions once so rerenders do not duplicate listeners.
    */
@@ -355,6 +367,7 @@
     mountArchiveButton("athlete", els.editAthleteBtn, state.athleteId, () => state.athlete, "athletes.html");
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -399,6 +412,7 @@
     setField("editAthleteCaptain", "false");
   }
 
+  // Save Workflow
   /**
    * Handles the edit athlete submit workflow and keeps side effects inside the intended API/action path.
    */
@@ -471,6 +485,7 @@
     }
   }
 
+  // Archive Workflow
   /**
    * Adds archive behavior after data load so warnings can include the current record context.
    */
@@ -490,6 +505,7 @@
     anchor.insertAdjacentElement("afterend", button);
   }
 
+  // Hero Section
   /**
    * Renders the hero section from normalized page state without mutating backend data.
    */
@@ -560,6 +576,7 @@
     }
   }
 
+  // Body Info
   /**
    * Renders the body info section from normalized page state without mutating backend data.
    */
@@ -647,6 +664,7 @@
     return `<div class="${wrapperClass}"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
+  // Stats Overview
   /**
    * Renders the stats overview section from normalized page state without mutating backend data.
    */
@@ -688,6 +706,7 @@
     `;
   }
 
+  // Athlete Info
   /**
    * Renders the athlete info section from normalized page state without mutating backend data.
    */
@@ -732,6 +751,7 @@
     `;
   }
 
+  // Stats Section
   /**
    * Renders the stats section from normalized page state without mutating backend data.
    */
@@ -887,6 +907,7 @@
     }
   }
 
+  // Personal Bests
   /**
    * Renders the personal bests section from normalized page state without mutating backend data.
    */
@@ -940,6 +961,7 @@
     `;
   }
 
+  // Stat Entry
   /**
    * Renders the stat entry section from normalized page state without mutating backend data.
    */
@@ -1075,6 +1097,7 @@
     }
   }
 
+  // History
   /**
    * Renders the history section from normalized page state without mutating backend data.
    */
@@ -1106,6 +1129,7 @@
     `;
   }
 
+  // Teams
   /**
    * Renders the teams section from normalized page state without mutating backend data.
    */
@@ -1205,6 +1229,7 @@
       .map((slug) => APP.getSportName?.(slug) || formatSportName(slug));
   }
 
+  // Sport Stats Buttons
   /**
    * Renders the sport stats buttons section from normalized page state without mutating backend data.
    */
@@ -1232,6 +1257,7 @@
       .filter(Boolean)));
   }
 
+  // Records
   /**
    * Renders the records section from normalized page state without mutating backend data.
    */
@@ -1279,6 +1305,7 @@
     `;
   }
 
+  // Missing Selection
   /**
    * Renders the missing selection section from normalized page state without mutating backend data.
    */
@@ -1305,6 +1332,7 @@
     if (els.athleteRecords) els.athleteRecords.innerHTML = message;
   }
 
+  // Load Failure
   /**
    * Renders the load failure section from normalized page state without mutating backend data.
    */
@@ -1323,6 +1351,7 @@
     if (els.athleteRecords) els.athleteRecords.innerHTML = block;
   }
 
+  // Save Workflow
   /**
    * Handles the stat entry submit workflow and keeps side effects inside the intended API/action path.
    */
@@ -1492,6 +1521,7 @@
     return combined;
   }
 
+  // Derived Personal Bests From Stats
   /**
    * Derives personal bests from stats from entered data so downstream display stays consistent.
    */
@@ -1527,6 +1557,7 @@
     }));
   }
 
+  // Derived Cricket Personal Bests
   /**
    * Derives cricket personal bests from entered data so downstream display stays consistent.
    */
@@ -1558,6 +1589,7 @@
     return rows;
   }
 
+  // Derived Football Personal Bests
   /**
    * Derives football personal bests from entered data so downstream display stays consistent.
    */
@@ -1627,6 +1659,7 @@
     };
   }
 
+  // Derived Track Field Personal Bests
   /**
    * Derives track field personal bests from entered data so downstream display stays consistent.
    */
@@ -1766,6 +1799,7 @@
     return age >= 0 && age < 120 ? String(age) : "";
   }
 
+  // Normalize Gender
   /**
    * Normalizes gender data across current API and legacy nested shapes.
    */
@@ -1832,6 +1866,7 @@
     return `ath-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
+  // Event Wiring
   /**
    * Binds the summary button interactions once so rerenders do not duplicate listeners.
    */

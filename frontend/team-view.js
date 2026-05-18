@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Team detail workflow.
    *
@@ -9,11 +10,13 @@
    * assignment arrays, so renderers normalize before display.
    */
   const APP = window.UWISportsHub;
+  // Shared Registries
   const SPORT_REGISTRY = APP.SPORT_REGISTRY || [];
   const apiGet = APP.apiGet.bind(APP);
   const apiPost = APP.apiPost.bind(APP);
   const apiPatch = APP.apiPatch.bind(APP);
 
+  // Page State
   const state = {
     session: null,
     teamId: null,
@@ -28,9 +31,11 @@
     leaderboardSort: { metric: "", order: "desc" }
   };
 
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
   state.teamId = params.get("id") || params.get("teamId");
 
+  // Page Elements
   const els = {
     pageMessage: document.getElementById("pageMessage"),
 
@@ -80,6 +85,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -116,6 +122,7 @@
     }
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -174,6 +181,7 @@
     els.teamSectionButtons.forEach((button) => button.classList.remove("is-active"));
   }
 
+  // Data Loading
   /**
    * Refreshes all backend data for the page, then rerenders dependent sections from the same normalized state.
    */
@@ -226,6 +234,7 @@
     renderAllSections();
   }
 
+  // All Sections
   /**
    * Renders every team detail section from normalized roster, staff, competition, and result state.
    */
@@ -241,6 +250,7 @@
     populateTeamEditForm();
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -258,6 +268,7 @@
     setField("editTeamNotes", state.team.notes || "");
   }
 
+  // Workflow: Edit Team
   /**
    * Persists team edits used by roster, staff, competition, and result projections.
    */
@@ -288,6 +299,7 @@
     }
   }
 
+  // Archive Workflow
   /**
    * Adds archive behavior after data load so warnings can include the current record context.
    */
@@ -302,6 +314,7 @@
     });
   }
 
+  // Workflow: Add Athlete To Team
   /**
    * Handles the add athlete to team workflow and keeps side effects inside the intended API/action path.
    */
@@ -346,6 +359,7 @@
     }
   }
 
+  // Workflow: Add Coach To Team
   /**
    * Handles the add coach to team workflow and keeps side effects inside the intended API/action path.
    */
@@ -388,6 +402,7 @@
     }
   }
 
+  // Missing Team Selection
   /**
    * Renders the missing team selection section from normalized page state without mutating backend data.
    */
@@ -438,6 +453,7 @@
     if (els.teamSportPill) els.teamSportPill.textContent = "Sport";
   }
 
+  // Not Found
   /**
    * Renders the not found section from normalized page state without mutating backend data.
    */
@@ -484,6 +500,7 @@
     if (els.teamStatusPill) els.teamStatusPill.textContent = "Unavailable";
   }
 
+  // Load Failure
   /**
    * Renders the load failure section from normalized page state without mutating backend data.
    */
@@ -512,6 +529,7 @@
     setSquadMessage("Team details could not be loaded right now.", "error");
   }
 
+  // Head
   /**
    * Renders the head section from normalized page state without mutating backend data.
    */
@@ -547,6 +565,7 @@
     if (els.teamCompletenessStat) els.teamCompletenessStat.innerHTML = completenessMarkup(getTeamCompleteness(team), true);
   }
 
+  // Team Identity
   /**
    * Renders the team identity section from normalized page state without mutating backend data.
    */
@@ -599,6 +618,7 @@
     return `<div class="${wrapperClass}"><span class="completeness-ring" style="--score:${normalized}"></span><span class="completeness-text">${normalized}%</span></div>`;
   }
 
+  // Team Staff
   /**
    * Renders the team staff section from normalized page state without mutating backend data.
    */
@@ -655,6 +675,7 @@
     `;
   }
 
+  // Team Roster
   /**
    * Renders the team roster section from normalized page state without mutating backend data.
    */
@@ -710,6 +731,7 @@
     `;
   }
 
+  // Team Competitions
   /**
    * Renders the team competitions section from normalized page state without mutating backend data.
    */
@@ -760,6 +782,7 @@
     `;
   }
 
+  // Team Recent Results
   /**
    * Renders the team recent results section from normalized page state without mutating backend data.
    */
@@ -809,6 +832,7 @@
     `;
 
     const strip = document.getElementById("teamResultStrip");
+    // Strip
     /**
      * Renders the strip section from normalized page state without mutating backend data.
      */
@@ -826,6 +850,7 @@
     renderStrip("");
   }
 
+  // Team Performance
   /**
    * Renders the team performance section from normalized page state without mutating backend data.
    */
@@ -894,6 +919,7 @@
     `;
   }
 
+  // Team Leaderboard Access
   /**
    * Renders the team leaderboard access section from normalized page state without mutating backend data.
    */
@@ -911,6 +937,7 @@
     `;
   }
 
+  // Team Leaderboards
   /**
    * Renders the team leaderboards section from normalized page state without mutating backend data.
    */
@@ -948,6 +975,7 @@
     `;
   }
 
+  // Event Wiring
   /**
    * Binds the team leaderboard controls interactions once so rerenders do not duplicate listeners.
    */
@@ -966,6 +994,7 @@
     });
   }
 
+  // Team Achievements
   /**
    * Renders the team achievements section from normalized page state without mutating backend data.
    */
@@ -1002,6 +1031,7 @@
     `;
   }
 
+  // Build Team Leaderboard Rows
   /**
    * Builds team leaderboard rows from shared state so markup and payload labels stay consistent.
    */
@@ -1230,6 +1260,7 @@
     return [];
   }
 
+  // Normalize Team Stat Line
   /**
    * Normalizes team stat line data across current API and legacy nested shapes.
    */
@@ -1269,6 +1300,7 @@
     return text || fallback;
   }
 
+  // Team Result Card
   /**
    * Renders the team result card section from normalized page state without mutating backend data.
    */
@@ -1299,6 +1331,7 @@
     `;
   }
 
+  // Team Football Result Card
   /**
    * Renders the team football result card section from normalized page state without mutating backend data.
    */
@@ -1328,6 +1361,7 @@
     `;
   }
 
+  // Team Volleyball Result Card
   /**
    * Renders the team volleyball result card section from normalized page state without mutating backend data.
    */
@@ -1353,6 +1387,7 @@
     `;
   }
 
+  // Team Hockey Result Card
   /**
    * Renders the team hockey result card section from normalized page state without mutating backend data.
    */
@@ -1379,6 +1414,7 @@
     `;
   }
 
+  // Team Basketball Result Card
   /**
    * Renders the team basketball result card section from normalized page state without mutating backend data.
    */
@@ -1405,6 +1441,7 @@
     `;
   }
 
+  // Team Swimming Result Card
   /**
    * Renders the team swimming result card section from normalized page state without mutating backend data.
    */
@@ -1434,6 +1471,7 @@
     `;
   }
 
+  // Team Track Field Result Card
   /**
    * Renders the team track field result card section from normalized page state without mutating backend data.
    */
@@ -1472,6 +1510,7 @@
     return `${innings.total}${wickets}${declared}${overs}`;
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -1522,6 +1561,7 @@
     }
   }
 
+  // Normalize Roster Array
   /**
    * Normalizes roster array data across current API and legacy nested shapes.
    */
@@ -1535,6 +1575,7 @@
     return [];
   }
 
+  // Normalize Staff Array
   /**
    * Normalizes staff array data across current API and legacy nested shapes.
    */
@@ -1548,6 +1589,7 @@
     return [];
   }
 
+  // Normalize Competitions Array
   /**
    * Normalizes competitions array data across current API and legacy nested shapes.
    */
@@ -1559,6 +1601,7 @@
     return [];
   }
 
+  // Normalize Results Array
   /**
    * Normalizes results array data across current API and legacy nested shapes.
    */
@@ -1570,6 +1613,7 @@
     return [];
   }
 
+  // Normalize Stat Lines Array
   /**
    * Normalizes stat lines array data across current API and legacy nested shapes.
    */
@@ -1581,6 +1625,7 @@
     return [];
   }
 
+  // Normalize Athletes Array
   /**
    * Normalizes athletes array data across current API and legacy nested shapes.
    */
@@ -1592,6 +1637,7 @@
     return [];
   }
 
+  // Normalize Coaches Array
   /**
    * Normalizes coaches array data across current API and legacy nested shapes.
    */
@@ -1638,6 +1684,7 @@
     }) || null;
   }
 
+  // Build Coach Name
   /**
    * Builds coach name from shared state so markup and payload labels stay consistent.
    */
@@ -1648,6 +1695,7 @@
     return `${coach.firstName || ""} ${coach.lastName || ""}`.trim();
   }
 
+  // Build Athlete Name
   /**
    * Builds athlete name from shared state so markup and payload labels stay consistent.
    */
@@ -1694,6 +1742,7 @@
     return match ? match.name : raw;
   }
 
+  // Normalize Campus
   /**
    * Normalizes campus data across current API and legacy nested shapes.
    */
@@ -1769,6 +1818,7 @@
     return String(result.value || result.result || "—");
   }
 
+  // Normalize Text
   /**
    * Normalizes text data across current API and legacy nested shapes.
    */
@@ -1811,6 +1861,7 @@
     }
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -1835,6 +1886,7 @@
     return String(document.getElementById(id)?.value || "").trim();
   }
 
+  // Normalize Status
   /**
    * Normalizes status data across current API and legacy nested shapes.
    */

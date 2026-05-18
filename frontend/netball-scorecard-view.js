@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  // Shared App Access
   /**
    * Read-only netball score sheet renderer.
    *
@@ -8,6 +9,7 @@
    */
   const APP = window.UWISportsHub;
   const scorecardId = new URLSearchParams(window.location.search).get("scorecardId") || new URLSearchParams(window.location.search).get("id") || "";
+  // Scorecard Fields
   const els = {
     msg: document.getElementById("pageMessage"),
     title: document.getElementById("scorecardTitle"),
@@ -19,6 +21,7 @@
   };
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -44,6 +47,7 @@
     }
   }
 
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -74,6 +78,7 @@
     `;
   }
 
+  // Player Row
   /**
    * Renders the player row section from normalized page state without mutating backend data.
    */
@@ -81,6 +86,7 @@
     return `<tr><td>${escapeHtml(row.number ?? "")}</td><td>${playerLink(row.athleteId, row.name)}</td><td>${escapeHtml(row.position || "")}</td><td>${escapeHtml(row.goals ?? "")}</td><td>${escapeHtml(row.attempts ?? "")}</td><td>${escapeHtml(row.shootingPercentage || "")}</td><td>${escapeHtml(row.goalAssists ?? "")}</td><td>${escapeHtml(row.feeds ?? "")}</td><td>${escapeHtml(row.centrePassReceives ?? "")}</td><td>${escapeHtml(row.intercepts ?? "")}</td><td>${escapeHtml(row.deflections ?? "")}</td><td>${escapeHtml(row.rebounds ?? "")}</td><td>${escapeHtml(row.gains ?? "")}</td><td>${escapeHtml(row.turnovers ?? "")}</td><td>${escapeHtml(row.penalties ?? "")}</td><td>${escapeHtml(row.minutes ?? "")}</td></tr>`;
   }
 
+  // Substitution
   /**
    * Renders the substitution section from normalized page state without mutating backend data.
    */
@@ -93,6 +99,7 @@
     return id ? `<a href="athlete-view.html?athleteId=${encodeURIComponent(id)}">${safeName}</a>` : safeName;
   }
 
+  // Normalize Line
   /**
    * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
    */

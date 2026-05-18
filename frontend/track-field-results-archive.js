@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  // Shared App Access
   /**
    * Track and field results archive.
    *
@@ -7,10 +8,14 @@
    * metadata from statData so official marks stay tied to the original entry.
    */
   const APP = window.UWISportsHub;
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
+  // Page State
   const state = { competitions: [], scorecards: [], activeCompetitionId: params.get("competitionId") || "", teamId: params.get("teamId") || "", searchApplied: false };
+  // Page Elements
   const els = { msg: document.getElementById("pageMessage"), tabs: document.getElementById("competitionTabs"), season: document.getElementById("seasonFilter"), type: document.getElementById("typeFilter"), event: document.getElementById("eventFilter"), searchButton: document.getElementById("resultsSearchButton"), count: document.getElementById("resultCount"), grid: document.getElementById("resultsGrid") };
   document.addEventListener("DOMContentLoaded", init);
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -26,6 +31,7 @@
       render();
     } catch (error) { show(error?.message || "Track and field results could not be loaded."); }
   }
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild markup without duplicating listeners.
    */
@@ -33,6 +39,7 @@
     [els.season, els.type, els.event].forEach((el) => el.addEventListener("input", () => { state.searchApplied = false; }));
     els.searchButton?.addEventListener("click", () => { state.searchApplied = true; render(); });
   }
+  // Filters
   /**
    * Builds filter controls from available backend records so searches reflect saved data.
    */
@@ -43,6 +50,7 @@
     const seasons = [...new Set(state.scorecards.map((line) => line.season || competitionFor(line.competitionId)?.season || "").filter(Boolean))].sort().reverse();
     els.season.innerHTML = `<option value="">All seasons</option>${seasons.map((season) => `<option value="${escapeHtml(season)}">${escapeHtml(season)}</option>`).join("")}`;
   }
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -61,6 +69,7 @@
     if (els.event.value && !String(data.eventName || line.eventName || "").toLowerCase().includes(els.event.value.toLowerCase())) return false;
     return true;
   }
+  // Card
   /**
    * Renders one result card from normalized stat data while preserving links to view/edit workflows.
    */
@@ -71,6 +80,7 @@
     const mark = data.resultType === "field" ? topUwi?.best : topUwi?.time;
     return `<article class="result-card"><div class="result-card-top"><span>${escapeHtml(data.resultType === "field" ? "Field" : "Track")}</span><small>${escapeHtml(competition?.title || competition?.name || "Competition")}</small></div><div class="result-card-title">${escapeHtml(compactUwiResultLabel(data.eventName || line.eventName || "Track and field event"))}</div><div class="result-team-row"><span>${escapeHtml(topUwi?.name || "Top UWI")}</span><strong>${escapeHtml(mark || "—")}</strong></div><p class="result-text">${escapeHtml(compactUwiResultLabel(data.summary?.topUwiResult || data.summary?.winningResult || "Result recorded"))}</p><div class="result-card-actions"><a href="track-field-results-view.html?scorecardId=${encodeURIComponent(line.id)}">View Results Sheet</a><a href="track-field-results.html?competitionId=${encodeURIComponent(line.competitionId)}&scorecardId=${encodeURIComponent(line.id)}">Edit Results Sheet</a><a href="competition-view.html?id=${encodeURIComponent(line.competitionId)}">Competition</a></div></article>`;
   }
+  // Normalize Line
   /**
    * Flattens current and legacy stat-line shapes into one structure for filters and renderers.
    */
@@ -78,6 +88,7 @@
   function isTrackFieldScorecard(line) { return APP.normalizeSportSlug(line.sportSlug || line.sport) === "track-and-field" && (line.eventType === "scorecard" || line.statData?.eventType === "scorecard"); }
   function scorecardsFor(id) { return state.scorecards.filter((line) => String(line.competitionId) === String(id)); }
   function competitionFor(id) { return state.competitions.find((competition) => String(competition.id) === String(id)); }
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */

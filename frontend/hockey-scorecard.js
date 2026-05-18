@@ -1,5 +1,6 @@
 (function () {
   "use strict";
+  // Shared App Access
   /**
    * Hockey score sheet engine.
    *
@@ -9,7 +10,9 @@
    */
   const APP = window.UWISportsHub;
   const competitionId = new URLSearchParams(window.location.search).get("competitionId") || new URLSearchParams(window.location.search).get("id") || "";
+  // Scorecard State
   const state = { session: null, competition: null, athletes: [], teams: [] };
+  // Scorecard Fields
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("scorecardHeading"),
@@ -33,6 +36,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -66,6 +70,7 @@
     }
   }
 
+  // Page Layout
   /**
    * Builds the initial page UI from loaded campus-scoped data and default workflow state.
    */
@@ -85,6 +90,7 @@
     renderPenaltyRows();
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -106,6 +112,7 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  // Roster
   /**
    * Renders the roster section from normalized page state without mutating backend data.
    */
@@ -117,6 +124,7 @@
     }).join("");
   }
 
+  // Scoring Rows
   /**
    * Renders the scoring rows section from normalized page state without mutating backend data.
    */
@@ -130,6 +138,7 @@
     return `<tr><td><input class="input" id="${id}Number" type="number" min="0"/></td><td>${uwiSide ? playerControl(`${id}Scorer`) : `<input class="input" id="${id}ScorerName" type="text" value="Opp ${row}"/>`}</td><td><select class="select" id="${id}Period"><option value="">Period</option><option>1</option><option>2</option><option>3</option><option>OT</option></select></td><td><input class="input" id="${id}Goal" type="number" min="0" max="1"/></td><td>${uwiSide ? playerControl(`${id}Assist1`, "Assist 1") : `<input class="input" id="${id}Assist1Name" type="text"/>`}</td><td>${uwiSide ? playerControl(`${id}Assist2`, "Assist 2") : `<input class="input" id="${id}Assist2Name" type="text"/>`}</td></tr>`;
   }
 
+  // Penalty Rows
   /**
    * Renders the penalty rows section from normalized page state without mutating backend data.
    */
@@ -156,6 +165,7 @@
     });
   }
 
+  // Derived Fields
   /**
    * Recalculates derived display values from editable fields without saving until submit.
    */
@@ -174,6 +184,7 @@
     setValue("penaltyMinutes", readPenalties("home", true).reduce((total, item) => total + (item.minutes || 0), 0));
   }
 
+  // Derived Result
   /**
    * Builds result text from score inputs while leaving manual corrections possible before save.
    */
@@ -184,6 +195,7 @@
     return `Draw ${homeTotal}-${visitTotal}`;
   }
 
+  // Save Workflow
   /**
    * Validates and persists the workflow payload through the shared API helper.
    */
@@ -235,6 +247,7 @@
     }
   }
 
+  // Collect Scoring
   /**
    * Reads scoring values into the structured payload consumed by reports and result views.
    */
@@ -260,6 +273,7 @@
     }).filter((row) => row.period || row.scorerAthleteId || row.scorerName || row.assist1AthleteId || row.assist2AthleteId);
   }
 
+  // Collect Penalties
   /**
    * Reads penalties values into the structured payload consumed by reports and result views.
    */
@@ -280,6 +294,7 @@
     return readScoring("home", true).reduce((total, row) => total + (row.assist1AthleteId || row.assist1Name ? 1 : 0) + (row.assist2AthleteId || row.assist2Name ? 1 : 0), 0);
   }
 
+  // Lookup Roster Athletes
   /**
    * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
    */
@@ -294,6 +309,7 @@
     return ids.map((id) => state.athletes.find((athlete) => String(athlete.id) === String(id))).filter(Boolean);
   }
 
+  // Workflow: Roster Select Change
   /**
    * Handles the roster select change workflow and keeps side effects inside the intended API/action path.
    */
@@ -318,6 +334,7 @@
     return displayName(state.athletes.find((athlete) => String(athlete.id) === String(id)));
   }
 
+  // Lookup UWI Team Name
   /**
    * Resolves the selected UWI team label from backend data for saved statData and display.
    */
@@ -326,6 +343,7 @@
     return els.homeTeamLabel.value.trim() || team?.name || team?.teamName || "UWI Team";
   }
 
+  // Opponent Name
   /**
    * Returns the typed opponent label, falling back only when staff did not enter one.
    */
@@ -333,6 +351,7 @@
     return els.opponentName.value.trim() || "Opponent";
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -381,6 +400,7 @@
     return date.toISOString().slice(0, 10);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -389,6 +409,7 @@
     els.message.textContent = "";
   }
 
+  // Messages and UI State
   /**
    * Displays blocking load errors without throwing away the signed-in shell.
    */
@@ -397,6 +418,7 @@
     els.pageMessage.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -405,6 +427,7 @@
     els.message.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */

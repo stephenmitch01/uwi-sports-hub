@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Athlete football stats projection.
    *
@@ -8,11 +9,13 @@
    * minutes, cards, saves, and match logs for the selected player.
    */
   const APP = window.UWISportsHub;
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
   const athleteId = params.get("athleteId") || params.get("id") || "";
   const selectedSeason = params.get("season") || "all";
   const selectedCompetition = params.get("competitionId") || "all";
 
+  // Page Elements
   const els = {
     msg: document.getElementById("pageMessage"),
     title: document.getElementById("pageTitle"),
@@ -26,6 +29,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -50,6 +54,7 @@
     }
   }
 
+  // Page Display
   /**
    * Renders the current state into the page without mutating backend data.
    */
@@ -136,6 +141,7 @@
     return rows.filter((row) => String(row.eventType || "") === type);
   }
 
+  // Event Wiring
   /**
    * Binds the scope filters interactions once so rerenders do not duplicate listeners.
    */
@@ -144,6 +150,7 @@
     document.getElementById("competitionScope")?.addEventListener("change", updateScope);
   }
 
+  // Filter Scope
   /**
    * Updates derived UI state from the current form/model values without persisting changes directly.
    */
@@ -159,6 +166,7 @@
     return `<div class="mini-card"><div class="mini-label">${escapeHtml(label)}</div><div class="mini-value">${escapeHtml(value)}</div><div class="mini-sub">${escapeHtml(sub)}</div></div>`;
   }
 
+  // Normalize Row
   /**
    * Normalizes row data across current API and legacy nested shapes.
    */
@@ -171,6 +179,7 @@
     return new Set(rows.map((row) => row.sourceId || String(row.id || "").split("-football-")[0] || row.id).filter(Boolean)).size;
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */

@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Coach and staff registry workflow.
    *
@@ -12,6 +13,7 @@
 
   const SPORTS = APP.SPORT_REGISTRY.map(function (sport) { return sport.name; });
 
+  // Page State
   const state = {
     user: null,
     coaches: [],
@@ -20,6 +22,7 @@
     registrySearchApplied: false
   };
 
+  // Page Elements
   const els = {
     totalCoachesStat: document.getElementById("totalCoachesStat"),
     headCoachesStat: document.getElementById("headCoachesStat"),
@@ -80,6 +83,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -115,6 +119,7 @@
     }
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -168,6 +173,7 @@
     bindWorkflowClose();
   }
 
+  // Event Wiring
   /**
    * Binds the workflow close interactions once so rerenders do not duplicate listeners.
    */
@@ -185,6 +191,7 @@
     });
   }
 
+  // Workflow: Filter Change
   /**
    * Handles the filter change workflow and keeps side effects inside the intended API/action path.
    */
@@ -203,6 +210,7 @@
     renderAll();
   }
 
+  // Data Loading
   /**
    * Fetches teams used to resolve relationship IDs into display labels and links.
    */
@@ -219,6 +227,7 @@
   populateTeamSelects();
 }
 
+  // Data Loading
   /**
    * Loads coaches data required by later normalization and rendering steps.
    */
@@ -235,6 +244,7 @@
   populateCoachSelect();
 }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -245,6 +255,7 @@
     });
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -259,6 +270,7 @@
     });
   }
 
+  // Edit Form Prefill
   /**
    * Populates editable controls from loaded backend data while preserving record IDs and relationships.
    */
@@ -283,6 +295,7 @@
     }
   }
 
+  // Workflow: Create Coach
   /**
    * Handles the create coach workflow and keeps side effects inside the intended API/action path.
    */
@@ -378,6 +391,7 @@
     els.assignmentRoleWrap.classList.add("hidden");
   }
 
+  // Workflow: Create Assignment
   /**
    * Handles the create assignment workflow and keeps side effects inside the intended API/action path.
    */
@@ -411,6 +425,7 @@
     }
   }
 
+  // Full Page Render
   /**
    * Renders coach summary, assignment lists, and registry rows from the current campus-scoped state.
    */
@@ -421,6 +436,7 @@
     renderCoachTable();
   }
 
+  // Operational Summary
   /**
    * Renders the operational summary section from normalized page state without mutating backend data.
    */
@@ -493,6 +509,7 @@
     });
   }
 
+  // Stats
   /**
    * Renders the stats section from normalized page state without mutating backend data.
    */
@@ -526,6 +543,7 @@
     els.unassignedStaffStat.textContent = String(unassigned);
   }
 
+  // Coach Table
   /**
    * Renders the coach table section from normalized page state without mutating backend data.
    */
@@ -629,6 +647,7 @@
     });
   }
 
+  // Normalize Campus
   /**
    * Normalizes campus data across current API and legacy nested shapes.
    */
@@ -691,6 +710,7 @@
     element.textContent = message;
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -730,6 +750,7 @@
       .replace(/'/g, "&#039;");
   }
 
+  // Insight List
   /**
    * Renders the insight list section from normalized page state without mutating backend data.
    */
@@ -748,6 +769,7 @@
     `).join("");
   }
 
+  // Event Wiring
   /**
    * Binds the insight actions interactions once so rerenders do not duplicate listeners.
    */
@@ -767,6 +789,7 @@
     });
   }
 
+  // Activity List
   /**
    * Renders the activity list section from normalized page state without mutating backend data.
    */
@@ -796,6 +819,7 @@
     return Date.parse(record.updatedAt || record.createdAt || record.modifiedAt || "") || 0;
   }
 
+  // Quality
   /**
    * Renders the quality section from normalized page state without mutating backend data.
    */
@@ -828,6 +852,7 @@
     APP.saveRecentSearch(scope, label, values);
   }
 
+  // Shared UI Mounting
   /**
    * Mounts the recent searches feature after required context has loaded.
    */

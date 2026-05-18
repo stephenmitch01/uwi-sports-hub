@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Shared App Access
   /**
    * Swimming result sheet engine.
    *
@@ -9,9 +10,12 @@
    * and competition reports.
    */
   const APP = window.UWISportsHub;
+  // URL Parameters
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
+  // Scorecard State
   const state = { session: null, competition: null, athletes: [], teams: [] };
+  // Scorecard Fields
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("resultsHeading"),
@@ -35,6 +39,7 @@
 
   document.addEventListener("DOMContentLoaded", init);
 
+  // Page Setup
   /**
    * Coordinates the page lifecycle: mount/auth context first, fetch backend data, then render and bind events.
    */
@@ -68,6 +73,7 @@
     }
   }
 
+  // Page Layout
   /**
    * Builds the initial page UI from loaded campus-scoped data and default workflow state.
    */
@@ -84,6 +90,7 @@
     renderLaneRows();
   }
 
+  // Event Wiring
   /**
    * Centralizes event wiring so rendering functions can rebuild dynamic controls safely.
    */
@@ -99,6 +106,7 @@
     els.form.addEventListener("submit", handleSubmit);
   }
 
+  // Lane Rows
   /**
    * Renders the lane rows section from normalized page state without mutating backend data.
    */
@@ -130,6 +138,7 @@
     return `<select class="select" id="${prefix}Id" data-swimmer-select><option value="">Select swimmer</option>${getRosterAthletes().map((athlete) => `<option value="${escapeHtml(athlete.id)}" ${String(selectedId || "") === String(athlete.id) ? "selected" : ""}>${escapeHtml(displayName(athlete))}</option>`).join("")}<option value="__quick_add__">Quick Add New Athlete</option></select>`;
   }
 
+  // Derived Fields
   /**
    * Recalculates derived display values from editable fields without saving until submit.
    */
@@ -145,6 +154,7 @@
     setValue("exhCount", rows.filter((row) => row.exhibition).length);
   }
 
+  // Save Workflow
   /**
    * Validates and persists the workflow payload through the shared API helper.
    */
@@ -194,6 +204,7 @@
     }
   }
 
+  // Collect Lane Results
   /**
    * Reads lane results values into the structured payload consumed by reports and result views.
    */
@@ -225,6 +236,7 @@
     return Boolean(row.athleteId || row.name || row.seedTime || row.finalTime || row.place || row.points || row.dq || row.exhibition);
   }
 
+  // Lookup Roster Athletes
   /**
    * Filters athlete choices by selected team/sport to prevent duplicate manual stat attribution.
    */
@@ -234,6 +246,7 @@
     return state.athletes.filter((athlete) => String(athlete.teamId || athlete.activeRosterAssignment?.teamId || "") === String(teamId));
   }
 
+  // Lookup UWI Team Name
   /**
    * Resolves the selected UWI team label from backend data for saved statData and display.
    */
@@ -242,6 +255,7 @@
     return team?.name || team?.teamName || "UWI Swimming";
   }
 
+  // Workflow: Swimmer Select Change
   /**
    * Handles the swimmer select change workflow and keeps side effects inside the intended API/action path.
    */
@@ -259,6 +273,7 @@
     if (target) target.value = athlete.id;
   }
 
+  // Normalize Array
   /**
    * Accepts current and nested API response shapes so pages remain compatible during backend evolution.
    */
@@ -309,6 +324,7 @@
     return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
   }
 
+  // Messages and UI State
   /**
    * Resets message state before a new fetch or submit attempt.
    */
@@ -317,6 +333,7 @@
     els.message.textContent = "";
   }
 
+  // Messages and UI State
   /**
    * Displays blocking load errors without throwing away the signed-in shell.
    */
@@ -325,6 +342,7 @@
     els.pageMessage.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Displays recoverable workflow errors near the relevant form or result section.
    */
@@ -333,6 +351,7 @@
     els.message.textContent = text;
   }
 
+  // Messages and UI State
   /**
    * Confirms successful backend persistence without changing page state unexpectedly.
    */
