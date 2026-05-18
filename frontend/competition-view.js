@@ -2401,6 +2401,12 @@
     return text || fallback;
   }
 
+  function cricketInningsTeamLabel(value, data, fallback = "Team") {
+    const text = compactUwiResultLabel(value);
+    if (/^opposition$/i.test(text) || /^opponent$/i.test(text)) return opponentLabel(data);
+    return text || fallback;
+  }
+
   function renderResultCard(line) {
     const data = line.statData || {};
     const innings = Array.isArray(data.innings) ? data.innings : [];
@@ -2416,11 +2422,11 @@
         </div>
         <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row">
-          <span>${escapeHtml(compactUwiTeamLabel(first.team || data.uwiTeamName))}</span>
+          <span>${escapeHtml(cricketInningsTeamLabel(first.team || data.uwiTeamName, data, "Blackbirds"))}</span>
           <strong>${formatInningsScore(first)}</strong>
         </div>
         <div class="result-team-row">
-          <span>${escapeHtml(compactUwiTeamLabel(second.team || data.opponentName, "Opponent"))}</span>
+          <span>${escapeHtml(cricketInningsTeamLabel(second.team || data.opponentName, data, "Opponent"))}</span>
           <strong>${formatInningsScore(second)}</strong>
         </div>
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
