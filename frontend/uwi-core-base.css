@@ -335,7 +335,7 @@ label{display:block;font-size:12px;font-weight:600;color:#102033;margin-bottom:6
   display:block;
   margin-top:6px;
   color:#071b33;
-  font-size:clamp(20px,2vw,28px);
+  font-size:clamp(18px,1.7vw,24px);
   line-height:1.15;
   font-weight:600;
   overflow-wrap:anywhere;
@@ -343,7 +343,7 @@ label{display:block;font-size:12px;font-weight:600;color:#102033;margin-bottom:6
 .scorecard-result-panel p{
   margin:8px 0 0;
   color:#4d5870;
-  font-size:13px;
+  font-size:12px;
   line-height:1.4;
   font-weight:500;
   overflow-wrap:anywhere;
