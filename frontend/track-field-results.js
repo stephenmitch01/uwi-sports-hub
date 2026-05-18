@@ -4,9 +4,10 @@
   const APP = window.UWISportsHub;
   const params = new URLSearchParams(window.location.search);
   const competitionId = params.get("competitionId") || params.get("id") || "";
+  const scorecardId = params.get("scorecardId") || "";
   const TRACK_ROW_COUNT = 8;
   const FIELD_ROW_COUNT = 12;
-  const state = { competition: null, athletes: [], teams: [] };
+  const state = { competition: null, scorecard: null, athletes: [], teams: [] };
   const els = {
     pageMessage: document.getElementById("pageMessage"),
     heading: document.getElementById("resultsHeading"),
@@ -52,6 +53,11 @@
         return;
       }
       renderPage();
+      if (scorecardId) {
+        const scorecard = await APP.apiGet(`/competition-stat-lines/${encodeURIComponent(scorecardId)}`);
+        state.scorecard = scorecard?.data || scorecard;
+        applyExistingResults();
+      }
       bindEvents();
       updateMode();
       updateDerivedFields();
@@ -73,6 +79,30 @@
       .join("")}`;
     renderTrackRows();
     renderFieldRows();
+  }
+
+  function applyExistingResults() {
+    const row = state.scorecard || {};
+    const data = row.statData || row.data?.statData || {};
+    els.resultKind.value = data.resultType === "field" ? "field" : "track";
+    els.teamSelect.value = data.uwiTeamId || row.teamId || "";
+    els.meetTitle.value = data.title || row.eventName || els.meetTitle.value;
+    els.eventDate.value = formatDateInput(row.date || data.date || els.eventDate.value);
+    els.eventName.value = data.eventName || row.eventName || "";
+    els.eventNumber.value = data.eventNumber || "";
+    els.division.value = data.division || "";
+    els.roundType.value = data.round || "";
+    setValue("heatNumber", data.track?.heatNumber);
+    setValue("semiFinalNumber", data.track?.semiFinalNumber);
+    setValue("recordNotes", data.track?.recordNotes);
+    setValue("windDirection", data.track?.windDirection);
+    setValue("windValue", data.track?.wind);
+    setValue("fieldEventType", data.field?.fieldEventType || data.disciplineType);
+    setValue("fieldStandard", data.field?.fieldStandard);
+    setValue("fieldWind", data.field?.wind);
+    setValue("fieldNotes", data.field?.remarks);
+    renderTrackRowsFrom(data.entries || []);
+    renderFieldRowsFrom(data.entries || []);
   }
 
   function bindEvents() {
@@ -114,6 +144,14 @@
   function renderFieldRows() {
     const previous = readFieldResults();
     els.fieldRows.innerHTML = Array.from({ length: FIELD_ROW_COUNT }, (_, index) => fieldRow(index + 1, previous[index] || {})).join("");
+  }
+
+  function renderTrackRowsFrom(entries) {
+    els.trackRows.innerHTML = Array.from({ length: TRACK_ROW_COUNT }, (_, index) => trackRow(index + 1, entries[index] || {})).join("");
+  }
+
+  function renderFieldRowsFrom(entries) {
+    els.fieldRows.innerHTML = Array.from({ length: FIELD_ROW_COUNT }, (_, index) => fieldRow(index + 1, entries[index] || {})).join("");
   }
 
   function trackRow(place, existing) {
@@ -238,8 +276,12 @@
       source: "track-field-results-sheet"
     };
     try {
-      await APP.apiPost("/competition-stat-lines", payload);
-      showSuccess("Track and field results saved successfully.");
+      if (scorecardId) {
+        await APP.apiPatch(`/competition-stat-lines/${encodeURIComponent(scorecardId)}`, payload);
+      } else {
+        await APP.apiPost("/competition-stat-lines", payload);
+      }
+      showSuccess(scorecardId ? "Track and field results updated successfully." : "Track and field results saved successfully.");
     } catch (error) {
       showError(error?.message || "Track and field results could not be saved.");
     }

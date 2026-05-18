@@ -1795,8 +1795,20 @@
     return `${page}?competitionId=${encodeURIComponent(line.competitionId || state.competitionId)}&scorecardId=${encodeURIComponent(line.id)}`;
   }
 
+  function scorecardEditLabel(line) {
+    const sportSlug = normalizeSportSlug(line.sportSlug || line.sport || line.statData?.sport || line.statData?.sportSlug || getCompetitionSportSlug());
+    if (sportSlug === "cricket") return "Edit Scorecard";
+    if (["swimming", "track-and-field"].includes(sportSlug)) return "Edit Results Sheet";
+    if (["football", "volleyball", "hockey", "basketball", "netball", "badminton", "table-tennis", "lawn-tennis", "taekwondo", "chess"].includes(sportSlug)) return "Edit Score Sheet";
+    return "Edit Scorecard";
+  }
+
   function scorecardEditLink(line) {
-    return `<a href="${scorecardEditHref(line)}">Edit</a>`;
+    return `<a href="${scorecardEditHref(line)}">${scorecardEditLabel(line)}</a>`;
+  }
+
+  function opponentLabel(data, fallback = "Opponent") {
+    return String(data?.opponentName || data?.opponentTeamName || data?.opponent?.name || fallback || "Opponent").trim() || "Opponent";
   }
 
   function buildParticipantRows() {
@@ -2441,7 +2453,7 @@
           <strong>${escapeHtml(score.uwi?.total ?? 0)}</strong>
         </div>
         <div class="result-team-row">
-          <span>${escapeHtml(data.opponentName || "Opponent")}</span>
+          <span>${escapeHtml(opponentLabel(data))}</span>
           <strong>${escapeHtml(score.opponent?.total ?? 0)}</strong>
         </div>
         <p class="result-text">${scorerLine}</p>
@@ -2471,7 +2483,7 @@
           <strong>${escapeHtml(data.finalSets?.uwi ?? 0)}</strong>
         </div>
         <div class="result-team-row">
-          <span>${escapeHtml(data.opponentName || "Opponent")}</span>
+          <span>${escapeHtml(opponentLabel(data))}</span>
           <strong>${escapeHtml(data.finalSets?.opponent ?? 0)}</strong>
         </div>
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || sets.map((set) => `${set.uwiScore}-${set.opponentScore}`).join(", ") || "Result recorded"))}</p>
@@ -2496,7 +2508,7 @@
         </div>
         <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
-        <div class="result-team-row"><span>${escapeHtml(data.opponentName || "Opponent")}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
+        <div class="result-team-row"><span>${escapeHtml(opponentLabel(data))}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="hockey-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
@@ -2519,7 +2531,7 @@
         </div>
         <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
-        <div class="result-team-row"><span>${escapeHtml(data.opponentName || "Opponent")}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
+        <div class="result-team-row"><span>${escapeHtml(opponentLabel(data))}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="basketball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
@@ -2595,7 +2607,7 @@
         </div>
         <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(score.uwi?.total ?? 0)}</strong></div>
-        <div class="result-team-row"><span>${escapeHtml(data.opponentName || "Opponent")}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
+        <div class="result-team-row"><span>${escapeHtml(opponentLabel(data))}</span><strong>${escapeHtml(score.opponent?.total ?? 0)}</strong></div>
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || "Result recorded"))}</p>
         <div class="result-card-actions">
           <a href="netball-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Match Sheet</a>
@@ -2647,7 +2659,7 @@
         </div>
         <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(summary.uwiRubbers ?? 0)}</strong></div>
-        <div class="result-team-row"><span>${escapeHtml(data.opponentTeamName || "Opponent")}</span><strong>${escapeHtml(summary.opponentRubbers ?? 0)}</strong></div>
+        <div class="result-team-row"><span>${escapeHtml(opponentLabel(data))}</span><strong>${escapeHtml(summary.opponentRubbers ?? 0)}</strong></div>
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || `${summary.pointsFor ?? 0}-${summary.pointsAgainst ?? 0} points`))}</p>
         <div class="result-card-actions">
           <a href="table-tennis-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
@@ -2670,7 +2682,7 @@
         </div>
         <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row"><span>${escapeHtml(compactUwiTeamLabel(data.uwiTeamName))}</span><strong>${escapeHtml(summary.uwiMatches ?? 0)}</strong></div>
-        <div class="result-team-row"><span>${escapeHtml(data.opponentTeamName || "Opponent")}</span><strong>${escapeHtml(summary.opponentMatches ?? 0)}</strong></div>
+        <div class="result-team-row"><span>${escapeHtml(opponentLabel(data))}</span><strong>${escapeHtml(summary.opponentMatches ?? 0)}</strong></div>
         <p class="result-text">${escapeHtml(compactUwiResultLabel(data.result || `${summary.gamesFor ?? 0}-${summary.gamesAgainst ?? 0} games`))}</p>
         <div class="result-card-actions">
           <a href="tennis-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
@@ -2716,7 +2728,7 @@
         </div>
         <div class="result-card-title">${escapeHtml(compactUwiResultLabel(title))}</div>
         <div class="result-team-row"><span>${escapeHtml(data.uwiPlayer?.name || "UWI player")}</span><strong>${escapeHtml(summary.uwiScore ?? "-")}</strong></div>
-        <div class="result-team-row"><span>${escapeHtml(data.opponent?.name || "Opponent")}</span><strong>${escapeHtml(summary.opponentScore ?? "-")}</strong></div>
+        <div class="result-team-row"><span>${escapeHtml(opponentLabel(data))}</span><strong>${escapeHtml(summary.opponentScore ?? "-")}</strong></div>
         <p class="result-text">${escapeHtml(compactUwiResultLabel(summary.resultLabel || data.result || data.opening || "Game recorded"))}</p>
         <div class="result-card-actions">
           <a href="chess-scorecard-view.html?scorecardId=${encodeURIComponent(line.id)}">View Score Sheet</a>
