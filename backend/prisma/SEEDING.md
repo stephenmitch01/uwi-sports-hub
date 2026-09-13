@@ -103,4 +103,6 @@ The seed uses the existing Prisma models only:
 - `AuditLog`
 - app-only fictional `UserProfile` rows
 
-Scorecard data is stored in `CompetitionStatLine.data` using the same `statData`-style fields consumed by athlete reports, team views, competition views, leaderboards, result cards, and sport-specific scorecard views.
+The normal presentation seed creates enough data to exercise the live UI: 236 fictional athletes, 26 fictional coaches, 13 teams, 260 competitions/fixtures, 1,248 competition/stat rows, 396 direct athlete stats, and 294 personal-best rows, plus the preserved Stephen Mitchel athlete record.
+
+Scorecard data is stored in `CompetitionStatLine.data` using the same `statData`-style fields consumed by athlete reports, team views, competition views, leaderboards, result cards, and sport-specific scorecard views. Cricket scorecards rotate through every built-in format filter: T20, 40 Over, 50 Over, BCA 3-Day, and Other Format.

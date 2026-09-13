@@ -7,26 +7,30 @@ const DATASET_ID = "ush-demo-v1";
 const CURRENT_SEASON = "2026";
 let preservedStephenRef = null;
 const SPORTS = [
-  { slug: "cricket", name: "Cricket", team: "UWI Blackbirds Cricket Team", division: "BCA 3-Day", roster: 13 },
-  { slug: "track-and-field", name: "Track and Field", team: "UWI Blackbirds Track and Field Team", division: "Intercollegiate", roster: 14 },
-  { slug: "football", name: "Football", team: "UWI Blackbirds Football Team", division: "Premier Division", roster: 16 },
-  { slug: "basketball", name: "Basketball", team: "UWI Blackbirds Basketball Team", division: "League One", roster: 10 },
-  { slug: "netball", name: "Netball", team: "UWI Blackbirds Netball Team", division: "Elite Division", roster: 10 },
-  { slug: "volleyball", name: "Volleyball", team: "UWI Blackbirds Volleyball Team", division: "Championship", roster: 10 },
-  { slug: "hockey", name: "Hockey", team: "UWI Blackbirds Hockey Team", division: "Open League", roster: 10 },
-  { slug: "swimming", name: "Swimming", team: "UWI Blackbirds Swimming Team", division: "Aquatic Meet", roster: 8 },
-  { slug: "badminton", name: "Badminton", team: "UWI Blackbirds Badminton Team", division: "Open", roster: 5 },
-  { slug: "table-tennis", name: "Table Tennis", team: "UWI Blackbirds Table Tennis Team", division: "Open", roster: 5 },
-  { slug: "lawn-tennis", name: "Lawn Tennis", team: "UWI Blackbirds Tennis Team", division: "Open", roster: 5 },
-  { slug: "taekwondo", name: "Taekwondo", team: "UWI Blackbirds Taekwondo Team", division: "Poomsae", roster: 5 },
-  { slug: "chess", name: "Chess", team: "UWI Blackbirds Chess Team", division: "Board League", roster: 5 }
+  { slug: "cricket", name: "Cricket", team: "UWI Blackbirds Cricket Team", division: "BCA 3-Day", roster: 24, genderPolicy: "male" },
+  { slug: "track-and-field", name: "Track and Field", team: "UWI Blackbirds Track and Field Team", division: "Intercollegiate", roster: 30, genderPolicy: "mixed" },
+  { slug: "football", name: "Football", team: "UWI Blackbirds Football Team", division: "Premier Division", roster: 28, genderPolicy: "male" },
+  { slug: "basketball", name: "Basketball", team: "UWI Blackbirds Basketball Team", division: "League One", roster: 18, genderPolicy: "male" },
+  { slug: "netball", name: "Netball", team: "UWI Blackbirds Netball Team", division: "Elite Division", roster: 18, genderPolicy: "female" },
+  { slug: "volleyball", name: "Volleyball", team: "UWI Blackbirds Volleyball Team", division: "Championship", roster: 18, genderPolicy: "female" },
+  { slug: "hockey", name: "Hockey", team: "UWI Blackbirds Hockey Team", division: "Open League", roster: 22, genderPolicy: "mixed" },
+  { slug: "swimming", name: "Swimming", team: "UWI Blackbirds Swimming Team", division: "Aquatic Meet", roster: 18, genderPolicy: "mixed" },
+  { slug: "badminton", name: "Badminton", team: "UWI Blackbirds Badminton Team", division: "Open", roster: 12, genderPolicy: "mixed" },
+  { slug: "table-tennis", name: "Table Tennis", team: "UWI Blackbirds Table Tennis Team", division: "Open", roster: 12, genderPolicy: "mixed" },
+  { slug: "lawn-tennis", name: "Lawn Tennis", team: "UWI Blackbirds Tennis Team", division: "Open", roster: 12, genderPolicy: "mixed" },
+  { slug: "taekwondo", name: "Taekwondo", team: "UWI Blackbirds Taekwondo Team", division: "Poomsae", roster: 12, genderPolicy: "mixed" },
+  { slug: "chess", name: "Chess", team: "UWI Blackbirds Chess Team", division: "Board League", roster: 12, genderPolicy: "mixed" }
 ];
 
-const FIRST_NAMES = [
-  "Aaliyah", "Akil", "Amara", "Andre", "Anika", "Ari", "Brianna", "Caleb", "Camille", "Dante",
-  "Elena", "Imani", "Jabari", "Jalen", "Janelle", "Kai", "Keisha", "Kemar", "Leah", "Malik",
-  "Maya", "Micah", "Nadia", "Naomi", "Nia", "Omar", "Priya", "Rafael", "Renee", "Sasha",
-  "Selena", "Tariq", "Tiana", "Zara", "Mateo", "Lucia", "Diego", "Sofia", "Noah", "Isla"
+const MALE_FIRST_NAMES = [
+  "Akil", "Andre", "Ari", "Caleb", "Dante", "Jabari", "Jalen", "Kai", "Kemar", "Malik",
+  "Micah", "Omar", "Rafael", "Tariq", "Mateo", "Diego", "Noah", "Nathan", "Jevon", "Dario",
+  "Nikolai", "Shamar", "Kadeem", "Xavier", "Adrian", "Marcus", "Liam", "Ethan", "Joel", "Rohan"
+];
+const FEMALE_FIRST_NAMES = [
+  "Aaliyah", "Amara", "Anika", "Brianna", "Camille", "Elena", "Imani", "Janelle", "Keisha", "Leah",
+  "Maya", "Nadia", "Naomi", "Nia", "Priya", "Renee", "Sasha", "Selena", "Tiana", "Zara",
+  "Lucia", "Sofia", "Isla", "Gabrielle", "Arielle", "Mikayla", "Serena", "Thalia", "Kiara", "Jada"
 ];
 const LAST_NAMES = [
   "Alleyne", "Baptiste", "Best", "Browne", "Clarke", "Dacosta", "Forde", "Francis", "Gittens", "Grant",
@@ -38,6 +42,9 @@ const COACH_FIRST_NAMES = ["Marcia", "Dwayne", "Althea", "Gavin", "Nerissa", "Ju
 const COACH_LAST_NAMES = ["Bishop", "Cumberbatch", "Walcott", "Prescod", "Weekes", "Brathwaite", "Small", "Roach", "Chase", "Hinds", "Browne", "Charles", "Hope", "Maharaj", "Gray"];
 const OPPONENTS = ["Gladiola", "Wanderers", "Empire", "Carlton", "YMPC", "Lodge School", "Spartans", "Titans", "Mavericks", "Hurricanes", "Royals", "Cavaliers", "Rangers"];
 const VENUES = ["3Ws Oval", "Usain Bolt Sports Complex", "Sir Garfield Sobers Gymnasium", "Cave Hill Courts", "UWI Aquatic Centre", "Paradise Park", "National Stadium"];
+const SPORT_INDEX = new Map(SPORTS.map((sport, index) => [sport.slug, index]));
+const COMPETITION_SERIES = ["Campus Series", "League Round", "Championship Match", "Inter-Campus Meet", "Open Invitational", "Knockout Round", "Ranking Event", "Season Showcase"];
+const CRICKET_FORMATS = ["T20", "40 Over", "50 Over", "BCA 3-Day", "Other Format"];
 
 function parseArgs() {
   const args = new Set(process.argv.slice(2));
@@ -67,6 +74,10 @@ const rand = seededRandom(DATASET_ID);
 const pick = (items, offset = 0) => items[Math.floor((rand() * items.length + offset) % items.length)];
 const iso = (date) => new Date(date).toISOString();
 const day = (month, date) => iso(`2026-${String(month).padStart(2, "0")}-${String(date).padStart(2, "0")}T15:00:00.000Z`);
+const seasonDate = (offset, hour = 15) => {
+  const date = new Date(Date.UTC(2026, 1, 1 + offset, hour, 0, 0));
+  return date.toISOString();
+};
 
 function normalizeName(value) {
   return String(value || "").toLowerCase().replace(/[^a-z]/g, "");
@@ -228,65 +239,80 @@ function buildTeams(campus) {
   }));
 }
 
+function genderForSport(sportSlug, index) {
+  const policy = SPORTS.find((sport) => sport.slug === sportSlug)?.genderPolicy || "mixed";
+  if (policy === "male" || policy === "female") return policy;
+  return index % 2 === 0 ? "female" : "male";
+}
+
+function athleteSeedProfile(sportSlug, index) {
+  const gender = genderForSport(sportSlug, index);
+  const sportOffset = SPORT_INDEX.get(sportSlug) || 0;
+  const firstPool = gender === "female" ? FEMALE_FIRST_NAMES : MALE_FIRST_NAMES;
+  const firstName = firstPool[(index * 3 + sportOffset) % firstPool.length];
+  const lastName = LAST_NAMES[(index * 5 + sportOffset * 2) % LAST_NAMES.length];
+  return { firstName, lastName, fullName: `${firstName} ${lastName}`, gender };
+}
+
 function buildAthletes(campus, multiplier) {
   const athletes = [];
-  let index = 0;
+  let sequence = 0;
   for (const sport of SPORTS) {
     const count = sport.roster * multiplier;
     for (let i = 0; i < count; i += 1) {
-      index += 1;
-      const firstName = FIRST_NAMES[(index + i) % FIRST_NAMES.length];
-      const lastName = LAST_NAMES[(index * 3 + i) % LAST_NAMES.length];
-      const fullName = `${firstName} ${lastName}`;
-      const missingOptional = index % 29 === 0;
+      sequence += 1;
+      const { firstName, lastName, fullName, gender } = athleteSeedProfile(sport.slug, i);
+      const missingOptional = sequence % 47 === 0;
       athletes.push({
         id: idFor("athlete", `${sport.slug}-${i}`),
         campus,
         sport: sport.slug,
         firstName,
         lastName,
-        status: i % 37 === 0 ? "inactive" : "active",
+        status: i > sport.roster - 4 ? "reserve" : "active",
         data: {
           seedDataset: DATASET_ID,
           firstName,
           lastName,
           fullName,
           athleteType: "Student-Athlete",
-          dateOfBirth: missingOptional ? "" : `${1999 + (index % 7)}-${String(1 + (index % 12)).padStart(2, "0")}-${String(1 + (index % 26)).padStart(2, "0")}`,
-          gender: index % 2 === 0 ? "female" : "male",
-          email: missingOptional ? "" : `${firstName}.${lastName}.${index}@athletes.ush.test`.toLowerCase(),
-          phone: missingOptional ? "" : `246-555-${String(1000 + index).slice(-4)}`,
-          studentId: `UWID${String(2026000 + index)}`,
-          yearOfStudy: String(1 + (index % 4)),
-          faculty: ["Science and Technology", "Social Sciences", "Humanities and Education", "Medical Sciences"][index % 4],
-          program: ["Management", "Computer Science", "Kinesiology", "Economics", "Biology"][index % 5],
+          dateOfBirth: missingOptional ? "" : `${1999 + (sequence % 7)}-${String(1 + (sequence % 12)).padStart(2, "0")}-${String(1 + (sequence % 26)).padStart(2, "0")}`,
+          gender,
+          sex: gender.charAt(0).toUpperCase() + gender.slice(1),
+          email: missingOptional ? "" : `${firstName}.${lastName}.${sequence}@athletes.ush.test`.toLowerCase(),
+          phone: missingOptional ? "" : `246-555-${String(1000 + sequence).slice(-4)}`,
+          studentId: `UWID${String(2026000 + sequence)}`,
+          yearOfStudy: String(1 + (sequence % 4)),
+          faculty: ["Science and Technology", "Social Sciences", "Humanities and Education", "Medical Sciences"][sequence % 4],
+          program: ["Management", "Computer Science", "Kinesiology", "Economics", "Biology"][sequence % 5],
           facultyProgram: "",
-          nationality: ["Barbadian", "Trinidadian", "Jamaican", "Vincentian", "Guyanese", "Grenadian"][index % 6],
-          hometown: ["Bridgetown", "Speightstown", "Port of Spain", "Kingston", "Georgetown", "Castries"][index % 6],
-          status: i % 37 === 0 ? "inactive" : "active",
+          nationality: ["Barbadian", "Trinidadian", "Jamaican", "Vincentian", "Guyanese", "Grenadian"][sequence % 6],
+          hometown: ["Bridgetown", "Speightstown", "Port of Spain", "Kingston", "Georgetown", "Castries"][sequence % 6],
+          status: i > sport.roster - 4 ? "reserve" : "active",
           campus,
           primarySport: sport.slug,
           sport: sport.slug,
           sportSlug: sport.slug,
           sports: [sport.slug],
-          position: positionForSport(sport.slug, index),
-          events: eventsForSport(sport.slug, index),
-          imageUrl: index % 17 === 0 ? "" : `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(fullName)}`,
+          position: positionForSport(sport.slug, i),
+          events: eventsForSport(sport.slug, i),
+          imageUrl: sequence % 31 === 0 ? "" : `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(fullName)}`,
           bio: missingOptional ? "" : `${fullName} is a fictional demo ${sport.name.toLowerCase()} athlete used for development and presentation testing.`,
           profile: {
             sportSlug: sport.slug,
-            position: positionForSport(sport.slug, index),
-            eventsSpecialties: eventsForSport(sport.slug, index).join(", "),
-            heightCm: 162 + (index % 32),
-            weightKg: 56 + (index % 38),
-            dominantHand: index % 3 === 0 ? "Left" : "Right",
-            dominantLeg: index % 4 === 0 ? "Left" : "Right",
-            dateOfBirth: missingOptional ? "" : `${1999 + (index % 7)}-${String(1 + (index % 12)).padStart(2, "0")}-${String(1 + (index % 26)).padStart(2, "0")}`,
-            gender: index % 2 === 0 ? "female" : "male",
-            faculty: ["Science and Technology", "Social Sciences", "Humanities and Education", "Medical Sciences"][index % 4],
-            program: ["Management", "Computer Science", "Kinesiology", "Economics", "Biology"][index % 5],
-            nationality: ["Barbadian", "Trinidadian", "Jamaican", "Vincentian", "Guyanese", "Grenadian"][index % 6],
-            hometown: ["Bridgetown", "Speightstown", "Port of Spain", "Kingston", "Georgetown", "Castries"][index % 6]
+            position: positionForSport(sport.slug, i),
+            eventsSpecialties: eventsForSport(sport.slug, i).join(", "),
+            heightCm: gender === "female" ? 158 + (sequence % 26) : 170 + (sequence % 28),
+            weightKg: gender === "female" ? 52 + (sequence % 26) : 64 + (sequence % 34),
+            dominantHand: sequence % 3 === 0 ? "Left" : "Right",
+            dominantLeg: sequence % 4 === 0 ? "Left" : "Right",
+            dateOfBirth: missingOptional ? "" : `${1999 + (sequence % 7)}-${String(1 + (sequence % 12)).padStart(2, "0")}-${String(1 + (sequence % 26)).padStart(2, "0")}`,
+            gender,
+            sex: gender.charAt(0).toUpperCase() + gender.slice(1),
+            faculty: ["Science and Technology", "Social Sciences", "Humanities and Education", "Medical Sciences"][sequence % 4],
+            program: ["Management", "Computer Science", "Kinesiology", "Economics", "Biology"][sequence % 5],
+            nationality: ["Barbadian", "Trinidadian", "Jamaican", "Vincentian", "Guyanese", "Grenadian"][sequence % 6],
+            hometown: ["Bridgetown", "Speightstown", "Port of Spain", "Kingston", "Georgetown", "Castries"][sequence % 6]
           }
         }
       });
@@ -452,39 +478,47 @@ function buildCompetitions(campus, multiplier) {
   const participants = [];
   const results = [];
   const statLines = [];
-  SPORTS.forEach((sport, index) => {
-    const completedId = idFor("competition", `${sport.slug}-completed`);
-    const upcomingId = idFor("competition", `${sport.slug}-upcoming`);
-    const completedName = `${sport.name} Campus Series ${CURRENT_SEASON}`;
-    const upcomingName = `${sport.name} Invitational Fixture`;
-    const opponent = OPPONENTS[index % OPPONENTS.length];
-    const venue = VENUES[index % VENUES.length];
+  const completedCount = multiplier > 1 ? 40 : 16;
+  const upcomingCount = multiplier > 1 ? 8 : 4;
 
-    competitions.push(competitionRow({ id: completedId, campus, sport, name: completedName, status: "completed", startDate: day(3 + (index % 5), 4 + index), opponent, venue }));
-    competitions.push(competitionRow({ id: upcomingId, campus, sport, name: upcomingName, status: "scheduled", startDate: day(9 + (index % 3), 8 + index), opponent: OPPONENTS[(index + 2) % OPPONENTS.length], venue }));
+  SPORTS.forEach((sport, sportIndex) => {
+    const teamId = idFor("team", sport.slug);
 
-    units.push(unitRow(campus, completedId, sport, "Round 1", 1));
-    units.push(unitRow(campus, upcomingId, sport, "Scheduled Fixture", 1));
-    participants.push(participantRow(campus, completedId, idFor("team", sport.slug), "team", sport.team));
-    participants.push(participantRow(campus, upcomingId, idFor("team", sport.slug), "team", sport.team));
-    results.push(resultRow(campus, completedId, idFor("team", sport.slug), sport, opponent, index));
-    statLines.push(...scorecardRowsForSport(campus, completedId, sport, opponent, venue, index));
+    for (let matchIndex = 0; matchIndex < completedCount; matchIndex += 1) {
+      const competitionId = idFor("competition", `${sport.slug}-completed-${matchIndex}`);
+      const opponent = OPPONENTS[(sportIndex + matchIndex) % OPPONENTS.length];
+      const venue = VENUES[(sportIndex + matchIndex) % VENUES.length];
+      const sequence = sportIndex * 100 + matchIndex;
+      const startDate = seasonDate(sportIndex * 3 + matchIndex * 9);
+      const name = `${sport.name} ${COMPETITION_SERIES[matchIndex % COMPETITION_SERIES.length]} ${matchIndex + 1}`;
+      const format = sport.slug === "cricket" ? CRICKET_FORMATS[matchIndex % CRICKET_FORMATS.length] : sport.division;
 
-    if (multiplier > 1) {
-      for (let extra = 1; extra < multiplier; extra += 1) {
-        const extraId = idFor("competition", `${sport.slug}-extra-${extra}`);
-        competitions.push(competitionRow({ id: extraId, campus, sport, name: `${sport.name} Development Meet ${extra}`, status: "completed", startDate: day(2 + ((index + extra) % 6), 12 + extra), opponent: OPPONENTS[(index + extra) % OPPONENTS.length], venue }));
-        units.push(unitRow(campus, extraId, sport, `Round ${extra + 1}`, extra + 1));
-        participants.push(participantRow(campus, extraId, idFor("team", sport.slug), "team", sport.team));
-        results.push(resultRow(campus, extraId, idFor("team", sport.slug), sport, OPPONENTS[(index + extra) % OPPONENTS.length], index + extra));
-        statLines.push(...scorecardRowsForSport(campus, extraId, sport, OPPONENTS[(index + extra) % OPPONENTS.length], venue, index + extra));
-      }
+      competitions.push(competitionRow({ id: competitionId, campus, sport, name, status: "completed", startDate, opponent, venue, format }));
+      units.push(unitRow(campus, competitionId, sport, `Round ${matchIndex + 1}`, matchIndex + 1));
+      participants.push(participantRow(campus, competitionId, teamId, "team", sport.team));
+      participants.push(participantRow(campus, competitionId, idFor("opponent", `${sport.slug}-${matchIndex}`), "team", opponent));
+      results.push(resultRow(campus, competitionId, teamId, sport, opponent, sequence, startDate));
+      const scorecardRows = scorecardRowsForSport(campus, competitionId, sport, opponent, venue, sequence, name, startDate, format);
+      statLines.push(...scorecardRows, ...playerSummaryLinesForScorecards(campus, sport, competitionId, teamId, scorecardRows, sequence));
+    }
+
+    for (let fixtureIndex = 0; fixtureIndex < upcomingCount; fixtureIndex += 1) {
+      const competitionId = idFor("competition", `${sport.slug}-upcoming-${fixtureIndex}`);
+      const opponent = OPPONENTS[(sportIndex + completedCount + fixtureIndex) % OPPONENTS.length];
+      const venue = VENUES[(sportIndex + fixtureIndex + 2) % VENUES.length];
+      const startDate = seasonDate(230 + sportIndex * 3 + fixtureIndex * 14);
+      const name = `${sport.name} Upcoming Fixture ${fixtureIndex + 1}`;
+
+      competitions.push(competitionRow({ id: competitionId, campus, sport, name, status: "scheduled", startDate, opponent, venue, format: sport.slug === "cricket" ? CRICKET_FORMATS[(completedCount + fixtureIndex) % CRICKET_FORMATS.length] : sport.division }));
+      units.push(unitRow(campus, competitionId, sport, "Scheduled Fixture", fixtureIndex + 1));
+      participants.push(participantRow(campus, competitionId, teamId, "team", sport.team));
+      participants.push(participantRow(campus, competitionId, idFor("opponent", `${sport.slug}-upcoming-${fixtureIndex}`), "team", opponent));
     }
   });
   return { competitions, units, participants, results, statLines };
 }
 
-function competitionRow({ id, campus, sport, name, status, startDate, opponent, venue }) {
+function competitionRow({ id, campus, sport, name, status, startDate, opponent, venue, format }) {
   return {
     id,
     campus,
@@ -501,7 +535,7 @@ function competitionRow({ id, campus, sport, name, status, startDate, opponent, 
       campusOwner: campus,
       sport: sport.slug,
       sportSlug: sport.slug,
-      format: sport.division,
+      format: format || sport.division,
       status,
       startDate,
       endDate: startDate,
@@ -542,9 +576,8 @@ function participantRow(campus, competitionId, subjectId, subjectType, name) {
   };
 }
 
-function resultRow(campus, competitionId, teamId, sport, opponent, index) {
-  const uwi = 62 + (index * 7) % 55;
-  const opp = 48 + (index * 5) % 45;
+function resultRow(campus, competitionId, teamId, sport, opponent, index, date = seasonDate(index + 20)) {
+  const score = scoreForSport(sport.slug, index);
   return {
     id: idFor("result", competitionId),
     competitionId,
@@ -559,16 +592,123 @@ function resultRow(campus, competitionId, teamId, sport, opponent, index) {
       sport: sport.slug,
       sportSlug: sport.slug,
       opponentName: opponent,
-      result: `Blackbirds won ${uwi}-${opp}`,
-      score: { uwi, opponent: opp },
-      date: day(4 + (index % 4), 5 + index)
+      result: score.result,
+      score: { uwi: score.uwi, opponent: score.opponent },
+      date
     }
   };
 }
 
-function scorecardRowsForSport(campus, competitionId, sport, opponent, venue, index) {
+function scoreForSport(sportSlug, index) {
+  const close = index % 5 === 0;
+  if (sportSlug === "cricket") {
+    const uwi = 138 + (index * 17) % 155;
+    const opponent = Math.max(80, uwi - (close ? 8 + (index % 9) : 24 + (index % 65)));
+    return { uwi, opponent, result: `Blackbirds won by ${uwi - opponent} runs` };
+  }
+  if (sportSlug === "football" || sportSlug === "hockey") {
+    const uwi = 1 + (index % 4);
+    const opponent = close ? Math.max(0, uwi - 1) : index % 3;
+    return { uwi, opponent, result: `Blackbirds won ${uwi}-${opponent}` };
+  }
+  if (sportSlug === "basketball") {
+    const uwi = 72 + (index * 5) % 34;
+    const opponent = Math.max(58, uwi - (6 + (index % 18)));
+    return { uwi, opponent, result: `Blackbirds won ${uwi}-${opponent}` };
+  }
+  if (sportSlug === "netball") {
+    const uwi = 44 + (index * 4) % 25;
+    const opponent = Math.max(31, uwi - (4 + (index % 12)));
+    return { uwi, opponent, result: `Blackbirds won ${uwi}-${opponent}` };
+  }
+  if (sportSlug === "volleyball") return { uwi: 3, opponent: close ? 2 : 1, result: `Blackbirds won 3-${close ? 2 : 1}` };
+  return { uwi: 1, opponent: 0, result: "Blackbirds result recorded" };
+}
+
+function playerSummaryLinesForScorecards(campus, sport, competitionId, teamId, scorecardRows, index) {
+  if (["cricket", "football", "basketball", "track-and-field"].includes(sport.slug)) return [];
+  const lines = [];
+  scorecardRows.forEach((row, rowIndex) => {
+    const data = row.data?.statData || row.data || {};
+    const addLine = (athlete, values, suffix) => {
+      if (!athlete?.athleteId) return;
+      lines.push({
+        id: idFor("scorecard-athlete-summary", `${competitionId}-${athlete.athleteId}-${suffix}`),
+        competitionId,
+        subjectId: athlete.athleteId,
+        subjectType: "athlete",
+        teamId,
+        athleteId: athlete.athleteId,
+        campus,
+        sport: sport.slug,
+        data: {
+          seedDataset: DATASET_ID,
+          competitionId,
+          teamId,
+          athleteId: athlete.athleteId,
+          playerName: athlete.name,
+          sport: sport.slug,
+          sportSlug: sport.slug,
+          title: data.title,
+          eventName: data.eventName || data.title,
+          competitionName: data.title,
+          date: data.date,
+          result: data.result,
+          ...values
+        }
+      });
+    };
+
+    (data.playerStats || []).forEach((player, playerIndex) => addLine(player, {
+      goals: Number(player.goals || 0),
+      assists: Number(player.goalAssists || player.assists || 0),
+      saves: Number(player.saves || 0),
+      points: Number(player.points || player.goals || player.kills || 0),
+      rebounds: Number(player.rebounds || 0),
+      kills: Number(player.kills || 0),
+      aces: Number(player.aces || 0),
+      blocks: Number(player.blocks || 0),
+      wins: /won|win/i.test(String(data.result || "")) ? 1 : 0,
+      entries: 1
+    }, `${rowIndex}-player-${playerIndex}`));
+
+    (data.lanes || []).forEach((lane, laneIndex) => addLine(lane, {
+      points: Number(lane.points || 0),
+      wins: Number(lane.place || 0) === 1 ? 1 : 0,
+      entries: 1,
+      resultTime: lane.finalTime
+    }, `${rowIndex}-lane-${laneIndex}`));
+
+    (data.uwiPlayers || []).forEach((player, playerIndex) => addLine(player, {
+      wins: Number(data.summary?.uwiGamesWon || 0) > Number(data.summary?.opponentGamesWon || 0) ? 1 : 0,
+      points: Number(data.summary?.pointDifferential || 0),
+      entries: 1
+    }, `${rowIndex}-racket-${playerIndex}`));
+
+    (data.rubbers || []).forEach((rubber, rubberIndex) => {
+      (rubber.uwiPlayers || []).forEach((player, playerIndex) => addLine(player, {
+        wins: rubber.winner === "UWI" ? 1 : 0,
+        points: Number(rubber.uwiGames || 0),
+        entries: 1
+      }, `${rowIndex}-rubber-${rubberIndex}-${playerIndex}`));
+    });
+
+    (data.matches || []).forEach((match, matchIndex) => {
+      (match.uwiPlayers || []).forEach((player, playerIndex) => addLine(player, {
+        wins: match.winner === "UWI" ? 1 : 0,
+        points: Number(match.uwiSets || 0),
+        entries: 1
+      }, `${rowIndex}-match-${matchIndex}-${playerIndex}`));
+    });
+
+    if (data.athlete) addLine(data.athlete, { points: Number(data.summary?.finalScore || 0), wins: Number(data.summary?.rank || 0) === 1 ? 1 : 0, entries: 1 }, `${rowIndex}-taekwondo`);
+    if (data.uwiPlayer) addLine(data.uwiPlayer, { points: Number(data.summary?.uwiScore || 0), wins: /win/i.test(String(data.summary?.resultLabel || "")) ? 1 : 0, entries: 1 }, `${rowIndex}-chess`);
+  });
+  return lines;
+}
+
+function scorecardRowsForSport(campus, competitionId, sport, opponent, venue, index, title = `${sport.name} Campus Series ${CURRENT_SEASON}`, startDate = day(4, 1), format = sport.division) {
   const teamId = idFor("team", sport.slug);
-  const title = `${sport.name} Campus Series ${CURRENT_SEASON}`;
   const common = {
     id: idFor("scorecard", `${competitionId}-${sport.slug}`),
     competitionId,
@@ -579,24 +719,24 @@ function scorecardRowsForSport(campus, competitionId, sport, opponent, venue, in
     campus,
     sport: sport.slug
   };
-  if (sport.slug === "cricket") return [scorecardRow(common, cricketScorecard(competitionId, teamId, title, opponent, venue))];
-  if (sport.slug === "football") return [scorecardRow(common, footballScorecard(competitionId, teamId, title, opponent, venue))];
-  if (sport.slug === "basketball") return [scorecardRow(common, basketballScorecard(competitionId, teamId, title, opponent, venue))];
-  if (sport.slug === "track-and-field") return trackFieldScorecards(campus, competitionId, teamId, title, venue).map(wrapScorecardRow);
-  if (sport.slug === "swimming") return [scorecardRow(common, swimmingScorecard(competitionId, teamId, title, venue))];
-  if (sport.slug === "netball") return [scorecardRow(common, netballScorecard(competitionId, teamId, title, opponent, venue))];
-  if (sport.slug === "volleyball") return [scorecardRow(common, volleyballScorecard(competitionId, teamId, title, opponent, venue))];
-  if (sport.slug === "hockey") return [scorecardRow(common, hockeyScorecard(competitionId, teamId, title, opponent, venue))];
-  if (sport.slug === "badminton") return [scorecardRow(common, badmintonScorecard(competitionId, teamId, title, opponent, venue))];
-  if (sport.slug === "table-tennis") return [scorecardRow(common, tableTennisScorecard(competitionId, teamId, title, opponent, venue))];
-  if (sport.slug === "lawn-tennis") return [scorecardRow(common, tennisScorecard(competitionId, teamId, title, opponent, venue))];
+  if (sport.slug === "cricket") return [scorecardRow(common, cricketScorecard(competitionId, teamId, title, opponent, venue, index, startDate, format))];
+  if (sport.slug === "football") return [scorecardRow(common, footballScorecard(competitionId, teamId, title, opponent, venue, index, startDate))];
+  if (sport.slug === "basketball") return [scorecardRow(common, basketballScorecard(competitionId, teamId, title, opponent, venue, index, startDate))];
+  if (sport.slug === "track-and-field") return trackFieldScorecards(campus, competitionId, teamId, title, venue, index, startDate).map(wrapScorecardRow);
+  if (sport.slug === "swimming") return [scorecardRow(common, swimmingScorecard(competitionId, teamId, title, venue, index, startDate))];
+  if (sport.slug === "netball") return [scorecardRow(common, netballScorecard(competitionId, teamId, title, opponent, venue, index, startDate))];
+  if (sport.slug === "volleyball") return [scorecardRow(common, volleyballScorecard(competitionId, teamId, title, opponent, venue, index, startDate))];
+  if (sport.slug === "hockey") return [scorecardRow(common, hockeyScorecard(competitionId, teamId, title, opponent, venue, index, startDate))];
+  if (sport.slug === "badminton") return [scorecardRow(common, badmintonScorecard(competitionId, teamId, title, opponent, venue, index, startDate))];
+  if (sport.slug === "table-tennis") return [scorecardRow(common, tableTennisScorecard(competitionId, teamId, title, opponent, venue, index, startDate))];
+  if (sport.slug === "lawn-tennis") return [scorecardRow(common, tennisScorecard(competitionId, teamId, title, opponent, venue, index, startDate))];
   if (sport.slug === "taekwondo") {
-    const athlete = athleteRef("taekwondo", 0);
-    return [scorecardRow(common, taekwondoScorecard(competitionId, teamId, title, athlete, venue), { subjectId: athlete.athleteId, subjectType: "athlete", athleteId: athlete.athleteId, teamId })];
+    const athlete = athleteRef("taekwondo", index % (SPORTS.find((item) => item.slug === "taekwondo")?.roster || 1));
+    return [scorecardRow(common, taekwondoScorecard(competitionId, teamId, title, athlete, venue, index, startDate), { subjectId: athlete.athleteId, subjectType: "athlete", athleteId: athlete.athleteId, teamId })];
   }
   if (sport.slug === "chess") {
-    const athlete = athleteRef("chess", 0);
-    return [scorecardRow(common, chessScorecard(competitionId, teamId, title, athlete, opponent, venue), { subjectId: athlete.athleteId, subjectType: "athlete", athleteId: athlete.athleteId, teamId })];
+    const athlete = athleteRef("chess", index % (SPORTS.find((item) => item.slug === "chess")?.roster || 1));
+    return [scorecardRow(common, chessScorecard(competitionId, teamId, title, athlete, opponent, venue, index, startDate), { subjectId: athlete.athleteId, subjectType: "athlete", athleteId: athlete.athleteId, teamId })];
   }
   return [];
 }
@@ -617,38 +757,50 @@ function withStatData(data) {
 
 function athleteRef(sport, index) {
   const id = idFor("athlete", `${sport}-${index}`);
-  const firstName = FIRST_NAMES[(1 + index) % FIRST_NAMES.length];
-  const lastName = LAST_NAMES[(3 + index) % LAST_NAMES.length];
-  return { athleteId: id, id, name: `${firstName} ${lastName}` };
+  const { fullName } = athleteSeedProfile(sport, index);
+  return { athleteId: id, id, name: fullName };
 }
 
-function teamAthletes(sport, count) {
-  const rows = Array.from({ length: count }, (_, index) => athleteRef(sport, index));
+function teamAthletes(sport, count, offset = 0) {
+  const rosterSize = SPORTS.find((item) => item.slug === sport)?.roster || count;
+  const rows = Array.from({ length: count }, (_, index) => athleteRef(sport, (offset + index) % rosterSize));
   if (preservedStephenRef && ["cricket", "track-and-field"].includes(sport)) rows.unshift(preservedStephenRef);
   return rows.slice(0, count);
 }
 
-function cricketScorecard(competitionId, teamId, title, opponentName, venue) {
-  const players = teamAthletes("cricket", 11);
+function sumStats(rows, key) {
+  return rows.reduce((total, row) => total + Number(row[key] || 0), 0);
+}
+
+function cricketScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(4, 30), format = "BCA 3-Day") {
+  const players = teamAthletes("cricket", 11, index);
+  const oversLabel = format.includes("50") ? "50" : format.includes("40") ? "40" : format.includes("3-Day") ? "82.4" : "20";
   const batting = players.map((player, index) => ({
     ...player,
-    runs: [72, 44, 31, 18, 10, 6, 23, 4, 0, 12, 1][index],
-    balls: [96, 60, 45, 20, 12, 7, 28, 9, 2, 19, 4][index],
-    fours: index < 4 ? 2 + index : 0,
-    sixes: index === 0 ? 3 : index === 1 ? 1 : 0,
-    dismissalMode: index === 0 ? "caught" : index === 10 ? "" : "bowled",
-    fielderAthleteId: index === 0 ? players[7].athleteId : "",
-    bowlerAthleteId: ""
+    runs: Math.max(0, [72, 44, 31, 18, 10, 6, 23, 4, 0, 12, 1][index] + ((competitionId.charCodeAt(0) + index) % 9) - 4),
+    balls: [96, 60, 45, 20, 12, 7, 28, 9, 2, 19, 4][index] + (index % 3),
+    fours: index < 5 ? 1 + ((index + competitionId.length) % 5) : 0,
+    sixes: index < 3 ? (index + competitionId.length) % 3 : 0,
+    dismissalMode: index === 10 ? "not out" : ["caught", "bowled", "lbw", "run out", "stumped"][index % 5],
+    fielderAthleteId: index % 2 === 0 ? players[(index + 5) % players.length].athleteId : "",
+    fielderName: index % 2 === 0 ? players[(index + 5) % players.length].name : "",
+    bowlerAthleteId: players[(index + 6) % players.length].athleteId,
+    bowlerName: players[(index + 6) % players.length].name
   }));
   const bowling = players.slice(5, 10).map((player, index) => ({
     ...player,
     overs: [8, 7, 6, 5, 4][index],
     maidens: index === 0 ? 1 : 0,
-    runs: [32, 28, 23, 21, 18][index],
-    wickets: [3, 2, 1, 1, 0][index],
-    wides: index,
-    noBalls: 0
+    runs: [32, 28, 23, 21, 18][index] + (competitionId.length % 7),
+    wickets: [3, 2, 1, 1, 0][(index + competitionId.length) % 5],
+    wides: index % 3,
+    noBalls: index === 4 ? 1 : 0,
+    dots: 14 + index,
+    economy: Number((([32, 28, 23, 21, 18][index] + (competitionId.length % 7)) / [8, 7, 6, 5, 4][index]).toFixed(2))
   }));
+  const uwiRuns = batting.reduce((total, player) => total + Number(player.runs || 0), 18);
+  const opponentRuns = Math.max(95, uwiRuns - (18 + (competitionId.length % 60)));
+  const opponentWickets = 5 + (competitionId.length % 5);
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -656,9 +808,9 @@ function cricketScorecard(competitionId, teamId, title, opponentName, venue) {
     sport: "cricket",
     sportSlug: "cricket",
     title,
-    date: day(4, 30),
+    date,
     venue,
-    format: "BCA 3-Day",
+    format,
     uwiTeamId: teamId,
     teamId,
     uwiTeamName: "UWI Blackbirds Cricket Team",
@@ -666,16 +818,19 @@ function cricketScorecard(competitionId, teamId, title, opponentName, venue) {
     inningsCount: 2,
     startingXi: players,
     innings: [
-      { innings: 1, side: "uwi", team: "UWI Blackbirds Cricket Team", runs: 260, wickets: 4, overs: "20", batting, bowling: [] },
-      { innings: 2, side: "opponent", team: opponentName, runs: 159, wickets: 8, overs: "20", batting: [], bowling }
+      { innings: 1, side: "uwi", team: "UWI Blackbirds Cricket Team", runs: uwiRuns, wickets: 7, overs: oversLabel, batting, bowling: [] },
+      { innings: 2, side: "opponent", team: opponentName, runs: opponentRuns, wickets: opponentWickets, overs: oversLabel, batting: [], bowling }
     ],
-    result: "Blackbirds won by 101 runs",
-    summary: { uwiRuns: 260, opponentRuns: 159, wickets: 8 }
+    result: `Blackbirds won by ${uwiRuns - opponentRuns} runs`,
+    summary: { uwiRuns, opponentRuns, wickets: opponentWickets }
   };
 }
 
-function footballScorecard(competitionId, teamId, title, opponentName, venue) {
-  const players = teamAthletes("football", 11);
+function footballScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(4, 18)) {
+  const players = teamAthletes("football", 18, index);
+  const uwiGoals = 1 + (index % 4);
+  const opponentGoals = Math.max(0, uwiGoals - 1 - (index % 2));
+  const scorers = players.slice(0, uwiGoals);
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -683,49 +838,56 @@ function footballScorecard(competitionId, teamId, title, opponentName, venue) {
     sport: "football",
     sportSlug: "football",
     title,
-    date: day(4, 18),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Football Team",
     opponentName,
-    score: { uwi: 3, opponent: 1 },
-    result: "Blackbirds won 3-1",
-    playerStats: players.map((player, index) => ({
+    score: { uwi: uwiGoals, opponent: opponentGoals },
+    result: `Blackbirds ${uwiGoals >= opponentGoals ? "won" : "lost"} ${uwiGoals}-${opponentGoals}`,
+    playerStats: players.map((player, playerIndex) => ({
       ...player,
-      goals: index < 2 ? 1 + (index === 0 ? 1 : 0) : 0,
-      assists: index > 1 && index < 4 ? 1 : 0,
-      shots: index < 5 ? 2 + index : 0,
-      shotsOnTarget: index < 4 ? 1 + index : 0,
-      saves: index === 10 ? 5 : 0,
-      minutes: index < 8 ? 90 : 24 + index,
-      tackles: index > 4 ? 2 + index : 1,
-      interceptions: index > 5 ? 2 : 0
+      goals: playerIndex < uwiGoals ? 1 : 0,
+      assists: playerIndex >= 2 && playerIndex < 2 + uwiGoals ? 1 : 0,
+      shots: playerIndex < 7 ? 1 + ((playerIndex + index) % 5) : 0,
+      shotsOnTarget: playerIndex < 7 ? 1 + ((playerIndex + index) % 3) : 0,
+      goalsConceded: playerIndex === 10 ? opponentGoals : 0,
+      saves: playerIndex === 10 ? 3 + (index % 5) : 0,
+      fouls: playerIndex % 4,
+      offsides: playerIndex < 3 ? playerIndex % 2 : 0,
+      yellowCards: playerIndex === 6 && index % 3 === 0 ? 1 : 0,
+      redCards: 0,
+      minutes: playerIndex < 11 ? 90 : 18 + ((playerIndex + index) % 25),
+      tackles: playerIndex > 4 ? 2 + ((playerIndex + index) % 6) : 1,
+      interceptions: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0
     })),
-    goals: [
-      { minute: 18, scorerAthleteId: players[0].athleteId, scorerName: players[0].name, assistAthleteId: players[2].athleteId, assistName: players[2].name },
-      { minute: 52, scorerAthleteId: players[1].athleteId, scorerName: players[1].name, assistAthleteId: players[3].athleteId, assistName: players[3].name },
-      { minute: 77, scorerAthleteId: players[0].athleteId, scorerName: players[0].name, assistAthleteId: "", assistName: "" }
-    ]
+    goals: scorers.map((player, goalIndex) => ({ minute: 12 + goalIndex * 21 + (index % 6), scorerAthleteId: player.athleteId, scorerName: player.name, assistAthleteId: players[(goalIndex + 2) % players.length].athleteId, assistName: players[(goalIndex + 2) % players.length].name })),
+    matchStats: { shots: 12 + (index % 8), shotsOnTarget: 5 + (index % 5), possession: 52 + (index % 12), fouls: 9 + (index % 7), corners: 4 + (index % 5), offsides: 1 + (index % 3), tackles: 22 + (index % 12), saves: 3 + (index % 5) }
   };
 }
 
-function basketballScorecard(competitionId, teamId, title, opponentName, venue) {
-  const players = teamAthletes("basketball", 10);
-  const stats = players.map((player, index) => ({
+function basketballScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(5, 2)) {
+  const players = teamAthletes("basketball", 15, index);
+  const stats = players.map((player, playerIndex) => ({
     ...player,
-    points: [24, 18, 14, 11, 8, 6, 5, 4, 3, 2][index],
-    rebounds: [7, 5, 9, 3, 6, 2, 4, 2, 1, 1][index],
-    assists: [4, 7, 2, 5, 1, 2, 1, 0, 0, 0][index],
-    steals: index < 4 ? 1 : 0,
-    blocks: index === 2 ? 3 : index === 4 ? 1 : 0,
-    turnovers: index % 3,
-    fouls: 1 + (index % 4),
-    minutes: index < 5 ? 28 + index : 10 + index,
-    twoMade: 2 + (index % 5),
-    threeMade: index < 3 ? 2 : 0,
-    freeThrowsMade: index < 5 ? 2 : 1
+    points: Math.max(0, [24, 18, 14, 11, 8, 6, 5, 4, 3, 2, 7, 5, 4, 2, 1][playerIndex] + (index % 7) - 3),
+    rebounds: [7, 5, 9, 3, 6, 2, 4, 2, 1, 1, 5, 3, 2, 1, 1][playerIndex],
+    assists: [4, 7, 2, 5, 1, 2, 1, 0, 0, 0, 3, 2, 1, 0, 0][playerIndex],
+    steals: playerIndex < 7 ? (playerIndex + index) % 3 : 0,
+    blocks: playerIndex === 2 ? 3 : playerIndex === 4 ? 1 : playerIndex % 7 === 0 ? 1 : 0,
+    turnovers: (playerIndex + index) % 4,
+    fouls: 1 + ((playerIndex + index) % 4),
+    minutes: playerIndex < 10 ? 18 + ((playerIndex + index) % 16) : 7 + (playerIndex % 8),
+    twoMade: 1 + ((playerIndex + index) % 6),
+    twoAttempts: 3 + ((playerIndex + index) % 8),
+    threeMade: playerIndex < 6 ? (playerIndex + index) % 4 : 0,
+    threeAttempts: playerIndex < 6 ? 2 + ((playerIndex + index) % 6) : 0,
+    freeThrowsMade: playerIndex < 10 ? 1 + ((playerIndex + index) % 5) : 0,
+    freeThrowsAttempted: playerIndex < 10 ? 2 + ((playerIndex + index) % 6) : 0
   }));
+  const uwiPoints = stats.reduce((total, player) => total + player.points, 0);
+  const opponentPoints = Math.max(58, uwiPoints - (6 + (index % 18)));
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -733,41 +895,63 @@ function basketballScorecard(competitionId, teamId, title, opponentName, venue) 
     sport: "basketball",
     sportSlug: "basketball",
     title,
-    date: day(5, 2),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Basketball Team",
     opponentName,
-    score: { uwi: 95, opponent: 82 },
-    result: "Blackbirds won 95-82",
+    score: { uwi: uwiPoints, opponent: opponentPoints },
+    result: `Blackbirds won ${uwiPoints}-${opponentPoints}`,
     playerStats: stats,
-    teamTotals: { points: 95, rebounds: 40, assists: 22, steals: 5, blocks: 4 }
+    teamTotals: { points: uwiPoints, rebounds: sumStats(stats, "rebounds"), assists: sumStats(stats, "assists"), steals: sumStats(stats, "steals"), blocks: sumStats(stats, "blocks"), turnovers: sumStats(stats, "turnovers"), fouls: sumStats(stats, "fouls") }
   };
 }
 
-function trackFieldScorecards(campus, competitionId, teamId, title, venue) {
-  const trackEntries = teamAthletes("track-and-field", 8).map((athlete, index) => ({
-    entryType: index < 6 ? "uwi" : "opponent",
+function trackFieldScorecards(campus, competitionId, teamId, title, venue, index = 0, date = day(5, 6)) {
+  const trackEvents = [
+    { eventName: "100m", base: 10.52, step: 0.14, unit: "s" },
+    { eventName: "200m", base: 21.21, step: 0.27, unit: "s" },
+    { eventName: "400m", base: 48.65, step: 0.48, unit: "s" },
+    { eventName: "800m", base: 114.4, step: 1.25, unit: "s" },
+    { eventName: "1500m", base: 247.2, step: 2.4, unit: "s" },
+    { eventName: "110m Hurdles", base: 14.22, step: 0.18, unit: "s" }
+  ];
+  const fieldEvents = [
+    { eventName: "Long Jump", base: 6.85, step: 0.08, disciplineType: "horizontal-jump" },
+    { eventName: "Triple Jump", base: 14.18, step: 0.13, disciplineType: "horizontal-jump" },
+    { eventName: "High Jump", base: 2.03, step: 0.03, disciplineType: "vertical-jump" },
+    { eventName: "Shot Put", base: 14.9, step: 0.16, disciplineType: "throw" },
+    { eventName: "Discus", base: 44.5, step: 0.42, disciplineType: "throw" },
+    { eventName: "Javelin", base: 58.2, step: 0.55, disciplineType: "throw" }
+  ];
+  const trackEvent = trackEvents[index % trackEvents.length];
+  const fieldEvent = fieldEvents[index % fieldEvents.length];
+  const trackEntries = teamAthletes("track-and-field", 8, index).map((athlete, rowIndex) => ({
+    entryType: rowIndex < 6 ? "uwi" : "opponent",
     ...athlete,
-    time: (10.52 + index * 0.14).toFixed(2),
-    timeNumber: 10.52 + index * 0.14,
-    place: index + 1,
-    lane: 2 + index,
-    reactionTime: (0.132 + index * 0.004).toFixed(3),
-    wind: "1.1",
-    points: [10, 8, 6, 5, 4, 3, 2, 1][index]
+    time: formatTrackTime(trackEvent.base + rowIndex * trackEvent.step + (index % 4) * 0.03),
+    timeNumber: Number((trackEvent.base + rowIndex * trackEvent.step + (index % 4) * 0.03).toFixed(2)),
+    place: rowIndex + 1,
+    lane: 2 + rowIndex,
+    heat: 1 + (index % 3),
+    reactionTime: (0.132 + rowIndex * 0.004 + (index % 3) * 0.002).toFixed(3),
+    wind: trackEvent.eventName.includes("100") || trackEvent.eventName.includes("200") ? "1.1" : "N/A",
+    points: [10, 8, 6, 5, 4, 3, 2, 1][rowIndex]
   }));
-  const fieldEntries = teamAthletes("track-and-field", 8).map((athlete, index) => ({
-    entryType: index < 6 ? "uwi" : "opponent",
+  const fieldEntries = teamAthletes("track-and-field", 8, index + 8).map((athlete, rowIndex) => {
+    const best = fieldEvent.base - rowIndex * fieldEvent.step + (index % 3) * 0.03;
+    return {
+    entryType: rowIndex < 6 ? "uwi" : "opponent",
     ...athlete,
-    best: (6.85 - index * 0.08).toFixed(2),
-    bestNumber: 6.85 - index * 0.08,
-    finalRank: index + 1,
-    attempts: ["6.52", "6.68", "X", (6.85 - index * 0.08).toFixed(2)],
+    best: best.toFixed(2),
+    bestNumber: Number(best.toFixed(2)),
+    finalRank: rowIndex + 1,
+    attempts: [(best - 0.22).toFixed(2), (best - 0.11).toFixed(2), "X", best.toFixed(2), (best - 0.05).toFixed(2), "X"],
     wind: "0.8",
-    points: [10, 8, 6, 5, 4, 3, 2, 1][index]
-  }));
+    points: [10, 8, 6, 5, 4, 3, 2, 1][rowIndex]
+  };
+  });
   return [
     {
       id: idFor("scorecard", `${competitionId}-track-100m`),
@@ -787,16 +971,16 @@ function trackFieldScorecards(campus, competitionId, teamId, title, venue) {
         resultType: "track",
         disciplineType: "track",
         title,
-        eventName: "100m",
+        eventName: trackEvent.eventName,
         round: "Final",
         division: "Open",
-        date: day(5, 6),
+        date,
         venue,
         teamId,
         uwiTeamId: teamId,
         uwiTeamName: "UWI Blackbirds Track and Field Team",
         entries: trackEntries,
-        summary: { eventWinner: trackEntries[0].name, winningTime: trackEntries[0].time, uwiPoints: 36 }
+        summary: { eventWinner: trackEntries[0].name, winningTime: trackEntries[0].time, uwiPoints: 36, topUwiResult: `${trackEntries[0].name} ${trackEntries[0].time}` }
       }
     },
     {
@@ -815,32 +999,39 @@ function trackFieldScorecards(campus, competitionId, teamId, title, venue) {
         sport: "track-and-field",
         sportSlug: "track-and-field",
         resultType: "field",
-        disciplineType: "horizontal-jump",
+        disciplineType: fieldEvent.disciplineType,
         title,
-        eventName: "Long Jump",
+        eventName: fieldEvent.eventName,
         round: "Final",
         division: "Open",
-        date: day(5, 6),
+        date,
         venue,
         teamId,
         uwiTeamId: teamId,
         uwiTeamName: "UWI Blackbirds Track and Field Team",
         entries: fieldEntries,
-        summary: { eventWinner: fieldEntries[0].name, winningMark: fieldEntries[0].best, uwiPoints: 36 }
+        summary: { eventWinner: fieldEntries[0].name, winningMark: fieldEntries[0].best, uwiPoints: 36, topUwiResult: `${fieldEntries[0].name} ${fieldEntries[0].best}` }
       }
     }
   ];
 }
 
-function swimmingScorecard(competitionId, teamId, title, venue) {
-  const lanes = teamAthletes("swimming", 8).map((athlete, index) => ({
-    entryType: index < 6 ? "uwi" : "opponent",
-    lane: index + 1,
+function formatTrackTime(seconds) {
+  return seconds >= 60 ? `${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(2).padStart(5, "0")}` : seconds.toFixed(2);
+}
+
+function swimmingScorecard(competitionId, teamId, title, venue, index = 0, date = day(5, 9)) {
+  const eventNames = ["50m Freestyle", "100m Freestyle", "100m Butterfly", "100m Backstroke", "200m Individual Medley", "400m Freestyle"];
+  const eventName = eventNames[index % eventNames.length];
+  const lanes = teamAthletes("swimming", 8, index).map((athlete, rowIndex) => ({
+    entryType: rowIndex < 6 ? "uwi" : "opponent",
+    lane: rowIndex + 1,
     ...athlete,
-    seedTime: `25.${80 + index}`,
-    finalTime: `24.${90 + index}`,
-    place: index + 1,
-    points: [10, 8, 6, 5, 4, 3, 2, 1][index],
+    seedTime: formatTrackTime(25.8 + rowIndex * 0.35 + (index % 4) * 0.1),
+    finalTime: formatTrackTime(24.9 + rowIndex * 0.31 + (index % 4) * 0.08),
+    split50: formatTrackTime(24.9 + rowIndex * 0.31),
+    place: rowIndex + 1,
+    points: [10, 8, 6, 5, 4, 3, 2, 1][rowIndex],
     dq: false,
     exhibition: false
   }));
@@ -851,10 +1042,10 @@ function swimmingScorecard(competitionId, teamId, title, venue) {
     sport: "swimming",
     sportSlug: "swimming",
     title,
-    eventName: "50m Freestyle",
+    eventName,
     round: "Final",
     course: "SCM",
-    date: day(5, 9),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
@@ -864,8 +1055,23 @@ function swimmingScorecard(competitionId, teamId, title, venue) {
   };
 }
 
-function netballScorecard(competitionId, teamId, title, opponentName, venue) {
-  const players = teamAthletes("netball", 10);
+function netballScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(4, 22)) {
+  const players = teamAthletes("netball", 12, index);
+  const playerStats = players.map((player, playerIndex) => ({
+    ...player,
+    goals: playerIndex < 2 ? 24 - playerIndex * 7 + (index % 5) : 0,
+    attempts: playerIndex < 2 ? 29 - playerIndex * 7 + (index % 5) : 0,
+    goalAssists: playerIndex < 5 ? 3 + ((playerIndex + index) % 6) : 0,
+    feeds: playerIndex < 7 ? 8 + ((playerIndex + index) % 12) : 1,
+    intercepts: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0,
+    gains: playerIndex > 5 ? 2 + ((playerIndex + index) % 5) : 1,
+    deflections: playerIndex > 4 ? 2 + ((playerIndex + index) % 6) : 0,
+    rebounds: playerIndex < 2 ? 2 + (index % 3) : 0,
+    penalties: 2 + ((playerIndex + index) % 7),
+    minutes: playerIndex < 7 ? 60 : 12 + ((playerIndex + index) % 20)
+  }));
+  const goals = sumStats(playerStats, "goals");
+  const opponentGoals = Math.max(31, goals - (4 + (index % 12)));
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -873,21 +1079,34 @@ function netballScorecard(competitionId, teamId, title, opponentName, venue) {
     sport: "netball",
     sportSlug: "netball",
     title,
-    date: day(4, 22),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Netball Team",
     opponentName,
-    score: { uwi: 58, opponent: 46 },
-    result: "Blackbirds won 58-46",
-    playerStats: players.map((player, index) => ({ ...player, goals: index < 2 ? 28 - index * 6 : 0, attempts: index < 2 ? 33 - index * 6 : 0, goalAssists: index < 5 ? 3 + index : 0, feeds: index < 6 ? 8 + index : 1, gains: index > 5 ? 3 : 1, penalties: 2 + index })),
-    teamTotals: { goals: 58, attempts: 69, feeds: 72, gains: 15 }
+    score: { uwi: goals, opponent: opponentGoals },
+    result: `Blackbirds won ${goals}-${opponentGoals}`,
+    playerStats,
+    teamTotals: { goals, attempts: sumStats(playerStats, "attempts"), feeds: sumStats(playerStats, "feeds"), gains: sumStats(playerStats, "gains"), penalties: sumStats(playerStats, "penalties"), intercepts: sumStats(playerStats, "intercepts"), deflections: sumStats(playerStats, "deflections") }
   };
 }
 
-function volleyballScorecard(competitionId, teamId, title, opponentName, venue) {
-  const players = teamAthletes("volleyball", 10);
+function volleyballScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(4, 24)) {
+  const players = teamAthletes("volleyball", 14, index);
+  const playerStats = players.map((player, playerIndex) => ({
+    ...player,
+    kills: playerIndex < 8 ? 4 + ((playerIndex + index) % 10) : 0,
+    aces: (playerIndex + index) % 4,
+    blocks: playerIndex < 6 ? (playerIndex + index) % 5 : 0,
+    assists: playerIndex === 1 ? 24 + (index % 18) : 1 + (playerIndex % 4),
+    digs: 3 + ((playerIndex + index) % 13),
+    receptions: playerIndex < 8 ? 6 + ((playerIndex + index) % 12) : 1,
+    serviceErrors: playerIndex % 5 === 0 ? 1 : 0,
+    attackErrors: playerIndex % 4 === 0 ? 2 : 0,
+    minutes: playerIndex < 7 ? 70 : 18 + ((playerIndex + index) % 25)
+  }));
+  const close = index % 4 === 0;
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -895,21 +1114,33 @@ function volleyballScorecard(competitionId, teamId, title, opponentName, venue) 
     sport: "volleyball",
     sportSlug: "volleyball",
     title,
-    date: day(4, 24),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Volleyball Team",
     opponentName,
-    result: "Blackbirds won 3-1",
-    finalSets: { uwi: 3, opponent: 1 },
-    sets: [{ uwi: 25, opponent: 20 }, { uwi: 23, opponent: 25 }, { uwi: 25, opponent: 19 }, { uwi: 25, opponent: 22 }],
-    playerStats: players.map((player, index) => ({ ...player, kills: 5 + index, aces: index % 3, blocks: index % 4, assists: index === 1 ? 34 : 2, digs: 4 + index }))
+    result: `Blackbirds won 3-${close ? 2 : 1}`,
+    finalSets: { uwi: 3, opponent: close ? 2 : 1 },
+    sets: close ? [{ uwi: 25, opponent: 22 }, { uwi: 22, opponent: 25 }, { uwi: 25, opponent: 21 }, { uwi: 23, opponent: 25 }, { uwi: 15, opponent: 11 }] : [{ uwi: 25, opponent: 20 }, { uwi: 23, opponent: 25 }, { uwi: 25, opponent: 19 }, { uwi: 25, opponent: 22 }],
+    playerStats,
+    teamTotals: { kills: sumStats(playerStats, "kills"), aces: sumStats(playerStats, "aces"), blocks: sumStats(playerStats, "blocks"), assists: sumStats(playerStats, "assists"), digs: sumStats(playerStats, "digs") }
   };
 }
 
-function hockeyScorecard(competitionId, teamId, title, opponentName, venue) {
-  const players = teamAthletes("hockey", 10);
+function hockeyScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(4, 27)) {
+  const players = teamAthletes("hockey", 16, index);
+  const uwiGoals = 2 + (index % 4);
+  const opponentGoals = Math.max(0, uwiGoals - 1 - (index % 2));
+  const scoring = Array.from({ length: uwiGoals }, (_, goalIndex) => ({
+    period: 1 + (goalIndex % 4),
+    scorerAthleteId: players[goalIndex].athleteId,
+    scorerName: players[goalIndex].name,
+    assist1AthleteId: players[(goalIndex + 2) % players.length].athleteId,
+    assist1Name: players[(goalIndex + 2) % players.length].name,
+    assist2AthleteId: goalIndex % 2 ? players[(goalIndex + 4) % players.length].athleteId : "",
+    assist2Name: goalIndex % 2 ? players[(goalIndex + 4) % players.length].name : ""
+  }));
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -917,26 +1148,23 @@ function hockeyScorecard(competitionId, teamId, title, opponentName, venue) {
     sport: "hockey",
     sportSlug: "hockey",
     title,
-    date: day(4, 27),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Hockey Team",
     opponentName,
-    score: { uwi: 4, opponent: 2 },
-    result: "Blackbirds won 4-2",
-    scoring: [
-      { period: 1, scorerAthleteId: players[0].athleteId, scorerName: players[0].name, assist1AthleteId: players[2].athleteId, assist1Name: players[2].name },
-      { period: 2, scorerAthleteId: players[1].athleteId, scorerName: players[1].name, assist1AthleteId: players[3].athleteId, assist1Name: players[3].name },
-      { period: 3, scorerAthleteId: players[4].athleteId, scorerName: players[4].name, assist1AthleteId: "", assist1Name: "" },
-      { period: 4, scorerAthleteId: players[0].athleteId, scorerName: players[0].name, assist1AthleteId: players[5].athleteId, assist1Name: players[5].name }
-    ],
-    penalties: [{ athleteId: players[6].athleteId, name: players[6].name, minutes: 2, infraction: "Stick obstruction" }]
+    score: { uwi: uwiGoals, opponent: opponentGoals },
+    result: `Blackbirds won ${uwiGoals}-${opponentGoals}`,
+    scoring,
+    penalties: [{ athleteId: players[6].athleteId, name: players[6].name, minutes: 2, infraction: "Stick obstruction" }],
+    playerStats: players.map((player, playerIndex) => ({ ...player, shots: playerIndex < 8 ? 1 + ((playerIndex + index) % 5) : 0, saves: playerIndex === 15 ? 4 + (index % 5) : 0, tackles: playerIndex > 4 ? 3 + ((playerIndex + index) % 7) : 1, interceptions: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0, minutes: playerIndex < 11 ? 60 : 10 + ((playerIndex + index) % 20) }))
   };
 }
 
-function badmintonScorecard(competitionId, teamId, title, opponentName, venue) {
-  const players = teamAthletes("badminton", 2);
+function badmintonScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(5, 3)) {
+  const players = teamAthletes("badminton", 2, index);
+  const close = index % 3 === 0;
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -944,7 +1172,7 @@ function badmintonScorecard(competitionId, teamId, title, opponentName, venue) {
     sport: "badminton",
     sportSlug: "badminton",
     title,
-    date: day(5, 3),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
@@ -953,14 +1181,14 @@ function badmintonScorecard(competitionId, teamId, title, opponentName, venue) {
     discipline: "Doubles",
     matchType: "Best of 3",
     uwiPlayers: players,
-    games: [{ uwi: 21, opponent: 16 }, { uwi: 18, opponent: 21 }, { uwi: 21, opponent: 17 }],
-    summary: { uwiGamesWon: 2, opponentGamesWon: 1, pointDifferential: 6 },
-    result: "Blackbirds won 2-1"
+    games: close ? [{ uwi: 21, opponent: 19 }, { uwi: 19, opponent: 21 }, { uwi: 23, opponent: 21 }] : [{ uwi: 21, opponent: 16 }, { uwi: 21, opponent: 18 }],
+    summary: { uwiGamesWon: 2, opponentGamesWon: close ? 1 : 0, pointDifferential: close ? 3 : 8 },
+    result: `Blackbirds won 2-${close ? 1 : 0}`
   };
 }
 
-function tableTennisScorecard(competitionId, teamId, title, opponentName, venue) {
-  const players = teamAthletes("table-tennis", 3);
+function tableTennisScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(5, 4)) {
+  const players = teamAthletes("table-tennis", 4, index);
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -968,21 +1196,21 @@ function tableTennisScorecard(competitionId, teamId, title, opponentName, venue)
     sport: "table-tennis",
     sportSlug: "table-tennis",
     title,
-    date: day(5, 4),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Table Tennis Team",
     opponentTeamName: opponentName,
     category: "Open",
-    rubbers: players.map((player, index) => ({ label: `Rubber ${index + 1}`, type: "singles", uwiPlayers: [player], games: [{ uwi: 11, opponent: 8 }, { uwi: 11, opponent: 9 }, { uwi: 8, opponent: 11 }, { uwi: 11, opponent: 7 }], uwiGames: 3, opponentGames: 1, winner: "UWI" })),
-    summary: { uwiRubbers: 3, opponentRubbers: 0 },
-    result: "Blackbirds won 3-0"
+    rubbers: players.map((player, rubberIndex) => ({ label: `Rubber ${rubberIndex + 1}`, type: rubberIndex === 3 ? "doubles" : "singles", uwiPlayers: rubberIndex === 3 ? [player, players[0]] : [player], games: [{ uwi: 11, opponent: 8 + (rubberIndex % 3) }, { uwi: 11, opponent: 7 + (index % 4) }, { uwi: 9, opponent: 11 }, { uwi: 11, opponent: 6 + rubberIndex }], uwiGames: 3, opponentGames: 1, winner: "UWI" })),
+    summary: { uwiRubbers: 4, opponentRubbers: 0 },
+    result: "Blackbirds won 4-0"
   };
 }
 
-function tennisScorecard(competitionId, teamId, title, opponentName, venue) {
-  const players = teamAthletes("lawn-tennis", 3);
+function tennisScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(5, 5)) {
+  const players = teamAthletes("lawn-tennis", 4, index);
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -990,20 +1218,21 @@ function tennisScorecard(competitionId, teamId, title, opponentName, venue) {
     sport: "lawn-tennis",
     sportSlug: "lawn-tennis",
     title,
-    date: day(5, 5),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Tennis Team",
     opponentTeamName: opponentName,
     category: "Open",
-    matches: players.map((player, index) => ({ label: `Match ${index + 1}`, type: "singles", uwiPlayers: [player], setScores: [{ raw: "6-3", uwi: 6, opponent: 3 }, { raw: "6-4", uwi: 6, opponent: 4 }], uwiSets: 2, opponentSets: 0, winner: "UWI" })),
-    summary: { uwiMatches: 3, opponentMatches: 0 },
-    result: "Blackbirds won 3-0"
+    matches: players.map((player, matchIndex) => ({ label: `Match ${matchIndex + 1}`, type: matchIndex === 3 ? "doubles" : "singles", uwiPlayers: matchIndex === 3 ? [player, players[0]] : [player], setScores: [{ raw: "6-3", uwi: 6, opponent: 3 }, { raw: index % 2 ? "7-5" : "6-4", uwi: index % 2 ? 7 : 6, opponent: index % 2 ? 5 : 4 }], uwiSets: 2, opponentSets: 0, winner: "UWI" })),
+    summary: { uwiMatches: 4, opponentMatches: 0 },
+    result: "Blackbirds won 4-0"
   };
 }
 
-function taekwondoScorecard(competitionId, teamId, title, athlete, venue) {
+function taekwondoScorecard(competitionId, teamId, title, athlete, venue, index = 0, date = day(5, 7)) {
+  const score = 7.45 + (index % 9) * 0.08;
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1011,7 +1240,7 @@ function taekwondoScorecard(competitionId, teamId, title, athlete, venue) {
     sport: "taekwondo",
     sportSlug: "taekwondo",
     title,
-    date: day(5, 7),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
@@ -1019,13 +1248,15 @@ function taekwondoScorecard(competitionId, teamId, title, athlete, venue) {
     division: "Senior Poomsae",
     round: "Final",
     poomsae: "Taegeuk 8",
-    judges: [{ score: 7.8 }, { score: 7.9 }, { score: 8.1 }, { score: 7.7 }, { score: 8.0 }],
-    summary: { finalScore: 7.9, rank: 2, judgeCount: 5 },
-    result: "Silver medal"
+    judges: [{ score: score - 0.1 }, { score }, { score: score + 0.15 }, { score: score - 0.05 }, { score: score + 0.08 }],
+    summary: { finalScore: Number(score.toFixed(2)), rank: 1 + (index % 4), judgeCount: 5 },
+    result: index % 4 === 0 ? "Gold medal" : index % 4 === 1 ? "Silver medal" : index % 4 === 2 ? "Bronze medal" : "Finalist"
   };
 }
 
-function chessScorecard(competitionId, teamId, title, athlete, opponentName, venue) {
+function chessScorecard(competitionId, teamId, title, athlete, opponentName, venue, index = 0, date = day(5, 8)) {
+  const resultLabel = index % 5 === 0 ? "Draw" : "Win";
+  const score = resultLabel === "Draw" ? 0.5 : 1;
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1033,7 +1264,7 @@ function chessScorecard(competitionId, teamId, title, athlete, opponentName, ven
     sport: "chess",
     sportSlug: "chess",
     title,
-    date: day(5, 8),
+    date,
     venue,
     teamId,
     uwiTeamId: teamId,
@@ -1043,20 +1274,23 @@ function chessScorecard(competitionId, teamId, title, athlete, opponentName, ven
     board: 1,
     timeControl: "90+30",
     opening: "Queen's Gambit Declined",
-    moves: 42,
-    summary: { uwiScore: 1, resultLabel: "Win", moveCount: 42 },
-    result: "1-0"
+    moves: 34 + (index % 28),
+    summary: { uwiScore: score, resultLabel, moveCount: 34 + (index % 28) },
+    result: resultLabel === "Draw" ? "1/2-1/2" : "1-0"
   };
 }
 
 function buildDirectAthleteStats(campus, stephenId, fictionalAthletes) {
   const rows = [];
-  const selected = fictionalAthletes.filter((_, index) => index % 5 === 0).slice(0, 30);
-  selected.push({ id: stephenId, sport: "cricket", firstName: "Stephen", lastName: "Mitchel" });
+  const selected = [
+    ...fictionalAthletes,
+    { id: stephenId, sport: "cricket", firstName: "Stephen", lastName: "Mitchel" },
+    { id: stephenId, sport: "track-and-field", firstName: "Stephen", lastName: "Mitchel" }
+  ];
   selected.forEach((athlete, index) => {
     const sport = athlete.sport || "cricket";
-    rows.push({
-      id: idFor("athlete-stat", `${athlete.id}-${index}`),
+    sportDirectMetrics(sport, index).forEach((metric, metricIndex) => rows.push({
+      id: idFor("athlete-stat", `${athlete.id}-${sport}-${metric.statName}-${metricIndex}`),
       athleteId: athlete.id,
       campus,
       sport,
@@ -1067,50 +1301,91 @@ function buildDirectAthleteStats(campus, stephenId, fictionalAthletes) {
         sport,
         sportSlug: sport,
         season: CURRENT_SEASON,
-        statName: sport === "cricket" ? "Training Runs" : sport === "track-and-field" ? "Training Time" : "Match Rating",
-        statValue: sport === "track-and-field" ? "10.98" : String(20 + (index % 40)),
-        unit: sport === "track-and-field" ? "s" : "",
-        eventName: sport === "track-and-field" ? "100m" : "Season preparation",
-        eventType: sport === "track-and-field" ? "track" : "training",
-        performance: sport === "track-and-field" ? "10.98 s" : `${20 + (index % 40)} recorded`,
-        competitionName: "Training and Assessment",
-        date: day(2, 10 + (index % 14)),
+        ...metric,
+        competitionName: metric.competitionName || "Training and Assessment",
+        date: seasonDate(15 + (index % 80) + metricIndex),
         verified: true,
-        notes: "Fictional direct athlete stat used to demonstrate manual stat entry."
+        notes: athlete.id === stephenId ? "Demo direct stat linked to the preserved Stephen Mitchel athlete record." : "Fictional direct athlete stat used to demonstrate manual stat entry."
       }
-    });
+    }));
   });
   return rows;
 }
 
+function sportDirectMetrics(sport, index) {
+  if (sport === "cricket") return [
+    { statName: "Runs", statValue: String(24 + (index % 76)), eventName: "Batting assessment", eventType: "batting", performance: `${24 + (index % 76)} runs`, runs: 24 + (index % 76), balls: 30 + (index % 55), fours: 2 + (index % 6), sixes: index % 4 },
+    { statName: "Wickets", statValue: String(index % 5), eventName: "Bowling assessment", eventType: "bowling", performance: `${index % 5} wickets`, wickets: index % 5, overs: 4 + (index % 6), runsConceded: 18 + (index % 34), maidens: index % 2 },
+    { statName: "Fielding", statValue: String(1 + (index % 4)), eventName: "Fielding assessment", eventType: "fielding", performance: `${1 + (index % 4)} dismissals`, catches: index % 3, stumpings: index % 4 === 0 ? 1 : 0, runOuts: index % 5 === 0 ? 1 : 0 }
+  ];
+  if (sport === "track-and-field") return [
+    { statName: "100m", statValue: (10.85 + (index % 12) * 0.05).toFixed(2), unit: "s", eventName: "100m", eventType: "track", performance: `${(10.85 + (index % 12) * 0.05).toFixed(2)} s`, time: (10.85 + (index % 12) * 0.05).toFixed(2), timeNumber: Number((10.85 + (index % 12) * 0.05).toFixed(2)), points: 5 + (index % 6) },
+    { statName: "Long Jump", statValue: (6.1 + (index % 14) * 0.06).toFixed(2), unit: "m", eventName: "Long Jump", eventType: "field", performance: `${(6.1 + (index % 14) * 0.06).toFixed(2)} m`, best: (6.1 + (index % 14) * 0.06).toFixed(2), bestNumber: Number((6.1 + (index % 14) * 0.06).toFixed(2)), points: 4 + (index % 6) },
+    { statName: "400m", statValue: (49.8 + (index % 16) * 0.22).toFixed(2), unit: "s", eventName: "400m", eventType: "track", performance: `${(49.8 + (index % 16) * 0.22).toFixed(2)} s`, time: (49.8 + (index % 16) * 0.22).toFixed(2), timeNumber: Number((49.8 + (index % 16) * 0.22).toFixed(2)), points: 3 + (index % 6) }
+  ];
+  if (sport === "football") return [
+    { statName: "Match Goals", statValue: String(index % 3), eventName: "Football match", eventType: "match", performance: `${index % 3} goals`, goals: index % 3, assists: (index + 1) % 3, shots: 2 + (index % 5), shotsOnTarget: 1 + (index % 3), minutes: 70 + (index % 21), tackles: 2 + (index % 7), interceptions: index % 4 },
+    { statName: "Defensive Work", statValue: String(4 + (index % 8)), eventName: "Football match", eventType: "match", performance: `${4 + (index % 8)} defensive actions`, saves: index % 9 === 0 ? 5 : 0, goalsConceded: index % 9 === 0 ? 1 : 0, fouls: index % 4, offsides: index % 2, yellowCards: index % 7 === 0 ? 1 : 0, redCards: 0 }
+  ];
+  if (sport === "basketball") return [
+    { statName: "Scoring", statValue: String(8 + (index % 24)), eventName: "Basketball game", eventType: "match", performance: `${8 + (index % 24)} points`, points: 8 + (index % 24), twoMade: 2 + (index % 6), threeMade: index % 5, freeThrowsMade: 1 + (index % 6), minutes: 18 + (index % 18) },
+    { statName: "All-around", statValue: String(12 + (index % 18)), eventName: "Basketball game", eventType: "match", performance: `${12 + (index % 18)} combined rebounds/assists`, rebounds: 3 + (index % 10), assists: 2 + (index % 8), steals: index % 4, blocks: index % 3, turnovers: index % 4, fouls: 1 + (index % 4) }
+  ];
+  if (sport === "netball") return [
+    { statName: "Shooting", statValue: String(14 + (index % 30)), eventName: "Netball match", eventType: "match", performance: `${14 + (index % 30)} goals`, goals: 14 + (index % 30), attempts: 18 + (index % 34), goalAssists: 2 + (index % 8), feeds: 8 + (index % 18), gains: index % 5, penalties: 2 + (index % 10), minutes: 45 + (index % 16) }
+  ];
+  if (sport === "volleyball") return [
+    { statName: "Attack", statValue: String(6 + (index % 13)), eventName: "Volleyball match", eventType: "match", performance: `${6 + (index % 13)} kills`, kills: 6 + (index % 13), aces: index % 4, blocks: index % 5, assists: index % 7 === 0 ? 28 : 2 + (index % 5), digs: 5 + (index % 14) }
+  ];
+  return [
+    { statName: "Competition Points", statValue: String(1 + (index % 10)), eventName: "Competition appearance", eventType: "match", performance: `${1 + (index % 10)} points`, points: 1 + (index % 10), wins: index % 3 === 0 ? 1 : 0, entries: 1 }
+  ];
+}
+
 function buildPersonalBests(campus, stephenId, fictionalAthletes) {
-  const selected = fictionalAthletes.filter((_, index) => index % 8 === 0).slice(0, 18);
-  selected.push({ id: stephenId, sport: "cricket" });
-  return selected.map((athlete, index) => {
+  const selected = [
+    ...fictionalAthletes,
+    { id: stephenId, sport: "cricket" },
+    { id: stephenId, sport: "track-and-field" }
+  ];
+  return selected.flatMap((athlete, index) => {
     const sport = athlete.sport || "cricket";
-    const eventName = sport === "track-and-field" ? "100m" : sport === "cricket" ? "Highest Score" : "Best Match Performance";
-    const performance = sport === "track-and-field" ? `${(10.71 + index * 0.05).toFixed(2)} s` : sport === "cricket" ? `${62 + index} runs` : `${15 + index} impact points`;
-    return {
-      id: idFor("personal-best", `${athlete.id}-${eventName}`),
+    return personalBestMetrics(sport, index).map((metric) => ({
+      id: idFor("personal-best", `${athlete.id}-${sport}-${metric.eventName}`),
       athleteId: athlete.id,
       campus,
       sport,
-      eventName,
+      eventName: metric.eventName,
       data: {
         seedDataset: DATASET_ID,
         athleteId: athlete.id,
         sport,
         sportSlug: sport,
-        eventName,
-        performance,
+        ...metric,
         season: CURRENT_SEASON,
-        competitionName: "Training and Assessment",
-        date: day(3, 10 + (index % 15)),
+        competitionName: metric.competitionName || "Season Best Register",
+        date: seasonDate(40 + (index % 90)),
         verified: true,
-        notes: "Fictional personal best for presentation data."
+        notes: athlete.id === stephenId ? "Demo personal best linked to the preserved Stephen Mitchel athlete record." : "Fictional personal best for presentation data."
       }
-    };
+    }));
   });
+}
+
+function personalBestMetrics(sport, index) {
+  if (sport === "cricket") return [
+    { eventName: "Highest Score", performance: `${62 + (index % 58)} runs`, statValue: String(62 + (index % 58)), runs: 62 + (index % 58) },
+    { eventName: "Best Bowling Figures", performance: `${2 + (index % 5)}/${18 + (index % 32)}`, wickets: 2 + (index % 5), runsConceded: 18 + (index % 32) }
+  ];
+  if (sport === "track-and-field") return [
+    { eventName: "100m", performance: `${(10.71 + (index % 12) * 0.04).toFixed(2)} s`, time: (10.71 + (index % 12) * 0.04).toFixed(2), timeNumber: Number((10.71 + (index % 12) * 0.04).toFixed(2)) },
+    { eventName: "Long Jump", performance: `${(6.25 + (index % 16) * 0.05).toFixed(2)} m`, best: (6.25 + (index % 16) * 0.05).toFixed(2), bestNumber: Number((6.25 + (index % 16) * 0.05).toFixed(2)) }
+  ];
+  if (sport === "football") return [{ eventName: "Most Goal Contributions", performance: `${2 + (index % 4)} G+A`, goals: index % 3, assists: 1 + (index % 3) }];
+  if (sport === "basketball") return [{ eventName: "Highest Points", performance: `${18 + (index % 24)} points`, points: 18 + (index % 24) }];
+  if (sport === "netball") return [{ eventName: "Best Shooting Game", performance: `${25 + (index % 20)} goals`, goals: 25 + (index % 20), attempts: 30 + (index % 22) }];
+  if (sport === "volleyball") return [{ eventName: "Most Kills", performance: `${10 + (index % 12)} kills`, kills: 10 + (index % 12) }];
+  return [{ eventName: "Best Competition Result", performance: `${1 + (index % 10)} points`, points: 1 + (index % 10), wins: index % 3 === 0 ? 1 : 0 }];
 }
 
 function buildSupportRequests(campus) {
@@ -1162,10 +1437,6 @@ async function main() {
 
   console.log(`Preparing ${args.size} demo dataset for ${campus}.`);
   console.log(`Stephen Mitchel preserved as athlete ${stephenId}.`);
-  if (args.dryRun) {
-    console.log("Dry run complete. No rows were changed.");
-    return;
-  }
 
   const teams = buildTeams(campus);
   const fictionalAthletes = buildAthletes(campus, multiplier);
@@ -1178,6 +1449,12 @@ async function main() {
   const supportRequests = buildSupportRequests(campus);
   const auditLogs = buildAuditLogs(campus);
   const userProfiles = buildDemoUserProfiles(campus);
+
+  if (args.dryRun) {
+    console.log(`Dry-run summary: ${fictionalAthletes.length} fictional athletes, ${coaches.length} fictional coaches, ${teams.length} teams, ${competitionBundle.competitions.length} competitions, ${competitionBundle.statLines.length} competition/stat rows, ${athleteStats.length} direct athlete stats, ${personalBests.length} personal bests.`);
+    console.log("Dry run complete. No rows were changed.");
+    return;
+  }
 
   await prisma.$transaction(async (tx) => {
     await resetDemoDatabase(tx, campus, stephenId);
@@ -1197,7 +1474,7 @@ async function main() {
     await createMany(tx, "athletePersonalBest", personalBests);
     await createMany(tx, "supportRequest", supportRequests);
     await createMany(tx, "auditLog", auditLogs);
-  }, { maxWait: 10000, timeout: 60000 });
+  }, { maxWait: 15000, timeout: 120000 });
 
   console.log("Demo seed complete.");
   console.log(`Summary: 1 preserved real athlete, ${fictionalAthletes.length} fictional athletes, ${coaches.length} fictional coaches, ${teams.length} teams, ${competitionBundle.competitions.length} competitions.`);
