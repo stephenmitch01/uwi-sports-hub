@@ -102,9 +102,15 @@
   }
 
   function goalList(goals, team) {
-    const list = goals.filter((goal) => String(goal.team || "") === team);
+    const list = goals.filter((goal) => goalTeam(goal) === team);
     if (!list.length) return `<p class="muted">No scorers recorded.</p>`;
     return `<p>${list.map((goal) => `${escapeHtml(goal.scorerName || (team === "uwi" ? "UWI player" : "Opponent"))} ${escapeHtml(goal.minute ?? "")}'`).join("<br>")}</p>`;
+  }
+
+  function goalTeam(goal) {
+    const explicitTeam = String(goal.team || "").toLowerCase();
+    if (explicitTeam === "uwi" || explicitTeam === "opponent") return explicitTeam;
+    return goal.scorerAthleteId || goal.assistAthleteId ? "uwi" : "opponent";
   }
 
   function matchStatRows(data) {

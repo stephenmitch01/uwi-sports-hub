@@ -928,8 +928,14 @@ function footballScorecard(competitionId, teamId, title, opponentName, venue, in
   const uwiMatchStats = {
     shots: 12 + (index % 8),
     shotsOnTarget: 5 + (index % 5),
+    possession: 52 + (index % 12),
     fouls: 9 + (index % 7),
     corners: 4 + (index % 5),
+    freeKicks: 8 + (index % 5),
+    passesCompletedPct: 78 + (index % 12),
+    crosses: 11 + (index % 8),
+    interceptions: 9 + (index % 7),
+    tackles: 22 + (index % 12),
     offside: 1 + (index % 3),
     offsides: 1 + (index % 3),
     saves: 3 + (index % 5)
@@ -937,12 +943,36 @@ function footballScorecard(competitionId, teamId, title, opponentName, venue, in
   const opponentMatchStats = {
     shots: Math.max(5, uwiMatchStats.shots - 3),
     shotsOnTarget: Math.max(2, uwiMatchStats.shotsOnTarget - 2),
+    possession: 100 - uwiMatchStats.possession,
     fouls: 8 + (index % 6),
     corners: 2 + (index % 4),
+    freeKicks: 7 + (index % 4),
+    passesCompletedPct: 70 + (index % 10),
+    crosses: 8 + (index % 6),
+    interceptions: 7 + (index % 6),
+    tackles: 19 + (index % 10),
     offside: index % 2,
     offsides: index % 2,
     saves: Math.max(1, uwiMatchStats.shotsOnTarget - uwiGoals)
   };
+  const uwiGoalEvents = scorers.map((player, goalIndex) => ({
+    team: "uwi",
+    minute: 12 + goalIndex * 21 + (index % 6),
+    scorerAthleteId: player.athleteId,
+    scorerName: player.name,
+    assistAthleteId: players[(goalIndex + 2) % players.length].athleteId,
+    assistName: players[(goalIndex + 2) % players.length].name,
+    type: "goal"
+  }));
+  const opponentGoalEvents = Array.from({ length: opponentGoals }, (_, goalIndex) => ({
+    team: "opponent",
+    minute: 24 + goalIndex * 27 + (index % 5),
+    scorerAthleteId: "",
+    scorerName: `${opponentName} Forward ${goalIndex + 1}`,
+    assistAthleteId: "",
+    assistName: `${opponentName} Midfielder ${goalIndex + 1}`,
+    type: "goal"
+  }));
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -963,7 +993,7 @@ function footballScorecard(competitionId, teamId, title, opponentName, venue, in
     result: `Blackbirds ${uwiGoals >= opponentGoals ? "won" : "lost"} ${uwiGoals}-${opponentGoals}`,
     squad: players,
     playerStats,
-    goals: scorers.map((player, goalIndex) => ({ minute: 12 + goalIndex * 21 + (index % 6), scorerAthleteId: player.athleteId, scorerName: player.name, assistAthleteId: players[(goalIndex + 2) % players.length].athleteId, assistName: players[(goalIndex + 2) % players.length].name })),
+    goals: [...uwiGoalEvents, ...opponentGoalEvents],
     teamTotals: { shots: sumStats(playerStats, "shots"), assists: sumStats(playerStats, "assists"), saves: sumStats(playerStats, "saves"), yellowCards: sumStats(playerStats, "yellowCards"), redCards: sumStats(playerStats, "redCards") },
     matchStats: { uwi: uwiMatchStats, opponent: opponentMatchStats }
   };
