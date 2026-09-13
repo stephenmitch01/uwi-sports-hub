@@ -41,7 +41,10 @@ export function setSessionCookies(req, res, session) {
     refreshToken: session?.refresh_token,
     expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7
   });
-  res.cookie(SESSION_COOKIE, sessionId, cookieOptions(req));
+  const options = cookieOptions(req);
+  res.cookie(SESSION_COOKIE, sessionId, options);
+  if (session?.access_token) res.cookie(ACCESS_COOKIE, session.access_token, options);
+  if (session?.refresh_token) res.cookie(REFRESH_COOKIE, session.refresh_token, options);
   return sessionId;
 }
 
@@ -117,10 +120,29 @@ export async function requireAuth(req, res, next) {
     (memorySession && memorySession.expiresAt >= Date.now() ? memorySession.accessToken : "") ||
     req.cookies?.[ACCESS_COOKIE] ||
     String(req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-  if (!accessToken) return sendError(res, 401, "Authentication required");
+  const refreshToken = memorySession?.refreshToken || req.cookies?.[REFRESH_COOKIE];
+  if (!accessToken && !refreshToken) return sendError(res, 401, "Authentication required");
 
-  const { data, error } = await supabaseAuth.auth.getUser(accessToken);
-  if (error || !data?.user) return sendError(res, 401, "Session expired");
+  let { data, error } = accessToken
+    ? await supabaseAuth.auth.getUser(accessToken)
+    : { data: null, error: new Error("Missing access token") };
+  if (error || !data?.user) {
+    if (!refreshToken) return sendError(res, 401, "Session expired");
+
+    const refreshed = await supabaseAuth.auth.refreshSession({ refresh_token: refreshToken });
+    if (refreshed.error || !refreshed.data?.session?.access_token) {
+      clearSessionCookies(res);
+      if (sessionId) memorySessions.delete(sessionId);
+      return sendError(res, 401, "Session expired");
+    }
+
+    setSessionCookies(req, res, refreshed.data.session);
+    data = refreshed.data.user
+      ? { user: refreshed.data.user }
+      : (await supabaseAuth.auth.getUser(refreshed.data.session.access_token)).data;
+  }
+
+  if (!data?.user) return sendError(res, 401, "Session expired");
 
   const profile = await findOrCreateProfile(data.user);
   req.auth = { user: data.user, profile };
