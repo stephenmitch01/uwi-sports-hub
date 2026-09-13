@@ -772,35 +772,96 @@ function sumStats(rows, key) {
   return rows.reduce((total, row) => total + Number(row[key] || 0), 0);
 }
 
+function splitTotal(total, parts, variance = 0) {
+  const base = Math.floor(total / parts);
+  const remainder = total - base * parts;
+  return Array.from({ length: parts }, (_, index) => Math.max(0, base + (index < remainder ? 1 : 0) + (index % 2 === 0 ? variance : -variance)));
+}
+
+function percent(made, attempts) {
+  return attempts ? `${Math.round((made / attempts) * 100)}%` : "";
+}
+
+function opponentRoster(opponentName, count, label = "Player") {
+  return Array.from({ length: count }, (_, index) => ({ name: `${opponentName} ${label} ${index + 1}`, slot: index + 1 }));
+}
+
 function cricketScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(4, 30), format = "BCA 3-Day") {
   const players = teamAthletes("cricket", 11, index);
+  const opponentPlayers = Array.from({ length: 11 }, (_, playerIndex) => ({
+    athleteId: null,
+    id: "",
+    name: `${opponentName} Player ${playerIndex + 1}`,
+    side: "opponent"
+  }));
   const oversLabel = format.includes("50") ? "50" : format.includes("40") ? "40" : format.includes("3-Day") ? "82.4" : "20";
-  const batting = players.map((player, index) => ({
+  const batting = players.map((player, rowIndex) => ({
     ...player,
-    runs: Math.max(0, [72, 44, 31, 18, 10, 6, 23, 4, 0, 12, 1][index] + ((competitionId.charCodeAt(0) + index) % 9) - 4),
-    balls: [96, 60, 45, 20, 12, 7, 28, 9, 2, 19, 4][index] + (index % 3),
-    fours: index < 5 ? 1 + ((index + competitionId.length) % 5) : 0,
-    sixes: index < 3 ? (index + competitionId.length) % 3 : 0,
-    dismissalMode: index === 10 ? "not out" : ["caught", "bowled", "lbw", "run out", "stumped"][index % 5],
-    fielderAthleteId: index % 2 === 0 ? players[(index + 5) % players.length].athleteId : "",
-    fielderName: index % 2 === 0 ? players[(index + 5) % players.length].name : "",
-    bowlerAthleteId: players[(index + 6) % players.length].athleteId,
-    bowlerName: players[(index + 6) % players.length].name
+    side: "uwi",
+    runs: Math.max(0, [72, 44, 31, 18, 10, 6, 23, 4, 0, 12, 1][rowIndex] + ((competitionId.charCodeAt(0) + rowIndex) % 9) - 4),
+    minutes: 18 + rowIndex * 9 + (index % 8),
+    balls: [96, 60, 45, 20, 12, 7, 28, 9, 2, 19, 4][rowIndex] + (rowIndex % 3),
+    fours: rowIndex < 5 ? 1 + ((rowIndex + competitionId.length) % 5) : 0,
+    sixes: rowIndex < 3 ? (rowIndex + competitionId.length) % 3 : 0,
+    dismissalMode: rowIndex === 10 ? "not out" : ["caught", "bowled", "lbw", "run out", "stumped"][rowIndex % 5],
+    dismissalLabel: rowIndex === 10 ? "Not out" : ["Caught", "Bowled", "LBW", "Run out", "Stumped"][rowIndex % 5],
+    fielderAthleteId: "",
+    fielderName: rowIndex % 2 === 0 ? opponentPlayers[(rowIndex + 5) % opponentPlayers.length].name : "",
+    bowlerAthleteId: "",
+    bowlerName: opponentPlayers[(rowIndex + 6) % opponentPlayers.length].name,
+    strikeRate: ""
   }));
-  const bowling = players.slice(5, 10).map((player, index) => ({
+  batting.forEach((player) => {
+    player.strikeRate = player.balls ? ((player.runs / player.balls) * 100).toFixed(2) : "";
+  });
+  const opponentBatting = opponentPlayers.map((player, rowIndex) => ({
     ...player,
-    overs: [8, 7, 6, 5, 4][index],
-    maidens: index === 0 ? 1 : 0,
-    runs: [32, 28, 23, 21, 18][index] + (competitionId.length % 7),
-    wickets: [3, 2, 1, 1, 0][(index + competitionId.length) % 5],
-    wides: index % 3,
-    noBalls: index === 4 ? 1 : 0,
-    dots: 14 + index,
-    economy: Number((([32, 28, 23, 21, 18][index] + (competitionId.length % 7)) / [8, 7, 6, 5, 4][index]).toFixed(2))
+    role: "batter",
+    runs: Math.max(0, [38, 26, 19, 41, 8, 14, 22, 5, 3, 11, 0][rowIndex] + (index % 7) - 3),
+    minutes: 12 + rowIndex * 7 + (index % 6),
+    balls: [44, 35, 28, 51, 11, 22, 30, 9, 6, 18, 2][rowIndex],
+    fours: rowIndex < 4 ? 1 + ((rowIndex + index) % 4) : 0,
+    sixes: rowIndex < 2 ? rowIndex % 2 : 0,
+    dismissalMode: rowIndex === 10 ? "not out" : ["caught", "bowled", "lbw", "caught", "run out"][rowIndex % 5],
+    dismissalLabel: rowIndex === 10 ? "Not out" : ["Caught", "Bowled", "LBW", "Caught", "Run out"][rowIndex % 5],
+    bowlerAthleteId: players[(rowIndex + 5) % players.length].athleteId,
+    bowlerName: players[(rowIndex + 5) % players.length].name,
+    fielderAthleteId: rowIndex % 2 === 0 ? players[(rowIndex + 3) % players.length].athleteId : "",
+    fielderName: rowIndex % 2 === 0 ? players[(rowIndex + 3) % players.length].name : "",
+    strikeRate: ""
   }));
-  const uwiRuns = batting.reduce((total, player) => total + Number(player.runs || 0), 18);
-  const opponentRuns = Math.max(95, uwiRuns - (18 + (competitionId.length % 60)));
-  const opponentWickets = 5 + (competitionId.length % 5);
+  opponentBatting.forEach((player) => {
+    player.strikeRate = player.balls ? ((player.runs / player.balls) * 100).toFixed(2) : "";
+  });
+  const bowling = players.slice(5, 11).map((player, rowIndex) => ({
+    ...player,
+    side: "uwi",
+    overs: [8, 7, 6, 5, 4, 3][rowIndex],
+    maidens: rowIndex === 0 ? 1 : 0,
+    runs: [32, 28, 23, 21, 18, 15][rowIndex] + (competitionId.length % 7),
+    wickets: [3, 2, 1, 1, 0, 1][(rowIndex + competitionId.length) % 6],
+    wides: rowIndex % 3,
+    noBalls: rowIndex === 4 ? 1 : 0,
+    dots: 14 + rowIndex,
+    economy: Number((([32, 28, 23, 21, 18, 15][rowIndex] + (competitionId.length % 7)) / [8, 7, 6, 5, 4, 3][rowIndex]).toFixed(2)),
+    notes: rowIndex === 0 ? "New ball spell" : ""
+  }));
+  const opponentBowling = opponentPlayers.slice(0, 6).map((player, rowIndex) => ({
+    ...player,
+    role: "bowler",
+    overs: [8, 7, 6, 5, 4, 3][rowIndex],
+    maidens: rowIndex === 1 ? 1 : 0,
+    runs: [42, 36, 29, 28, 22, 18][rowIndex] + (index % 6),
+    wickets: [2, 1, 2, 1, 1, 0][rowIndex],
+    economy: Number((([42, 36, 29, 28, 22, 18][rowIndex] + (index % 6)) / [8, 7, 6, 5, 4, 3][rowIndex]).toFixed(2)),
+    notes: rowIndex === 0 ? "Opened the bowling" : ""
+  }));
+  const uwiExtras = 12 + (competitionId.length % 10);
+  const opponentExtras = 8 + (index % 8);
+  const uwiRuns = batting.reduce((total, player) => total + Number(player.runs || 0), uwiExtras);
+  const opponentRuns = opponentBatting.reduce((total, player) => total + Number(player.runs || 0), opponentExtras);
+  const opponentWickets = opponentBatting.filter((player) => player.dismissalMode && player.dismissalMode !== "not out").length;
+  const uwiWickets = batting.filter((player) => player.dismissalMode && player.dismissalMode !== "not out").length;
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -818,12 +879,25 @@ function cricketScorecard(competitionId, teamId, title, opponentName, venue, ind
     inningsCount: 2,
     startingXi: players,
     innings: [
-      { innings: 1, side: "uwi", team: "UWI Blackbirds Cricket Team", runs: uwiRuns, wickets: 7, overs: oversLabel, batting, bowling: [] },
-      { innings: 2, side: "opponent", team: opponentName, runs: opponentRuns, wickets: opponentWickets, overs: oversLabel, batting: [], bowling }
+      { innings: 1, battingSide: "uwi", side: "uwi", team: "UWI Blackbirds Cricket Team", overs: oversLabel, declared: false, target: "", runRate: (uwiRuns / Number.parseFloat(oversLabel)).toFixed(2), extras: `b 2, lb 4, w ${uwiExtras - 6}`, extrasRuns: uwiExtras, runs: uwiRuns, total: uwiRuns, wickets: uwiWickets, didNotBat: [], fallOfWickets: fallOfWickets(batting), batting, bowling: opponentBowling },
+      { innings: 2, battingSide: "opponent", side: "opponent", team: opponentName, overs: oversLabel, declared: false, target: String(uwiRuns + 1), runRate: (opponentRuns / Number.parseFloat(oversLabel)).toFixed(2), extras: `b 1, lb 3, w ${opponentExtras - 4}`, extrasRuns: opponentExtras, runs: opponentRuns, total: opponentRuns, wickets: opponentWickets, didNotBat: [], fallOfWickets: fallOfWickets(opponentBatting), batting: opponentBatting, bowling }
     ],
     result: `Blackbirds won by ${uwiRuns - opponentRuns} runs`,
     summary: { uwiRuns, opponentRuns, wickets: opponentWickets }
   };
+}
+
+function fallOfWickets(batting) {
+  let total = 0;
+  let wickets = 0;
+  return batting
+    .map((player) => {
+      total += Number(player.runs || 0);
+      if (!player.dismissalMode || player.dismissalMode === "not out") return null;
+      wickets += 1;
+      return `${wickets}-${total}`;
+    })
+    .filter(Boolean);
 }
 
 function footballScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(4, 18)) {
@@ -831,6 +905,44 @@ function footballScorecard(competitionId, teamId, title, opponentName, venue, in
   const uwiGoals = 1 + (index % 4);
   const opponentGoals = Math.max(0, uwiGoals - 1 - (index % 2));
   const scorers = players.slice(0, uwiGoals);
+  const uwiHalves = splitTotal(uwiGoals, 2);
+  const opponentHalves = splitTotal(opponentGoals, 2);
+  const playerStats = players.map((player, playerIndex) => ({
+    ...player,
+    number: playerIndex + 1,
+    goals: playerIndex < uwiGoals ? 1 : 0,
+    assists: playerIndex >= 2 && playerIndex < 2 + uwiGoals ? 1 : 0,
+    shots: playerIndex < 7 ? 1 + ((playerIndex + index) % 5) : 0,
+    shotsOnTarget: playerIndex < 7 ? 1 + ((playerIndex + index) % 3) : 0,
+    goalsConceded: playerIndex === 10 ? opponentGoals : 0,
+    saves: playerIndex === 10 ? 3 + (index % 5) : 0,
+    fouls: playerIndex % 4,
+    offside: playerIndex < 3 ? playerIndex % 2 : 0,
+    offsides: playerIndex < 3 ? playerIndex % 2 : 0,
+    yellowCards: playerIndex === 6 && index % 3 === 0 ? 1 : 0,
+    redCards: 0,
+    minutes: playerIndex < 11 ? 90 : 18 + ((playerIndex + index) % 25),
+    tackles: playerIndex > 4 ? 2 + ((playerIndex + index) % 6) : 1,
+    interceptions: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0
+  }));
+  const uwiMatchStats = {
+    shots: 12 + (index % 8),
+    shotsOnTarget: 5 + (index % 5),
+    fouls: 9 + (index % 7),
+    corners: 4 + (index % 5),
+    offside: 1 + (index % 3),
+    offsides: 1 + (index % 3),
+    saves: 3 + (index % 5)
+  };
+  const opponentMatchStats = {
+    shots: Math.max(5, uwiMatchStats.shots - 3),
+    shotsOnTarget: Math.max(2, uwiMatchStats.shotsOnTarget - 2),
+    fouls: 8 + (index % 6),
+    corners: 2 + (index % 4),
+    offside: index % 2,
+    offsides: index % 2,
+    saves: Math.max(1, uwiMatchStats.shotsOnTarget - uwiGoals)
+  };
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -844,50 +956,54 @@ function footballScorecard(competitionId, teamId, title, opponentName, venue, in
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Football Team",
     opponentName,
-    score: { uwi: uwiGoals, opponent: opponentGoals },
+    score: {
+      uwi: { firstHalf: uwiHalves[0], secondHalf: uwiHalves[1], overtime: 0, total: uwiGoals },
+      opponent: { firstHalf: opponentHalves[0], secondHalf: opponentHalves[1], overtime: 0, total: opponentGoals }
+    },
     result: `Blackbirds ${uwiGoals >= opponentGoals ? "won" : "lost"} ${uwiGoals}-${opponentGoals}`,
-    playerStats: players.map((player, playerIndex) => ({
-      ...player,
-      goals: playerIndex < uwiGoals ? 1 : 0,
-      assists: playerIndex >= 2 && playerIndex < 2 + uwiGoals ? 1 : 0,
-      shots: playerIndex < 7 ? 1 + ((playerIndex + index) % 5) : 0,
-      shotsOnTarget: playerIndex < 7 ? 1 + ((playerIndex + index) % 3) : 0,
-      goalsConceded: playerIndex === 10 ? opponentGoals : 0,
-      saves: playerIndex === 10 ? 3 + (index % 5) : 0,
-      fouls: playerIndex % 4,
-      offsides: playerIndex < 3 ? playerIndex % 2 : 0,
-      yellowCards: playerIndex === 6 && index % 3 === 0 ? 1 : 0,
-      redCards: 0,
-      minutes: playerIndex < 11 ? 90 : 18 + ((playerIndex + index) % 25),
-      tackles: playerIndex > 4 ? 2 + ((playerIndex + index) % 6) : 1,
-      interceptions: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0
-    })),
+    squad: players,
+    playerStats,
     goals: scorers.map((player, goalIndex) => ({ minute: 12 + goalIndex * 21 + (index % 6), scorerAthleteId: player.athleteId, scorerName: player.name, assistAthleteId: players[(goalIndex + 2) % players.length].athleteId, assistName: players[(goalIndex + 2) % players.length].name })),
-    matchStats: { shots: 12 + (index % 8), shotsOnTarget: 5 + (index % 5), possession: 52 + (index % 12), fouls: 9 + (index % 7), corners: 4 + (index % 5), offsides: 1 + (index % 3), tackles: 22 + (index % 12), saves: 3 + (index % 5) }
+    teamTotals: { shots: sumStats(playerStats, "shots"), assists: sumStats(playerStats, "assists"), saves: sumStats(playerStats, "saves"), yellowCards: sumStats(playerStats, "yellowCards"), redCards: sumStats(playerStats, "redCards") },
+    matchStats: { uwi: uwiMatchStats, opponent: opponentMatchStats }
   };
 }
 
 function basketballScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(5, 2)) {
   const players = teamAthletes("basketball", 15, index);
-  const stats = players.map((player, playerIndex) => ({
-    ...player,
-    points: Math.max(0, [24, 18, 14, 11, 8, 6, 5, 4, 3, 2, 7, 5, 4, 2, 1][playerIndex] + (index % 7) - 3),
-    rebounds: [7, 5, 9, 3, 6, 2, 4, 2, 1, 1, 5, 3, 2, 1, 1][playerIndex],
-    assists: [4, 7, 2, 5, 1, 2, 1, 0, 0, 0, 3, 2, 1, 0, 0][playerIndex],
-    steals: playerIndex < 7 ? (playerIndex + index) % 3 : 0,
-    blocks: playerIndex === 2 ? 3 : playerIndex === 4 ? 1 : playerIndex % 7 === 0 ? 1 : 0,
-    turnovers: (playerIndex + index) % 4,
-    fouls: 1 + ((playerIndex + index) % 4),
-    minutes: playerIndex < 10 ? 18 + ((playerIndex + index) % 16) : 7 + (playerIndex % 8),
-    twoMade: 1 + ((playerIndex + index) % 6),
-    twoAttempts: 3 + ((playerIndex + index) % 8),
-    threeMade: playerIndex < 6 ? (playerIndex + index) % 4 : 0,
-    threeAttempts: playerIndex < 6 ? 2 + ((playerIndex + index) % 6) : 0,
-    freeThrowsMade: playerIndex < 10 ? 1 + ((playerIndex + index) % 5) : 0,
-    freeThrowsAttempted: playerIndex < 10 ? 2 + ((playerIndex + index) % 6) : 0
-  }));
+  const stats = players.map((player, playerIndex) => {
+    const twoMade = 1 + ((playerIndex + index) % 6);
+    const threeMade = playerIndex < 6 ? (playerIndex + index) % 4 : 0;
+    const freeThrowsMade = playerIndex < 10 ? 1 + ((playerIndex + index) % 5) : 0;
+    const points = twoMade * 2 + threeMade * 3 + freeThrowsMade;
+    const quarters = splitTotal(points, 4);
+    return {
+      ...player,
+      number: playerIndex + 1,
+      fouls: 1 + ((playerIndex + index) % 4),
+      q1: quarters[0],
+      q2: quarters[1],
+      q3: quarters[2],
+      q4: quarters[3],
+      points,
+      twoMade,
+      twoAttempts: twoMade + 2 + ((playerIndex + index) % 3),
+      threeMade,
+      threeAttempts: threeMade + (playerIndex < 6 ? 2 + ((playerIndex + index) % 2) : 0),
+      freeThrowsMade,
+      freeThrowsAttempted: freeThrowsMade + (playerIndex % 3),
+      rebounds: [7, 5, 9, 3, 6, 2, 4, 2, 1, 1, 5, 3, 2, 1, 1][playerIndex],
+      assists: [4, 7, 2, 5, 1, 2, 1, 0, 0, 0, 3, 2, 1, 0, 0][playerIndex],
+      steals: playerIndex < 7 ? (playerIndex + index) % 3 : 0,
+      blocks: playerIndex === 2 ? 3 : playerIndex === 4 ? 1 : playerIndex % 7 === 0 ? 1 : 0,
+      turnovers: (playerIndex + index) % 4,
+      minutes: playerIndex < 10 ? 18 + ((playerIndex + index) % 16) : 7 + (playerIndex % 8)
+    };
+  });
   const uwiPoints = stats.reduce((total, player) => total + player.points, 0);
   const opponentPoints = Math.max(58, uwiPoints - (6 + (index % 18)));
+  const uwiQuarters = splitTotal(uwiPoints, 4);
+  const opponentQuarters = splitTotal(opponentPoints, 4);
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -901,9 +1017,17 @@ function basketballScorecard(competitionId, teamId, title, opponentName, venue, 
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Basketball Team",
     opponentName,
-    score: { uwi: uwiPoints, opponent: opponentPoints },
+    playedAt: venue,
+    gameTime: `${18 + (index % 4)}:00`,
+    coachName: "Coach Demo",
+    score: {
+      uwi: { q1: uwiQuarters[0], q2: uwiQuarters[1], q3: uwiQuarters[2], q4: uwiQuarters[3], overtime: 0, total: uwiPoints },
+      opponent: { q1: opponentQuarters[0], q2: opponentQuarters[1], q3: opponentQuarters[2], q4: opponentQuarters[3], overtime: 0, total: opponentPoints }
+    },
     result: `Blackbirds won ${uwiPoints}-${opponentPoints}`,
+    roster: players,
     playerStats: stats,
+    gameAdmin: { teamFouls: sumStats(stats, "fouls"), fullTimeouts: 3, shortTimeouts: 2, otTimeouts: 0, warnings: index % 2, possessionStart: "UWI", possessionSequence: "UWI-Opponent-UWI-Opponent" },
     teamTotals: { points: uwiPoints, rebounds: sumStats(stats, "rebounds"), assists: sumStats(stats, "assists"), steals: sumStats(stats, "steals"), blocks: sumStats(stats, "blocks"), turnovers: sumStats(stats, "turnovers"), fouls: sumStats(stats, "fouls") }
   };
 }
@@ -927,30 +1051,54 @@ function trackFieldScorecards(campus, competitionId, teamId, title, venue, index
   ];
   const trackEvent = trackEvents[index % trackEvents.length];
   const fieldEvent = fieldEvents[index % fieldEvents.length];
-  const trackEntries = teamAthletes("track-and-field", 8, index).map((athlete, rowIndex) => ({
-    entryType: rowIndex < 6 ? "uwi" : "opponent",
-    ...athlete,
-    time: formatTrackTime(trackEvent.base + rowIndex * trackEvent.step + (index % 4) * 0.03),
-    timeNumber: Number((trackEvent.base + rowIndex * trackEvent.step + (index % 4) * 0.03).toFixed(2)),
-    place: rowIndex + 1,
-    lane: 2 + rowIndex,
-    heat: 1 + (index % 3),
-    reactionTime: (0.132 + rowIndex * 0.004 + (index % 3) * 0.002).toFixed(3),
-    wind: trackEvent.eventName.includes("100") || trackEvent.eventName.includes("200") ? "1.1" : "N/A",
-    points: [10, 8, 6, 5, 4, 3, 2, 1][rowIndex]
-  }));
-  const fieldEntries = teamAthletes("track-and-field", 8, index + 8).map((athlete, rowIndex) => {
+  const trackUwi = teamAthletes("track-and-field", 6, index);
+  const trackOpponents = opponentRoster("Regional Club", 2, "Sprinter");
+  const trackEntries = [...trackUwi, ...trackOpponents].map((athlete, rowIndex) => {
+    const isUwi = rowIndex < trackUwi.length;
+    const timeNumber = Number((trackEvent.base + rowIndex * trackEvent.step + (index % 4) * 0.03).toFixed(2));
+    return {
+      rowNumber: rowIndex + 1,
+      place: rowIndex + 1,
+      entryType: isUwi ? "uwi" : "opponent",
+      athleteId: isUwi ? athlete.athleteId : "",
+      id: isUwi ? athlete.id : "",
+      name: athlete.name,
+      bib: `${100 + index}${rowIndex + 1}`,
+      club: isUwi ? "UWI Blackbirds" : "Regional Club",
+      lane: 2 + rowIndex,
+      time: formatTrackTime(timeNumber),
+      timeNumber,
+      ab: "",
+      heat: 1 + (index % 3),
+      reactionTime: (0.132 + rowIndex * 0.004 + (index % 3) * 0.002).toFixed(3),
+      wind: trackEvent.eventName.includes("100") || trackEvent.eventName.includes("200") ? "1.1" : "N/A",
+      points: [10, 8, 6, 5, 4, 3, 2, 1][rowIndex]
+    };
+  });
+  const fieldUwi = teamAthletes("track-and-field", 6, index + 8);
+  const fieldOpponents = opponentRoster("Regional Club", 2, "Jumper");
+  const fieldEntries = [...fieldUwi, ...fieldOpponents].map((athlete, rowIndex) => {
+    const isUwi = rowIndex < fieldUwi.length;
     const best = fieldEvent.base - rowIndex * fieldEvent.step + (index % 3) * 0.03;
     return {
-    entryType: rowIndex < 6 ? "uwi" : "opponent",
-    ...athlete,
-    best: best.toFixed(2),
-    bestNumber: Number(best.toFixed(2)),
-    finalRank: rowIndex + 1,
-    attempts: [(best - 0.22).toFixed(2), (best - 0.11).toFixed(2), "X", best.toFixed(2), (best - 0.05).toFixed(2), "X"],
-    wind: "0.8",
-    points: [10, 8, 6, 5, 4, 3, 2, 1][rowIndex]
-  };
+      rowNumber: rowIndex + 1,
+      rank: rowIndex + 1,
+      entryType: isUwi ? "uwi" : "opponent",
+      athleteId: isUwi ? athlete.athleteId : "",
+      id: isUwi ? athlete.id : "",
+      name: athlete.name,
+      bib: `${200 + index}${rowIndex + 1}`,
+      club: isUwi ? "UWI Blackbirds" : "Regional Club",
+      best1: (best - 0.11).toFixed(2),
+      best1Number: Number((best - 0.11).toFixed(2)),
+      best: best.toFixed(2),
+      bestNumber: Number(best.toFixed(2)),
+      rank1: rowIndex + 1,
+      finalRank: rowIndex + 1,
+      attempts: [(best - 0.22).toFixed(2), (best - 0.11).toFixed(2), "X", best.toFixed(2), (best - 0.05).toFixed(2), "X"],
+      wind: "0.8",
+      points: [10, 8, 6, 5, 4, 3, 2, 1][rowIndex]
+    };
   });
   return [
     {
@@ -972,6 +1120,7 @@ function trackFieldScorecards(campus, competitionId, teamId, title, venue, index
         disciplineType: "track",
         title,
         eventName: trackEvent.eventName,
+        eventNumber: `${10 + (index % 30)}`,
         round: "Final",
         division: "Open",
         date,
@@ -979,8 +1128,10 @@ function trackFieldScorecards(campus, competitionId, teamId, title, venue, index
         teamId,
         uwiTeamId: teamId,
         uwiTeamName: "UWI Blackbirds Track and Field Team",
+        track: { heatNumber: String(1 + (index % 3)), semiFinalNumber: "", recordNotes: index % 5 === 0 ? "Wind legal season best." : "", windDirection: "Tailwind", wind: trackEvent.eventName.includes("100") || trackEvent.eventName.includes("200") ? 1.1 : null },
+        field: null,
         entries: trackEntries,
-        summary: { eventWinner: trackEntries[0].name, winningTime: trackEntries[0].time, uwiPoints: 36, topUwiResult: `${trackEntries[0].name} ${trackEntries[0].time}` }
+        summary: { eventWinner: trackEntries[0].name, winningTime: trackEntries[0].time, uwiEntries: trackUwi.length, completedEntries: trackEntries.length, uwiPoints: 36, topUwiResult: `${trackEntries[0].name} ${trackEntries[0].time}`, winningResult: trackEntries[0].time }
       }
     },
     {
@@ -1002,6 +1153,7 @@ function trackFieldScorecards(campus, competitionId, teamId, title, venue, index
         disciplineType: fieldEvent.disciplineType,
         title,
         eventName: fieldEvent.eventName,
+        eventNumber: `${40 + (index % 30)}`,
         round: "Final",
         division: "Open",
         date,
@@ -1009,8 +1161,10 @@ function trackFieldScorecards(campus, competitionId, teamId, title, venue, index
         teamId,
         uwiTeamId: teamId,
         uwiTeamName: "UWI Blackbirds Track and Field Team",
+        track: null,
+        field: { fieldEventType: fieldEvent.disciplineType, fieldStandard: "Open", wind: fieldEvent.disciplineType === "horizontal-jump" ? 0.8 : null, remarks: "Best legal marks recorded from the seeded official sheet." },
         entries: fieldEntries,
-        summary: { eventWinner: fieldEntries[0].name, winningMark: fieldEntries[0].best, uwiPoints: 36, topUwiResult: `${fieldEntries[0].name} ${fieldEntries[0].best}` }
+        summary: { eventWinner: fieldEntries[0].name, winningMark: fieldEntries[0].best, uwiEntries: fieldUwi.length, completedEntries: fieldEntries.length, uwiPoints: 36, topUwiResult: `${fieldEntries[0].name} ${fieldEntries[0].best}`, winningResult: fieldEntries[0].best }
       }
     }
   ];
@@ -1023,18 +1177,27 @@ function formatTrackTime(seconds) {
 function swimmingScorecard(competitionId, teamId, title, venue, index = 0, date = day(5, 9)) {
   const eventNames = ["50m Freestyle", "100m Freestyle", "100m Butterfly", "100m Backstroke", "200m Individual Medley", "400m Freestyle"];
   const eventName = eventNames[index % eventNames.length];
-  const lanes = teamAthletes("swimming", 8, index).map((athlete, rowIndex) => ({
-    entryType: rowIndex < 6 ? "uwi" : "opponent",
-    lane: rowIndex + 1,
-    ...athlete,
-    seedTime: formatTrackTime(25.8 + rowIndex * 0.35 + (index % 4) * 0.1),
-    finalTime: formatTrackTime(24.9 + rowIndex * 0.31 + (index % 4) * 0.08),
-    split50: formatTrackTime(24.9 + rowIndex * 0.31),
-    place: rowIndex + 1,
-    points: [10, 8, 6, 5, 4, 3, 2, 1][rowIndex],
-    dq: false,
-    exhibition: false
-  }));
+  const uwiLanes = teamAthletes("swimming", 7, index);
+  const opponentLanes = opponentRoster("Regional Aquatics", 3, "Swimmer");
+  const lanes = [...uwiLanes, ...opponentLanes].map((athlete, rowIndex) => {
+    const isUwi = rowIndex < uwiLanes.length;
+    return {
+      entryType: isUwi ? "uwi" : "opponent",
+      lane: rowIndex + 1,
+      athleteId: isUwi ? athlete.athleteId : "",
+      id: isUwi ? athlete.id : "",
+      name: athlete.name,
+      year: String(1 + (rowIndex % 4)),
+      school: isUwi ? "UWI Cave Hill" : "Regional Aquatics",
+      seedTime: formatTrackTime(25.8 + rowIndex * 0.35 + (index % 4) * 0.1),
+      finalTime: formatTrackTime(24.9 + rowIndex * 0.31 + (index % 4) * 0.08),
+      split50: formatTrackTime(24.9 + rowIndex * 0.31),
+      place: rowIndex + 1,
+      points: [10, 8, 6, 5, 4, 3, 2, 1, 0, 0][rowIndex],
+      dq: false,
+      exhibition: rowIndex === 9 && index % 4 === 0
+    };
+  });
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1042,9 +1205,13 @@ function swimmingScorecard(competitionId, teamId, title, venue, index = 0, date 
     sport: "swimming",
     sportSlug: "swimming",
     title,
+    session: `S${1 + (index % 4)}`,
     eventName,
+    eventNumber: `${20 + (index % 30)}`,
     round: "Final",
     course: "SCM",
+    ageGroup: "Open",
+    schoolName: "UWI Cave Hill",
     date,
     venue,
     teamId,
@@ -1057,21 +1224,29 @@ function swimmingScorecard(competitionId, teamId, title, venue, index = 0, date 
 
 function netballScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(4, 22)) {
   const players = teamAthletes("netball", 12, index);
+  const positions = ["GS", "GA", "WA", "C", "WD", "GD", "GK", "GS", "GA", "WA", "GD", "GK"];
   const playerStats = players.map((player, playerIndex) => ({
     ...player,
+    number: playerIndex + 1,
+    position: positions[playerIndex],
     goals: playerIndex < 2 ? 24 - playerIndex * 7 + (index % 5) : 0,
     attempts: playerIndex < 2 ? 29 - playerIndex * 7 + (index % 5) : 0,
+    shootingPercentage: playerIndex < 2 ? percent(24 - playerIndex * 7 + (index % 5), 29 - playerIndex * 7 + (index % 5)) : "",
     goalAssists: playerIndex < 5 ? 3 + ((playerIndex + index) % 6) : 0,
     feeds: playerIndex < 7 ? 8 + ((playerIndex + index) % 12) : 1,
+    centrePassReceives: playerIndex >= 2 && playerIndex <= 4 ? 7 + ((playerIndex + index) % 10) : 1,
     intercepts: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0,
     gains: playerIndex > 5 ? 2 + ((playerIndex + index) % 5) : 1,
     deflections: playerIndex > 4 ? 2 + ((playerIndex + index) % 6) : 0,
     rebounds: playerIndex < 2 ? 2 + (index % 3) : 0,
+    turnovers: (playerIndex + index) % 4,
     penalties: 2 + ((playerIndex + index) % 7),
     minutes: playerIndex < 7 ? 60 : 12 + ((playerIndex + index) % 20)
   }));
   const goals = sumStats(playerStats, "goals");
   const opponentGoals = Math.max(31, goals - (4 + (index % 12)));
+  const uwiQuarters = splitTotal(goals, 4);
+  const opponentQuarters = splitTotal(opponentGoals, 4);
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1085,10 +1260,16 @@ function netballScorecard(competitionId, teamId, title, opponentName, venue, ind
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Netball Team",
     opponentName,
-    score: { uwi: goals, opponent: opponentGoals },
+    score: {
+      uwi: { q1: uwiQuarters[0], q2: uwiQuarters[1], q3: uwiQuarters[2], q4: uwiQuarters[3], overtime: 0, total: goals },
+      opponent: { q1: opponentQuarters[0], q2: opponentQuarters[1], q3: opponentQuarters[2], q4: opponentQuarters[3], overtime: 0, total: opponentGoals }
+    },
     result: `Blackbirds won ${goals}-${opponentGoals}`,
+    squad: players,
+    startingSeven: players.slice(0, 7).map((player, playerIndex) => ({ position: positions[playerIndex], athleteId: player.athleteId, name: player.name })),
     playerStats,
-    teamTotals: { goals, attempts: sumStats(playerStats, "attempts"), feeds: sumStats(playerStats, "feeds"), gains: sumStats(playerStats, "gains"), penalties: sumStats(playerStats, "penalties"), intercepts: sumStats(playerStats, "intercepts"), deflections: sumStats(playerStats, "deflections") }
+    substitutions: players.slice(7, 10).map((player, subIndex) => ({ period: `Q${2 + subIndex}`, playerOffAthleteId: players[subIndex + 2].athleteId, playerOffName: players[subIndex + 2].name, playerOnAthleteId: player.athleteId, playerOnName: player.name, position: positions[subIndex + 2], notes: "Rotation minutes" })),
+    teamTotals: { shootingPercentage: percent(goals, sumStats(playerStats, "attempts")), goals, attempts: sumStats(playerStats, "attempts"), feeds: sumStats(playerStats, "feeds"), gains: sumStats(playerStats, "gains"), penalties: sumStats(playerStats, "penalties"), intercepts: sumStats(playerStats, "intercepts"), deflections: sumStats(playerStats, "deflections") }
   };
 }
 
@@ -1096,17 +1277,26 @@ function volleyballScorecard(competitionId, teamId, title, opponentName, venue, 
   const players = teamAthletes("volleyball", 14, index);
   const playerStats = players.map((player, playerIndex) => ({
     ...player,
+    serveOrder: ["I", "II", "III", "IV", "V", "VI"][playerIndex % 6],
+    number: playerIndex + 1,
     kills: playerIndex < 8 ? 4 + ((playerIndex + index) % 10) : 0,
     aces: (playerIndex + index) % 4,
     blocks: playerIndex < 6 ? (playerIndex + index) % 5 : 0,
     assists: playerIndex === 1 ? 24 + (index % 18) : 1 + (playerIndex % 4),
     digs: 3 + ((playerIndex + index) % 13),
+    serveReceive: playerIndex < 8 ? 6 + ((playerIndex + index) % 12) : 1,
     receptions: playerIndex < 8 ? 6 + ((playerIndex + index) % 12) : 1,
-    serviceErrors: playerIndex % 5 === 0 ? 1 : 0,
-    attackErrors: playerIndex % 4 === 0 ? 2 : 0,
+    errors: (playerIndex % 5 === 0 ? 1 : 0) + (playerIndex % 4 === 0 ? 2 : 0),
+    substitutions: playerIndex > 6 ? 1 : 0,
+    timeouts: playerIndex === 0 ? 1 : 0,
+    captain: playerIndex === 0,
+    libero: playerIndex === 12,
     minutes: playerIndex < 7 ? 70 : 18 + ((playerIndex + index) % 25)
   }));
   const close = index % 4 === 0;
+  const sets = close
+    ? [{ set: 1, uwiScore: 25, opponentScore: 22, uwi: 25, opponent: 22 }, { set: 2, uwiScore: 22, opponentScore: 25, uwi: 22, opponent: 25 }, { set: 3, uwiScore: 25, opponentScore: 21, uwi: 25, opponent: 21 }, { set: 4, uwiScore: 23, opponentScore: 25, uwi: 23, opponent: 25 }, { set: 5, uwiScore: 15, opponentScore: 11, uwi: 15, opponent: 11 }]
+    : [{ set: 1, uwiScore: 25, opponentScore: 20, uwi: 25, opponent: 20 }, { set: 2, uwiScore: 23, opponentScore: 25, uwi: 23, opponent: 25 }, { set: 3, uwiScore: 25, opponentScore: 19, uwi: 25, opponent: 19 }, { set: 4, uwiScore: 25, opponentScore: 22, uwi: 25, opponent: 22 }];
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1120,11 +1310,20 @@ function volleyballScorecard(competitionId, teamId, title, opponentName, venue, 
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Volleyball Team",
     opponentName,
+    site: venue,
+    level: "Varsity",
+    startTime: "18:30",
+    endTime: close ? "20:42" : "20:05",
+    firstServe: index % 2 ? "opponent" : "uwi",
     result: `Blackbirds won 3-${close ? 2 : 1}`,
     finalSets: { uwi: 3, opponent: close ? 2 : 1 },
-    sets: close ? [{ uwi: 25, opponent: 22 }, { uwi: 22, opponent: 25 }, { uwi: 25, opponent: 21 }, { uwi: 23, opponent: 25 }, { uwi: 15, opponent: 11 }] : [{ uwi: 25, opponent: 20 }, { uwi: 23, opponent: 25 }, { uwi: 25, opponent: 19 }, { uwi: 25, opponent: 22 }],
+    sets,
+    roster: players,
     playerStats,
-    teamTotals: { kills: sumStats(playerStats, "kills"), aces: sumStats(playerStats, "aces"), blocks: sumStats(playerStats, "blocks"), assists: sumStats(playerStats, "assists"), digs: sumStats(playerStats, "digs") }
+    matchAdmin: { uwiTimeouts: 2, opponentTimeouts: 2, uwiSubs: 8 + (index % 4), opponentSubs: 7 + (index % 4), penaltyPoints: index % 2, replays: 3 + (index % 5) },
+    teamTotals: { kills: sumStats(playerStats, "kills"), aces: sumStats(playerStats, "aces"), blocks: sumStats(playerStats, "blocks"), assists: sumStats(playerStats, "assists"), digs: sumStats(playerStats, "digs") },
+    comments: "Seeded varsity scoresheet with linked UWI roster stats.",
+    officialNotes: "Officials confirmed lineups before first serve."
   };
 }
 
@@ -1132,8 +1331,13 @@ function hockeyScorecard(competitionId, teamId, title, opponentName, venue, inde
   const players = teamAthletes("hockey", 16, index);
   const uwiGoals = 2 + (index % 4);
   const opponentGoals = Math.max(0, uwiGoals - 1 - (index % 2));
+  const uwiPeriods = splitTotal(uwiGoals, 3);
+  const opponentPeriods = splitTotal(opponentGoals, 3);
   const scoring = Array.from({ length: uwiGoals }, (_, goalIndex) => ({
-    period: 1 + (goalIndex % 4),
+    side: "uwi",
+    period: `P${1 + (goalIndex % 3)}`,
+    number: players[goalIndex].number || goalIndex + 1,
+    goal: 1,
     scorerAthleteId: players[goalIndex].athleteId,
     scorerName: players[goalIndex].name,
     assist1AthleteId: players[(goalIndex + 2) % players.length].athleteId,
@@ -1141,6 +1345,7 @@ function hockeyScorecard(competitionId, teamId, title, opponentName, venue, inde
     assist2AthleteId: goalIndex % 2 ? players[(goalIndex + 4) % players.length].athleteId : "",
     assist2Name: goalIndex % 2 ? players[(goalIndex + 4) % players.length].name : ""
   }));
+  const playerStats = players.map((player, playerIndex) => ({ ...player, number: playerIndex + 1, shots: playerIndex < 8 ? 1 + ((playerIndex + index) % 5) : 0, saves: playerIndex === 15 ? 4 + (index % 5) : 0, tackles: playerIndex > 4 ? 3 + ((playerIndex + index) % 7) : 1, interceptions: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0, minutes: playerIndex < 11 ? 60 : 10 + ((playerIndex + index) % 20) }));
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1154,17 +1359,28 @@ function hockeyScorecard(competitionId, teamId, title, opponentName, venue, inde
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Hockey Team",
     opponentName,
-    score: { uwi: uwiGoals, opponent: opponentGoals },
+    league: "BUC League",
+    arena: venue,
+    score: {
+      uwi: { p1: uwiPeriods[0], p2: uwiPeriods[1], p3: uwiPeriods[2], overtime: 0, total: uwiGoals },
+      opponent: { p1: opponentPeriods[0], p2: opponentPeriods[1], p3: opponentPeriods[2], overtime: 0, total: opponentGoals }
+    },
     result: `Blackbirds won ${uwiGoals}-${opponentGoals}`,
+    roster: players,
     scoring,
-    penalties: [{ athleteId: players[6].athleteId, name: players[6].name, minutes: 2, infraction: "Stick obstruction" }],
-    playerStats: players.map((player, playerIndex) => ({ ...player, shots: playerIndex < 8 ? 1 + ((playerIndex + index) % 5) : 0, saves: playerIndex === 15 ? 4 + (index % 5) : 0, tackles: playerIndex > 4 ? 3 + ((playerIndex + index) % 7) : 1, interceptions: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0, minutes: playerIndex < 11 ? 60 : 10 + ((playerIndex + index) % 20) }))
+    penalties: [{ side: "uwi", period: "P2", time: "12:18", athleteId: players[6].athleteId, name: players[6].name, minutes: 2, infraction: "Stick obstruction" }],
+    goalieSaves: playerStats[15].saves,
+    teamTotals: { goals: uwiGoals, assists: scoring.reduce((sum, goal) => sum + (goal.assist1AthleteId ? 1 : 0) + (goal.assist2AthleteId ? 1 : 0), 0), penalties: 1, penaltyMinutes: 2 },
+    playerStats
   };
 }
 
 function badmintonScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(5, 3)) {
   const players = teamAthletes("badminton", 2, index);
   const close = index % 3 === 0;
+  const games = close ? [{ game: 1, uwi: 21, opponent: 19 }, { game: 2, uwi: 19, opponent: 21 }, { game: 3, uwi: 23, opponent: 21 }] : [{ game: 1, uwi: 21, opponent: 16 }, { game: 2, uwi: 21, opponent: 18 }];
+  const pointsFor = games.reduce((total, game) => total + game.uwi, 0);
+  const pointsAgainst = games.reduce((total, game) => total + game.opponent, 0);
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1178,17 +1394,52 @@ function badmintonScorecard(competitionId, teamId, title, opponentName, venue, i
     uwiTeamId: teamId,
     uwiTeamName: "UWI Blackbirds Badminton Team",
     opponentName,
-    discipline: "Doubles",
-    matchType: "Best of 3",
+    discipline: "MD",
+    matchType: "doubles",
+    matchNumber: `${1 + (index % 6)}`,
+    court: `Court ${1 + (index % 4)}`,
+    status: "completed",
     uwiPlayers: players,
-    games: close ? [{ uwi: 21, opponent: 19 }, { uwi: 19, opponent: 21 }, { uwi: 23, opponent: 21 }] : [{ uwi: 21, opponent: 16 }, { uwi: 21, opponent: 18 }],
-    summary: { uwiGamesWon: 2, opponentGamesWon: close ? 1 : 0, pointDifferential: close ? 3 : 8 },
+    opponentPlayers: opponentRoster(opponentName, 2, "Shuttler"),
+    games,
+    summary: { uwiGamesWon: 2, opponentGamesWon: close ? 1 : 0, pointsFor, pointsAgainst, pointDifferential: pointsFor - pointsAgainst, winner: "UWI Blackbirds Badminton Team" },
+    officials: { umpire: "Marcia Holder", serviceJudge: "Andre Lewis" },
+    timing: { startTime: "15:00", finishTime: close ? "16:12" : "15:46", durationMinutes: close ? 72 : 46 },
+    notes: "Seeded completed rubber with linked UWI doubles pair.",
     result: `Blackbirds won 2-${close ? 1 : 0}`
   };
 }
 
 function tableTennisScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(5, 4)) {
   const players = teamAthletes("table-tennis", 4, index);
+  const rubbers = players.map((player, rubberIndex) => {
+    const games = [{ game: 1, uwi: 11, opponent: 8 + (rubberIndex % 3) }, { game: 2, uwi: 11, opponent: 7 + (index % 4) }, { game: 3, uwi: 9, opponent: 11 }, { game: 4, uwi: 11, opponent: 6 + rubberIndex }];
+    return {
+      number: rubberIndex + 1,
+      label: `Rubber ${rubberIndex + 1}`,
+      type: rubberIndex === 3 ? "doubles" : "singles",
+      status: "played",
+      uwiPlayers: rubberIndex === 3 ? [{ ...player, slot: 1 }, { ...players[0], slot: 2 }] : [{ ...player, slot: 1 }],
+      opponentPlayers: rubberIndex === 3 ? opponentRoster(opponentName, 2, "Paddler") : opponentRoster(opponentName, 1, "Paddler"),
+      games,
+      uwiGames: 3,
+      opponentGames: 1,
+      uwiPoints: games.reduce((sum, game) => sum + game.uwi, 0),
+      opponentPoints: games.reduce((sum, game) => sum + game.opponent, 0),
+      winner: "UWI"
+    };
+  });
+  const summary = rubbers.reduce((acc, rubber) => {
+    acc.uwiRubbers += rubber.winner === "UWI" ? 1 : 0;
+    acc.opponentRubbers += rubber.winner === "Opponent" ? 1 : 0;
+    acc.uwiGames += rubber.uwiGames;
+    acc.opponentGames += rubber.opponentGames;
+    acc.pointsFor += rubber.uwiPoints;
+    acc.pointsAgainst += rubber.opponentPoints;
+    return acc;
+  }, { uwiRubbers: 0, opponentRubbers: 0, uwiGames: 0, opponentGames: 0, pointsFor: 0, pointsAgainst: 0 });
+  summary.pointDifferential = summary.pointsFor - summary.pointsAgainst;
+  summary.winner = "UWI Blackbirds Table Tennis Team";
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1203,14 +1454,48 @@ function tableTennisScorecard(competitionId, teamId, title, opponentName, venue,
     uwiTeamName: "UWI Blackbirds Table Tennis Team",
     opponentTeamName: opponentName,
     category: "Open",
-    rubbers: players.map((player, rubberIndex) => ({ label: `Rubber ${rubberIndex + 1}`, type: rubberIndex === 3 ? "doubles" : "singles", uwiPlayers: rubberIndex === 3 ? [player, players[0]] : [player], games: [{ uwi: 11, opponent: 8 + (rubberIndex % 3) }, { uwi: 11, opponent: 7 + (index % 4) }, { uwi: 9, opponent: 11 }, { uwi: 11, opponent: 6 + rubberIndex }], uwiGames: 3, opponentGames: 1, winner: "UWI" })),
-    summary: { uwiRubbers: 4, opponentRubbers: 0 },
+    status: "completed",
+    matchNumber: `${1 + (index % 8)}`,
+    venue,
+    rubbers,
+    summary,
+    officials: { referee: "Anika Best", umpire: "Dwayne Joseph" },
+    timing: { startTime: "17:30", finishTime: "19:06", durationMinutes: 96 },
+    notes: "Seeded tie sheet with singles and doubles rubbers.",
     result: "Blackbirds won 4-0"
   };
 }
 
 function tennisScorecard(competitionId, teamId, title, opponentName, venue, index = 0, date = day(5, 5)) {
   const players = teamAthletes("lawn-tennis", 4, index);
+  const matches = players.map((player, matchIndex) => {
+    const setScores = [{ set: 1, raw: "6-3", uwi: 6, opponent: 3 }, { set: 2, raw: index % 2 ? "7-5" : "6-4", uwi: index % 2 ? 7 : 6, opponent: index % 2 ? 5 : 4 }];
+    return {
+      number: matchIndex + 1,
+      label: `Match ${matchIndex + 1}`,
+      type: matchIndex === 3 ? "doubles" : "singles",
+      status: "played",
+      uwiPlayers: matchIndex === 3 ? [{ ...player, slot: 1 }, { ...players[0], slot: 2 }] : [{ ...player, slot: 1 }],
+      opponentPlayers: matchIndex === 3 ? opponentRoster(opponentName, 2, "Player") : opponentRoster(opponentName, 1, "Player"),
+      setScores,
+      uwiSets: 2,
+      opponentSets: 0,
+      uwiGames: setScores.reduce((sum, set) => sum + set.uwi, 0),
+      opponentGames: setScores.reduce((sum, set) => sum + set.opponent, 0),
+      winner: "UWI"
+    };
+  });
+  const summary = matches.reduce((acc, match) => {
+    acc.uwiMatches += match.winner === "UWI" ? 1 : 0;
+    acc.opponentMatches += match.winner === "Opponent" ? 1 : 0;
+    acc.uwiSets += match.uwiSets;
+    acc.opponentSets += match.opponentSets;
+    acc.gamesFor += match.uwiGames;
+    acc.gamesAgainst += match.opponentGames;
+    return acc;
+  }, { uwiMatches: 0, opponentMatches: 0, uwiSets: 0, opponentSets: 0, gamesFor: 0, gamesAgainst: 0 });
+  summary.gameDifferential = summary.gamesFor - summary.gamesAgainst;
+  summary.winner = "UWI Blackbirds Tennis Team";
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1225,14 +1510,45 @@ function tennisScorecard(competitionId, teamId, title, opponentName, venue, inde
     uwiTeamName: "UWI Blackbirds Tennis Team",
     opponentTeamName: opponentName,
     category: "Open",
-    matches: players.map((player, matchIndex) => ({ label: `Match ${matchIndex + 1}`, type: matchIndex === 3 ? "doubles" : "singles", uwiPlayers: matchIndex === 3 ? [player, players[0]] : [player], setScores: [{ raw: "6-3", uwi: 6, opponent: 3 }, { raw: index % 2 ? "7-5" : "6-4", uwi: index % 2 ? 7 : 6, opponent: index % 2 ? 5 : 4 }], uwiSets: 2, opponentSets: 0, winner: "UWI" })),
-    summary: { uwiMatches: 4, opponentMatches: 0 },
+    status: "completed",
+    matchNumber: `${1 + (index % 8)}`,
+    time: "16:00",
+    weather: "Clear",
+    courtConditions: "Dry hard court",
+    matches,
+    summary,
+    officials: { referee: "Kirk Alleyne" },
+    timing: { startTime: "16:00", finishTime: "18:15", durationMinutes: 135 },
+    notes: "Seeded tennis tie with linked roster athletes.",
     result: "Blackbirds won 4-0"
   };
 }
 
 function taekwondoScorecard(competitionId, teamId, title, athlete, venue, index = 0, date = day(5, 7)) {
-  const score = 7.45 + (index % 9) * 0.08;
+  const judges = Array.from({ length: 5 }, (_, judgeIndex) => {
+    const deductions = { basic: 0.1 + (judgeIndex % 2) * 0.05, individual: judgeIndex === 2 ? 0.1 : 0, balance: judgeIndex === 4 ? 0.05 : 0 };
+    const presentation = { powerSpeed: 1.75 + (judgeIndex % 2) * 0.05, rhythmTempo: 1.78 + (index % 3) * 0.03, energy: 1.82 + (judgeIndex % 3) * 0.04 };
+    const accuracyScore = Math.max(0, 4 - deductions.basic - deductions.individual - deductions.balance);
+    const presentationScore = Math.min(6, presentation.powerSpeed + presentation.rhythmTempo + presentation.energy);
+    const penalty = judgeIndex === 3 && index % 5 === 0 ? 0.1 : 0;
+    const total = Number(Math.max(0, Math.min(10, accuracyScore + presentationScore - penalty)).toFixed(2));
+    return {
+      number: judgeIndex + 1,
+      name: ["Judge Clarke", "Judge Baptiste", "Judge Singh", "Judge Moore", "Judge Hinds"][judgeIndex],
+      position: judgeIndex === 0 ? "Head Judge" : "Corner Judge",
+      active: true,
+      deductions,
+      presentation,
+      accuracyScore: Number(accuracyScore.toFixed(2)),
+      presentationScore: Number(presentationScore.toFixed(2)),
+      penalty,
+      total,
+      hasScore: true,
+      comments: judgeIndex === 0 ? "Controlled rhythm and clean stances." : ""
+    };
+  });
+  const finalScore = Number((judges.reduce((sum, judge) => sum + judge.total, 0) / judges.length).toFixed(2));
+  const rank = 1 + (index % 4);
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1245,11 +1561,14 @@ function taekwondoScorecard(competitionId, teamId, title, athlete, venue, index 
     teamId,
     uwiTeamId: teamId,
     athlete,
+    format: "poomsae",
+    court: `Court ${1 + (index % 3)}`,
     division: "Senior Poomsae",
     round: "Final",
     poomsae: "Taegeuk 8",
-    judges: [{ score: score - 0.1 }, { score }, { score: score + 0.15 }, { score: score - 0.05 }, { score: score + 0.08 }],
-    summary: { finalScore: Number(score.toFixed(2)), rank: 1 + (index % 4), judgeCount: 5 },
+    rank,
+    judges,
+    summary: { finalScore, rank, judgeCount: 5, averageScore: finalScore, bestJudgeScore: Math.max(...judges.map((judge) => judge.total)) },
     result: index % 4 === 0 ? "Gold medal" : index % 4 === 1 ? "Silver medal" : index % 4 === 2 ? "Bronze medal" : "Finalist"
   };
 }
@@ -1257,6 +1576,9 @@ function taekwondoScorecard(competitionId, teamId, title, athlete, venue, index 
 function chessScorecard(competitionId, teamId, title, athlete, opponentName, venue, index = 0, date = day(5, 8)) {
   const resultLabel = index % 5 === 0 ? "Draw" : "Win";
   const score = resultLabel === "Draw" ? 0.5 : 1;
+  const color = index % 2 ? "black" : "white";
+  const resultCode = resultLabel === "Draw" ? "draw" : color;
+  const moves = chessMoves(24 + (index % 12));
   return {
     seedDataset: DATASET_ID,
     eventType: "scorecard",
@@ -1268,16 +1590,34 @@ function chessScorecard(competitionId, teamId, title, athlete, opponentName, ven
     venue,
     teamId,
     uwiTeamId: teamId,
-    uwiPlayer: athlete,
-    opponent: { name: `${opponentName} Board 1` },
+    uwiTeamName: "UWI Blackbirds Chess Team",
+    uwiPlayer: { ...athlete, color, ranking: String(1740 + (index % 120)) },
+    opponent: { name: `${opponentName} Board 1`, color: color === "white" ? "black" : "white", ranking: String(1690 + (index % 140)) },
     round: "Round 3",
     board: 1,
+    section: "Open",
+    pairingNumber: `${index + 1}`,
     timeControl: "90+30",
     opening: "Queen's Gambit Declined",
-    moves: 34 + (index % 28),
-    summary: { uwiScore: score, resultLabel, moveCount: 34 + (index % 28) },
+    duration: "3h 08m",
+    moves,
+    summary: { uwiScore: score, opponentScore: 1 - score, resultCode, resultLabel: resultLabel === "Draw" ? "Draw" : "UWI won", moveCount: moves.length, color },
+    signatures: { arbiter: "Peter Jordan", player: athlete.name },
+    notes: "Seeded board result with a short algebraic move record.",
     result: resultLabel === "Draw" ? "1/2-1/2" : "1-0"
   };
+}
+
+function chessMoves(count) {
+  const pairs = [
+    ["d4", "Nf6"], ["c4", "e6"], ["Nc3", "d5"], ["Bg5", "Be7"], ["e3", "O-O"], ["Nf3", "h6"],
+    ["Bh4", "b6"], ["cxd5", "Nxd5"], ["Bxe7", "Qxe7"], ["Nxd5", "exd5"], ["Rc1", "Be6"], ["Qa4", "c5"],
+    ["Qa3", "Rc8"], ["Bb5", "a6"], ["dxc5", "bxc5"], ["O-O", "Ra7"], ["Be2", "Nd7"], ["Rc3", "Qd6"],
+    ["Rfc1", "Rac7"], ["Nd4", "Nf6"], ["Bf3", "g6"], ["h3", "Kg7"], ["Qa5", "Nd7"], ["b4", "c4"],
+    ["b5", "axb5"], ["Nxb5", "Rc5"], ["Nd4", "Rxa5"], ["Nxe6+", "fxe6"], ["Rxa5", "Ne5"], ["Be2", "Qb4"],
+    ["Ra7+", "Kf6"], ["f4", "Nc6"], ["Rc7", "Qd2"], ["Kf2", "Nb4"], ["g4", "Nd3+"], ["Kf3", "Qe1"]
+  ];
+  return pairs.slice(0, count).map(([white, black], index) => ({ number: index + 1, white, black }));
 }
 
 function buildDirectAthleteStats(campus, stephenId, fictionalAthletes) {
