@@ -25,6 +25,7 @@
     filteredSeason: "all",
     searchTerm: "",
     pbSportFilter: "all",
+    pbTypeFilter: "single",
     pbSort: "date-desc",
     editBound: false
   };
@@ -334,6 +335,7 @@
       discipline: raw.discipline || raw.disciplineType || "",
       eventType: raw.eventType || "",
       contextLabel: raw.contextLabel || "",
+      bestType: raw.bestType || raw.type || "",
       season: raw.season || "Unknown",
       competitionName: raw.competitionName || raw.competition || "",
       date: raw.date || "",
@@ -934,9 +936,19 @@
     ) {
       state.pbSportFilter = pbSportOptions[0].slug;
     }
+    const pbTypeOptions = getPersonalBestTypeOptions(allPbs);
+    if (
+      pbTypeOptions.length &&
+      !pbTypeOptions.some((option) => option.slug === state.pbTypeFilter)
+    ) {
+      state.pbTypeFilter = pbTypeOptions[0].slug;
+    }
     const pbs = getFilteredPBs(allPbs);
     const sportOptions = pbSportOptions
       .map((option) => `<option value="${escapeHtml(option.slug)}" ${state.pbSportFilter === option.slug ? "selected" : ""}>${escapeHtml(option.label)}</option>`)
+      .join("");
+    const typeOptions = pbTypeOptions
+      .map((option) => `<option value="${escapeHtml(option.slug)}" ${state.pbTypeFilter === option.slug ? "selected" : ""}>${escapeHtml(option.label)}</option>`)
       .join("");
 
     els.athletePersonalBests.innerHTML = `
@@ -957,9 +969,17 @@
           </select>
         </div>
         <div>
+          <label for="pbTypeFilter">Best Type</label>
+          <select class="select" id="pbTypeFilter">
+            ${typeOptions || `<option value="">No best types available</option>`}
+          </select>
+        </div>
+        <div>
           <label for="pbSort">Sort</label>
           <select class="select" id="pbSort">
             <option value="date-desc" ${state.pbSort === "date-desc" ? "selected" : ""}>Newest first</option>
+            <option value="type-single" ${state.pbSort === "type-single" ? "selected" : ""}>Single bests first</option>
+            <option value="type-aggregate" ${state.pbSort === "type-aggregate" ? "selected" : ""}>Aggregate bests first</option>
             <option value="sport-asc" ${state.pbSort === "sport-asc" ? "selected" : ""}>Sport A-Z</option>
             <option value="sport-desc" ${state.pbSort === "sport-desc" ? "selected" : ""}>Sport Z-A</option>
             <option value="event-asc" ${state.pbSort === "event-asc" ? "selected" : ""}>Event A-Z</option>
@@ -976,6 +996,7 @@
                   <tr>
                     <th>Event</th>
                     <th>Sport</th>
+                    <th>Type</th>
                     <th>Performance</th>
                     <th>Season</th>
                     <th>Competition</th>
@@ -988,6 +1009,7 @@
                     <tr>
                       <td>${escapeHtml(formatPersonalBestEventName(item))}</td>
                       <td>${escapeHtml(getPersonalBestSportLabel(item))}</td>
+                      <td>${escapeHtml(getPersonalBestTypeLabel(item))}</td>
                       <td>${escapeHtml(formatValueWithUnit(item.performance, item.unit) || "—")}</td>
                       <td>${escapeHtml(formatPersonalBestSeason(item))}</td>
                       <td>${escapeHtml(item.competitionName || "Unlinked")}</td>
@@ -1007,6 +1029,14 @@
     if (pbSportFilter) {
       pbSportFilter.addEventListener("change", function () {
         state.pbSportFilter = this.value || pbSportOptions[0]?.slug || "";
+        renderPersonalBests();
+      });
+    }
+
+    const pbTypeFilter = document.getElementById("pbTypeFilter");
+    if (pbTypeFilter) {
+      pbTypeFilter.addEventListener("change", function () {
+        state.pbTypeFilter = this.value || pbTypeOptions[0]?.slug || "";
         renderPersonalBests();
       });
     }
@@ -1551,11 +1581,15 @@
     let items = Array.isArray(sourceItems) ? sourceItems.slice() : mergeDerivedPersonalBests();
 
     if (state.filteredSeason !== "all") {
-      items = items.filter((item) => String(item.season || "").trim() === state.filteredSeason);
+      items = items.filter((item) => formatPersonalBestSeason(item) === state.filteredSeason);
     }
 
     if (state.pbSportFilter !== "all") {
       items = items.filter((item) => getPersonalBestSportSlug(item) === state.pbSportFilter);
+    }
+
+    if (state.pbTypeFilter) {
+      items = items.filter((item) => getPersonalBestType(item) === state.pbTypeFilter);
     }
 
     if (state.searchTerm) {
@@ -1563,6 +1597,7 @@
       items = items.filter((item) =>
         [
           getPersonalBestSportLabel(item),
+          getPersonalBestTypeLabel(item),
           item.eventName,
           item.competitionName,
           item.notes
@@ -1582,6 +1617,16 @@
 
     if (state.pbSort === "event-asc") {
       return items.sort((a, b) => formatPersonalBestEventName(a).localeCompare(formatPersonalBestEventName(b)));
+    }
+
+    if (state.pbSort === "type-single" || state.pbSort === "type-aggregate") {
+      const preferred = state.pbSort === "type-single" ? "single" : "aggregate";
+      return items.sort((a, b) => {
+        const aDelta = getPersonalBestType(a) === preferred ? 0 : 1;
+        const bDelta = getPersonalBestType(b) === preferred ? 0 : 1;
+        const dateDelta = new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime();
+        return aDelta - bDelta || dateDelta;
+      });
     }
 
     return items.sort((a, b) => {
@@ -1913,6 +1958,43 @@
     return `${getPersonalBestSportSlug(item)}:${item.eventName || ""}:${item.performance || ""}:${item.season || ""}:${item.competitionName || ""}`;
   }
 
+  function getPersonalBestTypeOptions(items) {
+    const available = new Set(
+      (items || [])
+        .filter((item) => !state.pbSportFilter || state.pbSportFilter === "all" || getPersonalBestSportSlug(item) === state.pbSportFilter)
+        .filter((item) => state.filteredSeason === "all" || String(formatPersonalBestSeason(item)) === state.filteredSeason)
+        .map(getPersonalBestType)
+        .filter(Boolean)
+    );
+    return [
+      { slug: "single", label: "Single-game/event bests" },
+      { slug: "aggregate", label: "Season/aggregate bests" }
+    ].filter((option) => available.has(option.slug));
+  }
+
+  function getPersonalBestType(item) {
+    const explicit = String(item?.bestType || "").trim().toLowerCase();
+    if (["single", "aggregate"].includes(explicit)) return explicit;
+    const eventName = String(item?.eventName || "").toLowerCase();
+    const competitionName = String(item?.competitionName || "").toLowerCase();
+    const notes = String(item?.notes || "").toLowerCase();
+    const context = String(item?.contextLabel || "").toLowerCase();
+    if (
+      eventName.includes("season") ||
+      competitionName.includes("season aggregate") ||
+      notes.includes("season total") ||
+      notes.includes("season aggregate") ||
+      context.includes("season")
+    ) {
+      return "aggregate";
+    }
+    return "single";
+  }
+
+  function getPersonalBestTypeLabel(item) {
+    return getPersonalBestType(item) === "aggregate" ? "Season/Aggregate" : "Single Game/Event";
+  }
+
   function getPersonalBestSportOptions(items) {
     const options = new Map();
     (items || []).forEach((item) => {
@@ -2020,6 +2102,7 @@
       unit: "",
       sport: sportSlug,
       sportSlug,
+      bestType: "single",
       season: seasonOverride || seasonFromLine(source),
       contextLabel: getPersonalBestContextLabel({ sport: sportSlug, sportSlug, source }),
       competitionName: source?.competitionName || "Recorded score sheet",
@@ -2031,6 +2114,7 @@
   function toDerivedSeasonPb(sportSlug, eventName, performance, source, season) {
     return {
       ...toDerivedSportPb(sportSlug, eventName, performance, source, season, `Derived from season totals across linked ${APP.getSportName?.(sportSlug) || formatSportName(sportSlug)} records.`),
+      bestType: "aggregate",
       contextLabel: `${season || seasonFromLine(source)} Season`,
       competitionName: "Season aggregate"
     };
@@ -2060,7 +2144,8 @@
     });
 
     mergeDerivedPersonalBests().forEach((item) => {
-      if (item.season) seasons.add(String(item.season));
+      const season = formatPersonalBestSeason(item);
+      if (season && !/^unknown$/i.test(season)) seasons.add(season);
     });
 
     return Array.from(seasons).sort().reverse();
