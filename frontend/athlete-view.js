@@ -919,8 +919,15 @@
     if (!els.athletePersonalBests) return;
 
     const allPbs = mergeDerivedPersonalBests();
+    const pbSportOptions = getPersonalBestSportOptions(allPbs);
+    if (
+      pbSportOptions.length &&
+      (state.pbSportFilter === "all" || !pbSportOptions.some((option) => option.slug === state.pbSportFilter))
+    ) {
+      state.pbSportFilter = pbSportOptions[0].slug;
+    }
     const pbs = getFilteredPBs(allPbs);
-    const sportOptions = getPersonalBestSportOptions(allPbs)
+    const sportOptions = pbSportOptions
       .map((option) => `<option value="${escapeHtml(option.slug)}" ${state.pbSportFilter === option.slug ? "selected" : ""}>${escapeHtml(option.label)}</option>`)
       .join("");
 
@@ -938,8 +945,7 @@
         <div>
           <label for="pbSportFilter">Sport</label>
           <select class="select" id="pbSportFilter">
-            <option value="all">All sports</option>
-            ${sportOptions}
+            ${sportOptions || `<option value="">No sports available</option>`}
           </select>
         </div>
         <div>
@@ -992,7 +998,7 @@
     const pbSportFilter = document.getElementById("pbSportFilter");
     if (pbSportFilter) {
       pbSportFilter.addEventListener("change", function () {
-        state.pbSportFilter = this.value || "all";
+        state.pbSportFilter = this.value || pbSportOptions[0]?.slug || "";
         renderPersonalBests();
       });
     }
