@@ -24,6 +24,8 @@
     records: [],
     filteredSeason: "all",
     searchTerm: "",
+    pbSportFilter: "all",
+    pbSort: "date-desc",
     editBound: false
   };
 
@@ -322,6 +324,8 @@
       eventName: raw.eventName || raw.event || "",
       performance: raw.performance || raw.value || raw.statValue || "",
       unit: raw.unit || "",
+      sport: raw.sport || raw.sportSlug || "",
+      sportSlug: raw.sportSlug || raw.sport || "",
       season: raw.season || "Unknown",
       competitionName: raw.competitionName || raw.competition || "",
       date: raw.date || "",
@@ -914,7 +918,11 @@
   function renderPersonalBests() {
     if (!els.athletePersonalBests) return;
 
-    const pbs = getFilteredPBs();
+    const allPbs = mergeDerivedPersonalBests();
+    const pbs = getFilteredPBs(allPbs);
+    const sportOptions = getPersonalBestSportOptions(allPbs)
+      .map((option) => `<option value="${escapeHtml(option.slug)}" ${state.pbSportFilter === option.slug ? "selected" : ""}>${escapeHtml(option.label)}</option>`)
+      .join("");
 
     els.athletePersonalBests.innerHTML = `
       <div class="section-title">
@@ -926,6 +934,25 @@
         </div>
       </div>
 
+      <div class="stats-toolbar">
+        <div>
+          <label for="pbSportFilter">Sport</label>
+          <select class="select" id="pbSportFilter">
+            <option value="all">All sports</option>
+            ${sportOptions}
+          </select>
+        </div>
+        <div>
+          <label for="pbSort">Sort</label>
+          <select class="select" id="pbSort">
+            <option value="date-desc" ${state.pbSort === "date-desc" ? "selected" : ""}>Newest first</option>
+            <option value="sport-asc" ${state.pbSort === "sport-asc" ? "selected" : ""}>Sport A-Z</option>
+            <option value="sport-desc" ${state.pbSort === "sport-desc" ? "selected" : ""}>Sport Z-A</option>
+            <option value="event-asc" ${state.pbSort === "event-asc" ? "selected" : ""}>Event A-Z</option>
+          </select>
+        </div>
+      </div>
+
       ${
         pbs.length
           ? `
@@ -934,6 +961,7 @@
                 <thead>
                   <tr>
                     <th>Event</th>
+                    <th>Sport</th>
                     <th>Performance</th>
                     <th>Season</th>
                     <th>Competition</th>
@@ -945,6 +973,7 @@
                   ${pbs.map((item) => `
                     <tr>
                       <td>${escapeHtml(item.eventName || "—")}</td>
+                      <td>${escapeHtml(getPersonalBestSportLabel(item))}</td>
                       <td>${escapeHtml(formatValueWithUnit(item.performance, item.unit) || "—")}</td>
                       <td>${escapeHtml(item.season || "—")}</td>
                       <td>${escapeHtml(item.competitionName || "Unlinked")}</td>
@@ -959,6 +988,22 @@
           : `<div class="empty-state">No personal bests match the current view yet.</div>`
       }
     `;
+
+    const pbSportFilter = document.getElementById("pbSportFilter");
+    if (pbSportFilter) {
+      pbSportFilter.addEventListener("change", function () {
+        state.pbSportFilter = this.value || "all";
+        renderPersonalBests();
+      });
+    }
+
+    const pbSort = document.getElementById("pbSort");
+    if (pbSort) {
+      pbSort.addEventListener("change", function () {
+        state.pbSort = this.value || "date-desc";
+        renderPersonalBests();
+      });
+    }
   }
 
   // Stat Entry
@@ -1488,17 +1533,22 @@
     });
   }
 
-  function getFilteredPBs() {
-    let items = mergeDerivedPersonalBests();
+  function getFilteredPBs(sourceItems) {
+    let items = Array.isArray(sourceItems) ? sourceItems.slice() : mergeDerivedPersonalBests();
 
     if (state.filteredSeason !== "all") {
       items = items.filter((item) => String(item.season || "").trim() === state.filteredSeason);
+    }
+
+    if (state.pbSportFilter !== "all") {
+      items = items.filter((item) => getPersonalBestSportSlug(item) === state.pbSportFilter);
     }
 
     if (state.searchTerm) {
       const needle = state.searchTerm.toLowerCase();
       items = items.filter((item) =>
         [
+          getPersonalBestSportLabel(item),
           item.eventName,
           item.competitionName,
           item.notes
@@ -1506,6 +1556,18 @@
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(needle))
       );
+    }
+
+    if (state.pbSort === "sport-asc" || state.pbSort === "sport-desc") {
+      return items.sort((a, b) => {
+        const sportDelta = getPersonalBestSportLabel(a).localeCompare(getPersonalBestSportLabel(b));
+        const eventDelta = String(a.eventName || "").localeCompare(String(b.eventName || ""));
+        return state.pbSort === "sport-asc" ? sportDelta || eventDelta : -sportDelta || eventDelta;
+      });
+    }
+
+    if (state.pbSort === "event-asc") {
+      return items.sort((a, b) => String(a.eventName || "").localeCompare(String(b.eventName || "")));
     }
 
     return items.sort((a, b) => {
@@ -1834,7 +1896,28 @@
   }
 
   function personalBestKey(item) {
-    return `${item.eventName || ""}:${item.performance || ""}:${item.season || ""}:${item.competitionName || ""}`;
+    return `${getPersonalBestSportSlug(item)}:${item.eventName || ""}:${item.performance || ""}:${item.season || ""}:${item.competitionName || ""}`;
+  }
+
+  function getPersonalBestSportOptions(items) {
+    const options = new Map();
+    (items || []).forEach((item) => {
+      const slug = getPersonalBestSportSlug(item);
+      if (!slug || options.has(slug)) return;
+      options.set(slug, getPersonalBestSportLabel(item));
+    });
+    return Array.from(options.entries())
+      .map(([slug, label]) => ({ slug, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }
+
+  function getPersonalBestSportSlug(item) {
+    return APP.normalizeSportSlug(item?.sportSlug || item?.sport || item?.statData?.sportSlug || item?.statData?.sport || "");
+  }
+
+  function getPersonalBestSportLabel(item) {
+    const slug = getPersonalBestSportSlug(item);
+    return slug ? (APP.getSportName?.(slug) || formatSportName(slug)) : "Sport not recorded";
   }
 
   function toDerivedSportPb(sportSlug, eventName, performance, source, seasonOverride, notesOverride) {
@@ -1843,7 +1926,9 @@
       eventName,
       performance,
       unit: "",
-      season: seasonOverride || source?.season || "Unknown",
+      sport: sportSlug,
+      sportSlug,
+      season: seasonOverride || source?.season || source?.statData?.season || "Unknown",
       competitionName: source?.competitionName || "Recorded score sheet",
       date: source?.date || "",
       notes: notesOverride || `Derived from linked ${APP.getSportName?.(sportSlug) || formatSportName(sportSlug)} performance data.`
@@ -1863,7 +1948,9 @@
       eventName,
       performance: performance || "Recorded mark",
       unit: "",
-      season: seasonOverride || source?.season || "Unknown",
+      sport: "track-and-field",
+      sportSlug: "track-and-field",
+      season: seasonOverride || source?.season || source?.statData?.season || "Unknown",
       competitionName: source?.competitionName || "Recorded result sheet",
       date: source?.date || "",
       notes: "Derived from linked track and field result-sheet data."
