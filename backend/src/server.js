@@ -1239,22 +1239,55 @@ async function archiveEntity(req, res, model) {
   res.json(cleanObject({ ...entityResponse(record), linkedDataSummary }));
 }
 
+// Scorecard Sport Dispatch
+/**
+ * Scorecard payloads reuse generic keys such as `playerStats`, so athlete row
+ * expansion must be gated by the saved sport before a sport-specific parser runs.
+ */
+function normalizeSportSlug(value) {
+  const normalized = String(value || "").trim().toLowerCase().replace(/[_\s]+/g, "-");
+  const aliases = {
+    tabletennis: "table-tennis",
+    "table-tennis": "table-tennis",
+    lawntennis: "lawn-tennis",
+    "lawn-tennis": "lawn-tennis",
+    tennis: "lawn-tennis",
+    athletics: "track-and-field",
+    track: "track-and-field",
+    "track-field": "track-and-field",
+    "track-and-field": "track-and-field",
+    "track-and-field-athletics": "track-and-field",
+    volleyball: "volleyball",
+    "beach-volleyball": "beach-volleyball"
+  };
+  return aliases[normalized] || normalized;
+}
+
+function scorecardSportSlug(record) {
+  const row = flattenRecord(record);
+  const statData = row?.statData && typeof row.statData === "object" ? row.statData : row?.data?.statData || {};
+  return normalizeSportSlug(row?.sportSlug || row?.sport || statData.sportSlug || statData.sport || row?.data?.sportSlug || row?.data?.sport || "");
+}
+
 function expandCompetitionRowsForAthlete(record, athleteId) {
-  return [
-    ...athleteCricketRows(record, athleteId),
-    ...athleteFootballRows(record, athleteId),
-    ...athleteVolleyballRows(record, athleteId),
-    ...athleteHockeyRows(record, athleteId),
-    ...athleteBasketballRows(record, athleteId),
-    ...athleteSwimmingRows(record, athleteId),
-    ...athleteNetballRows(record, athleteId),
-    ...athleteBadmintonRows(record, athleteId),
-    ...athleteTableTennisRows(record, athleteId),
-    ...athleteTennisRows(record, athleteId),
-    ...athleteTaekwondoRows(record, athleteId),
-    ...athleteChessRows(record, athleteId),
-    ...athleteTrackFieldRows(record, athleteId)
-  ];
+  const expanders = {
+    cricket: athleteCricketRows,
+    football: athleteFootballRows,
+    volleyball: athleteVolleyballRows,
+    "beach-volleyball": athleteVolleyballRows,
+    hockey: athleteHockeyRows,
+    basketball: athleteBasketballRows,
+    swimming: athleteSwimmingRows,
+    "track-and-field": athleteTrackFieldRows,
+    netball: athleteNetballRows,
+    badminton: athleteBadmintonRows,
+    "table-tennis": athleteTableTennisRows,
+    "lawn-tennis": athleteTennisRows,
+    taekwondo: athleteTaekwondoRows,
+    chess: athleteChessRows
+  };
+  const expand = expanders[scorecardSportSlug(record)];
+  return expand ? expand(record, athleteId) : [];
 }
 
 app.get("/health", (_req, res) => {
