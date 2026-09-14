@@ -1235,7 +1235,16 @@
    */
   function renderSportStatsButtons() {
     const links = getAthleteSportSlugs()
-      .map((slug) => ATHLETE_STAT_PAGES[slug] ? { ...ATHLETE_STAT_PAGES[slug], slug } : null)
+      .map((slug) => {
+        const sportName = APP.getSportName?.(slug) || formatSportName(slug);
+        const dedicated = ATHLETE_STAT_PAGES[slug];
+        if (dedicated) return { ...dedicated, slug, href: `${dedicated.href}?athleteId=${encodeURIComponent(state.athleteId)}` };
+        return {
+          slug,
+          href: `athlete-sport-stats.html?athleteId=${encodeURIComponent(state.athleteId)}&sport=${encodeURIComponent(slug)}`,
+          label: `${sportName} Stats`
+        };
+      })
       .filter(Boolean);
 
     if (!links.length) return "";
@@ -1243,7 +1252,7 @@
     return `
       <div class="quick-actions" style="margin:14px 0;">
         ${links.map((link) => `
-          <a class="btn btn-campus" href="${link.href}?athleteId=${encodeURIComponent(state.athleteId)}">
+          <a class="btn btn-campus" href="${escapeHtml(link.href)}">
             Open ${escapeHtml(link.label)}
           </a>
         `).join("")}
