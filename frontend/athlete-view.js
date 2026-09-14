@@ -326,6 +326,14 @@
       unit: raw.unit || "",
       sport: raw.sport || raw.sportSlug || "",
       sportSlug: raw.sportSlug || raw.sport || "",
+      format: raw.format || raw.matchFormat || raw.competitionFormat || "",
+      matchType: raw.matchType || "",
+      category: raw.category || "",
+      division: raw.division || "",
+      round: raw.round || "",
+      discipline: raw.discipline || raw.disciplineType || "",
+      eventType: raw.eventType || "",
+      contextLabel: raw.contextLabel || "",
       season: raw.season || "Unknown",
       competitionName: raw.competitionName || raw.competition || "",
       date: raw.date || "",
@@ -978,10 +986,10 @@
                 <tbody>
                   ${pbs.map((item) => `
                     <tr>
-                      <td>${escapeHtml(item.eventName || "—")}</td>
+                      <td>${escapeHtml(formatPersonalBestEventName(item))}</td>
                       <td>${escapeHtml(getPersonalBestSportLabel(item))}</td>
                       <td>${escapeHtml(formatValueWithUnit(item.performance, item.unit) || "—")}</td>
-                      <td>${escapeHtml(item.season || "—")}</td>
+                      <td>${escapeHtml(formatPersonalBestSeason(item))}</td>
                       <td>${escapeHtml(item.competitionName || "Unlinked")}</td>
                       <td>${escapeHtml(formatDate(item.date) || "—")}</td>
                       <td>${escapeHtml(item.notes || "—")}</td>
@@ -1567,13 +1575,13 @@
     if (state.pbSort === "sport-asc" || state.pbSort === "sport-desc") {
       return items.sort((a, b) => {
         const sportDelta = getPersonalBestSportLabel(a).localeCompare(getPersonalBestSportLabel(b));
-        const eventDelta = String(a.eventName || "").localeCompare(String(b.eventName || ""));
+        const eventDelta = formatPersonalBestEventName(a).localeCompare(formatPersonalBestEventName(b));
         return state.pbSort === "sport-asc" ? sportDelta || eventDelta : -sportDelta || eventDelta;
       });
     }
 
     if (state.pbSort === "event-asc") {
-      return items.sort((a, b) => String(a.eventName || "").localeCompare(String(b.eventName || "")));
+      return items.sort((a, b) => formatPersonalBestEventName(a).localeCompare(formatPersonalBestEventName(b)));
     }
 
     return items.sort((a, b) => {
@@ -1779,7 +1787,7 @@
   function aggregateBySeason(lines, valueFn) {
     const map = new Map();
     lines.forEach((line) => {
-      const season = String(line.season || "Unknown");
+      const season = seasonFromLine(line);
       const current = map.get(season) || { season, value: 0, source: line };
       current.value += valueFn(line);
       current.source = line;
@@ -1926,6 +1934,84 @@
     return slug ? (APP.getSportName?.(slug) || formatSportName(slug)) : "Sport not recorded";
   }
 
+  function formatPersonalBestEventName(item) {
+    const eventName = String(item?.eventName || "Best Performance").trim();
+    const context = getPersonalBestContextLabel(item);
+    if (!context || eventName.toLowerCase().includes(context.toLowerCase())) return eventName;
+    return `${eventName} (${context})`;
+  }
+
+  function formatPersonalBestSeason(item) {
+    const season = String(item?.season || "").trim();
+    if (season && !/^unknown$/i.test(season)) return season;
+    return yearFromDate(item?.date) || "Unknown";
+  }
+
+  function seasonFromLine(line) {
+    const season = String(line?.season || line?.statData?.season || "").trim();
+    if (season && !/^unknown$/i.test(season)) return season;
+    return yearFromDate(line?.date || line?.statData?.date || line?.createdAt) || "Unknown";
+  }
+
+  function yearFromDate(value) {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "" : String(date.getFullYear());
+  }
+
+  function getPersonalBestContextLabel(item) {
+    const source = item?.source || item || {};
+    const data = source.statData && typeof source.statData === "object" ? source.statData : {};
+    const sportSlug = getPersonalBestSportSlug(item) || getLineSportSlug(source);
+    const candidatesBySport = {
+      cricket: [source.format, data.format, source.matchFormat, data.matchFormat, source.competitionFormat, data.competitionFormat, data.innings ? `Innings ${data.innings}` : ""],
+      football: [source.format, data.format, source.competitionFormat, data.competitionFormat, source.division, data.division, source.competitionName],
+      basketball: [source.format, data.format, source.competitionFormat, data.competitionFormat, source.division, data.division, source.competitionName],
+      volleyball: [source.format, data.format, source.competitionFormat, data.competitionFormat, source.division, data.division, source.competitionName],
+      netball: [source.format, data.format, source.competitionFormat, data.competitionFormat, source.division, data.division, source.competitionName],
+      hockey: [source.format, data.format, source.competitionFormat, data.competitionFormat, source.division, data.division, source.competitionName],
+      swimming: [data.course, source.course, data.round, source.round, data.ageGroup, source.ageGroup],
+      "track-and-field": [data.disciplineType, source.discipline, data.resultType, source.eventType, data.round, source.round, data.division, source.division],
+      badminton: [data.discipline, source.discipline, data.matchType, source.matchType, source.category, data.category],
+      "table-tennis": [data.rubber?.type, source.matchType, data.category, source.category],
+      "lawn-tennis": [data.match?.type, source.matchType, data.category, source.category],
+      taekwondo: [data.division, source.division, data.round, source.round, data.poomsae, source.discipline],
+      chess: [data.timeControl, source.matchType, data.round, source.round, data.board ? `Board ${data.board}` : ""]
+    };
+    return firstUsefulPersonalBestContext([
+      item?.contextLabel,
+      item?.format,
+      item?.matchType,
+      item?.category,
+      item?.division,
+      item?.round,
+      item?.discipline,
+      ...(candidatesBySport[sportSlug] || []),
+      item?.competitionName
+    ]);
+  }
+
+  function firstUsefulPersonalBestContext(values) {
+    return (values || [])
+      .map(formatPersonalBestContextValue)
+      .find((value) => isUsefulPersonalBestContext(value)) || "";
+  }
+
+  function formatPersonalBestContextValue(value) {
+    return String(value || "")
+      .trim()
+      .replace(/[_]+/g, " ")
+      .replace(/\s+/g, " ")
+      .replace(/\b[a-z]/g, (match) => match.toUpperCase());
+  }
+
+  function isUsefulPersonalBestContext(value) {
+    const text = String(value || "").trim();
+    if (!text) return false;
+    if (/^(match|game|event|performance|recorded score sheet|recorded result sheet)$/i.test(text)) return false;
+    if (/\b(won|lost|draw|defeated)\b/i.test(text) && /\d/.test(text)) return false;
+    return true;
+  }
+
   function toDerivedSportPb(sportSlug, eventName, performance, source, seasonOverride, notesOverride) {
     return {
       id: `derived-${sportSlug}-${eventName}-${source?.id || seasonOverride || ""}`,
@@ -1934,7 +2020,8 @@
       unit: "",
       sport: sportSlug,
       sportSlug,
-      season: seasonOverride || source?.season || source?.statData?.season || "Unknown",
+      season: seasonOverride || seasonFromLine(source),
+      contextLabel: getPersonalBestContextLabel({ sport: sportSlug, sportSlug, source }),
       competitionName: source?.competitionName || "Recorded score sheet",
       date: source?.date || "",
       notes: notesOverride || `Derived from linked ${APP.getSportName?.(sportSlug) || formatSportName(sportSlug)} performance data.`
@@ -1944,6 +2031,7 @@
   function toDerivedSeasonPb(sportSlug, eventName, performance, source, season) {
     return {
       ...toDerivedSportPb(sportSlug, eventName, performance, source, season, `Derived from season totals across linked ${APP.getSportName?.(sportSlug) || formatSportName(sportSlug)} records.`),
+      contextLabel: `${season || seasonFromLine(source)} Season`,
       competitionName: "Season aggregate"
     };
   }
@@ -1956,7 +2044,8 @@
       unit: "",
       sport: "track-and-field",
       sportSlug: "track-and-field",
-      season: seasonOverride || source?.season || source?.statData?.season || "Unknown",
+      season: seasonOverride || seasonFromLine(source),
+      contextLabel: getPersonalBestContextLabel({ sport: "track-and-field", sportSlug: "track-and-field", source }),
       competitionName: source?.competitionName || "Recorded result sheet",
       date: source?.date || "",
       notes: "Derived from linked track and field result-sheet data."
