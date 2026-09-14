@@ -1736,7 +1736,7 @@
     return `
       <div class="detail-item">
         <span class="detail-label">${escapeHtml(label)}</span>
-        <div>${escapeHtml(value || "—")}</div>
+        <div class="detail-value">${escapeHtml(value || "—")}</div>
       </div>
     `;
   }

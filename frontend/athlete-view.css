@@ -25,6 +25,7 @@
 .compact-detail-list{display:grid;gap:8px}
 .compact-detail-list .detail-item{display:grid;grid-template-columns:minmax(120px,.42fr) minmax(0,1fr);gap:12px;align-items:center;padding:10px 12px;border-radius:12px}
 .compact-detail-list .detail-label{margin-bottom:0}
+.compact-detail-list .detail-value{min-width:0}
 .key-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .stat-metric-card{border:1px solid rgba(15,23,42,.08);border-radius:14px;background:#fbfcfe;padding:14px;min-height:98px}
 .stat-metric-card strong{display:block;margin-top:5px;font-size:28px;line-height:1;color:#102033}

@@ -422,7 +422,7 @@
       { key: "goalContributions", label: "G+A" },
       { key: "shots", label: "Shots" },
       { key: "shotsOnTarget", label: "Shots OT" },
-      { key: "shotAccuracy", label: "Shot %" },
+      { key: "shotAccuracy", label: "Shot Accuracy" },
       { key: "saves", label: "Saves" },
       { key: "fouls", label: "Fouls" },
       { key: "offsides", label: "Offsides" },
@@ -484,7 +484,7 @@
       return {
         ...row,
         goalContributions: Number(row.goals || 0) + Number(row.assists || 0),
-        shotAccuracy: Number(row.shots || 0) ? round((Number(row.shotsOnTarget || 0) / Number(row.shots || 0)) * 100, 2) : 0
+        shotAccuracy: Number(row.shots || 0) ? Math.min(100, round((Number(row.shotsOnTarget || 0) / Number(row.shots || 0)) * 100, 2)) : 0
       };
     }
     if (getSportSlug() === "basketball") {
@@ -666,6 +666,7 @@
     const key = metric.key;
     if (key === "bestTimeSeconds" || key === "averageTimeSeconds") return formatTime(row[key]);
     if (key === "bestMark" || key === "averageBestMark") return row[key] ? `${round(row[key], 2)}m` : "—";
+    if (key === "shotAccuracy") return `${round(row[key] || 0, 2)}%`;
     if (key === "highScoreDisplay") return row.highScore ? `${row.highScore}${row.highScoreNotOut ? "*" : ""}` : "0";
     if (key === "bestBowlingDisplay") return row.bestBowlingWickets ? `${row.bestBowlingWickets}/${row.bestBowlingRuns || 0}` : "0";
     return row[key] ?? 0;

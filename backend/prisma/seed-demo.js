@@ -907,24 +907,28 @@ function footballScorecard(competitionId, teamId, title, opponentName, venue, in
   const scorers = players.slice(0, uwiGoals);
   const uwiHalves = splitTotal(uwiGoals, 2);
   const opponentHalves = splitTotal(opponentGoals, 2);
-  const playerStats = players.map((player, playerIndex) => ({
-    ...player,
-    number: playerIndex + 1,
-    goals: playerIndex < uwiGoals ? 1 : 0,
-    assists: playerIndex >= 2 && playerIndex < 2 + uwiGoals ? 1 : 0,
-    shots: playerIndex < 7 ? 1 + ((playerIndex + index) % 5) : 0,
-    shotsOnTarget: playerIndex < 7 ? 1 + ((playerIndex + index) % 3) : 0,
-    goalsConceded: playerIndex === 10 ? opponentGoals : 0,
-    saves: playerIndex === 10 ? 3 + (index % 5) : 0,
-    fouls: playerIndex % 4,
-    offside: playerIndex < 3 ? playerIndex % 2 : 0,
-    offsides: playerIndex < 3 ? playerIndex % 2 : 0,
-    yellowCards: playerIndex === 6 && index % 3 === 0 ? 1 : 0,
-    redCards: 0,
-    minutes: playerIndex < 11 ? 90 : 18 + ((playerIndex + index) % 25),
-    tackles: playerIndex > 4 ? 2 + ((playerIndex + index) % 6) : 1,
-    interceptions: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0
-  }));
+  const playerStats = players.map((player, playerIndex) => {
+    const shots = playerIndex < 7 ? 1 + ((playerIndex + index) % 5) : 0;
+    const shotsOnTarget = shots ? Math.min(shots, 1 + ((playerIndex + index) % 3)) : 0;
+    return {
+      ...player,
+      number: playerIndex + 1,
+      goals: playerIndex < uwiGoals ? 1 : 0,
+      assists: playerIndex >= 2 && playerIndex < 2 + uwiGoals ? 1 : 0,
+      shots,
+      shotsOnTarget,
+      goalsConceded: playerIndex === 10 ? opponentGoals : 0,
+      saves: playerIndex === 10 ? 3 + (index % 5) : 0,
+      fouls: playerIndex % 4,
+      offside: playerIndex < 3 ? playerIndex % 2 : 0,
+      offsides: playerIndex < 3 ? playerIndex % 2 : 0,
+      yellowCards: playerIndex === 6 && index % 3 === 0 ? 1 : 0,
+      redCards: 0,
+      minutes: playerIndex < 11 ? 90 : 18 + ((playerIndex + index) % 25),
+      tackles: playerIndex > 4 ? 2 + ((playerIndex + index) % 6) : 1,
+      interceptions: playerIndex > 5 ? 1 + ((playerIndex + index) % 4) : 0
+    };
+  });
   const uwiMatchStats = {
     shots: 12 + (index % 8),
     shotsOnTarget: 5 + (index % 5),
