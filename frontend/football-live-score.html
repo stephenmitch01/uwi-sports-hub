@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Football Live Scoring | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="football-scorecard.css" rel="stylesheet"/>
+<link href="football-live-score.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar"><div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div><div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div></div>
+<header class="signed-navbar" id="shellNav"><div class="signed-navbar-inner"><div class="brand-wrap"><a class="brand" href="dashboard.html"><img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/><div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div></a><div class="signed-campus-pill" data-campus-name></div></div><button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button><nav class="signed-nav-links" id="signedNavLinks"><a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a><button class="sign-out-link" id="signOutButton" type="button">Sign Out</button></nav></div></header>
+<main class="page football-scorecard-page football-live-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="liveHeading">Football Live Scoring</h1>
+<p class="muted" id="liveSubtitle">Capture goals, cards, substitutions, match stats, and shootout events while the match is live.</p>
+<div class="quick-actions"><a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a><a class="btn btn-soft" id="manualScorecardLink" href="football-scorecard.html">Use Score Sheet Entry</a></div>
+</div>
+<div class="head-right"><div class="mini-card"><div class="mini-label">Mode</div><div class="mini-value">Live</div><div class="mini-sub">Event-first football scoring</div></div><div class="mini-card"><div class="mini-label">Output</div><div class="mini-value">Score Sheet</div><div class="mini-sub">Saved into competition results</div></div></div>
+</section>
+<section class="football-live-grid">
+<section class="card football-live-setup">
+<div class="section-title"><div><h2>Match Setup</h2><p>Confirm fixture details and select the UWI matchday squad.</p></div></div>
+<div class="live-setup-grid">
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="opponentName">Opponent</label><input class="input" id="opponentName" type="text" placeholder="Opponent team name"/></div>
+<div><label for="matchTitle">Match / Score Sheet Title</label><input class="input" id="matchTitle" type="text"/></div>
+<div><label for="matchDate">Date</label><input class="input" id="matchDate" type="date"/></div>
+<div><label for="matchLocation">Location</label><input class="input" id="matchLocation" type="text"/></div>
+<div><label for="matchStatus">Status</label><select class="select" id="matchStatus"><option value="live">Live</option><option value="interval">Interval</option><option value="suspended">Suspended</option><option value="abandoned">Abandoned</option><option value="complete">Complete</option></select></div>
+</div>
+<div class="football-lineup-section live-lineup-section">
+<div class="section-title section-title-sm"><div><h3>UWI Match Squad</h3><p>Choose the players available for UWI live event attribution.</p></div></div>
+<div class="football-lineup-grid live-lineup-grid" id="squadGrid"></div>
+</div>
+</section>
+<section class="card football-live-workspace">
+<div class="football-live-scoreboard">
+<div><span id="uwiTeamLabel">UWI</span><strong id="scoreText">0-0</strong><small id="periodText">First half</small></div>
+<div><span>Recent</span><strong id="recentEvent">No events yet</strong><small id="eventCount">0 events recorded</small></div>
+</div>
+<form id="eventForm" class="live-event-form" novalidate>
+<div class="live-event-topline">
+<div><label for="eventType">Event</label><select class="select" id="eventType"><option value="goal">Goal</option><option value="card">Card</option><option value="substitution">Substitution</option><option value="team-stat">Team Stat</option><option value="player-stat">Player Stat</option><option value="shootout">Penalty Shootout</option></select></div>
+<div><label for="period">Period</label><select class="select" id="period"><option value="firstHalf">First half</option><option value="secondHalf">Second half</option><option value="extraTime1">Extra time 1</option><option value="extraTime2">Extra time 2</option><option value="shootout">Shootout</option></select></div>
+<div><label for="minute">Minute</label><input class="input" id="minute" type="number" min="0" max="130" value="0"/></div>
+<div><label for="addedTime">Added Time</label><input class="input" id="addedTime" type="number" min="0" max="30" placeholder="+"/></div>
+</div>
+<div id="eventFields"></div>
+<div><label for="eventNotes">Event Notes</label><input class="input" id="eventNotes" type="text" placeholder="Optional correction, injury, review, or match context"/></div>
+<div class="live-button-row">
+<button class="btn btn-soft" type="button" data-quick-event="goal">Goal</button>
+<button class="btn btn-soft" type="button" data-quick-event="card">Card</button>
+<button class="btn btn-soft" type="button" data-quick-event="substitution">Sub</button>
+<button class="btn btn-soft" type="button" data-quick-event="team-stat" data-quick-stat="shots">Shot</button>
+<button class="btn btn-soft" type="button" data-quick-event="team-stat" data-quick-stat="shotsOnTarget">Shot OT</button>
+<button class="btn btn-soft" type="button" data-quick-event="team-stat" data-quick-stat="corners">Corner</button>
+<button class="btn btn-soft" type="button" data-quick-event="team-stat" data-quick-stat="fouls">Foul</button>
+<button class="btn btn-soft" type="button" data-quick-event="team-stat" data-quick-stat="offsides">Offside</button>
+<button class="btn btn-campus" type="submit">Record Event</button>
+</div>
+</form>
+<div class="live-control-row"><button class="btn btn-soft" id="undoEventButton" type="button">Undo Last Event</button><button class="btn btn-campus" id="saveScoreSheetButton" type="button">Complete & Save Score Sheet</button></div>
+<div aria-live="polite" class="message" id="scoreMessage"></div>
+</section>
+</section>
+<section class="card">
+<div class="section-title"><div><h2>Live Match Summary</h2><p>Review the generated score sheet data before saving.</p></div></div>
+<div id="liveSummary"></div>
+</section>
+<section class="card">
+<div class="section-title"><div><h2>Event Timeline</h2><p>Recent live entries. Undo reverses the latest event and recalculates the score sheet.</p></div></div>
+<div id="timeline"></div>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script><script src="uwi-app.js"></script><script src="football-live-score.js"></script>
+</body>
+</html>

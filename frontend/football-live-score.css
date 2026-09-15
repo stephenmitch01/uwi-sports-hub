@@ -1,0 +1,31 @@
+.football-live-page{max-width:1500px}
+.football-live-grid{display:grid;grid-template-columns:minmax(420px,1fr) minmax(520px,1fr);gap:18px;align-items:start}
+.football-live-setup,.football-live-workspace{border-radius:14px}
+.live-setup-grid,.live-event-topline,.live-event-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.live-event-topline{grid-template-columns:1.2fr 1fr .7fr .7fr}
+.live-lineup-section{margin-top:18px;padding:16px;border-radius:12px}
+.football-live-page .live-lineup-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.football-live-page .live-lineup-grid select{min-width:0;width:100%}
+.football-live-scoreboard{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.football-live-scoreboard>div{border:1px solid rgba(15,39,66,.1);border-radius:12px;background:#fbfdff;padding:16px;min-width:0}
+.football-live-scoreboard span{display:block;color:#4d5870;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.football-live-scoreboard strong{display:block;color:#0f2742;font-size:34px;line-height:1.1;margin-top:4px;overflow-wrap:anywhere}
+.football-live-scoreboard small{display:block;color:#4d5870;margin-top:6px;line-height:1.35}
+.live-event-form{display:grid;gap:12px}
+.live-button-row,.live-control-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.live-button-row .btn{min-width:76px}
+.live-control-row{padding-top:14px;border-top:1px solid rgba(15,39,66,.1)}
+.football-live-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.football-live-summary-grid>div{border:1px solid rgba(15,39,66,.1);border-radius:10px;background:#fbfdff;padding:12px;min-width:0}
+.football-live-summary-grid span{display:block;font-size:11px;font-weight:700;color:#4d5870;text-transform:uppercase;letter-spacing:.05em}
+.football-live-summary-grid strong{display:block;margin-top:5px;color:#0f2742;font-size:20px;overflow-wrap:anywhere}
+.timeline-list{display:grid;gap:8px}
+.timeline-event{border:1px solid rgba(15,39,66,.1);border-radius:10px;padding:10px 12px;background:#fff}
+.timeline-event strong{color:#0f2742}
+.timeline-event span{color:#4d5870}
+@media(max-width:1100px){
+  .football-live-grid,.live-event-topline,.football-live-scoreboard{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .live-setup-grid,.live-event-grid,.football-live-page .live-lineup-grid,.football-live-summary-grid{grid-template-columns:1fr}
+}
