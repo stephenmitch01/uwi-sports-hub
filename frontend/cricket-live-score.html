@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cricket Live Scoring | UWI Sports Hub</title>
+<link href="uwi-core-base.css" rel="stylesheet"/>
+<link href="uwi-signed-base.css" rel="stylesheet"/>
+<link href="competition-view.css" rel="stylesheet"/>
+<link href="cricket-scorecard.css" rel="stylesheet"/>
+<link href="cricket-live-score.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="top-bar" id="topBar">
+<div class="top-left"><span>UWI Sports Hub</span><span class="top-divider">•</span><span data-shell-context></span></div>
+<div class="top-right"><span data-session-email></span><a href="about.html">About</a><a href="legal.html">Legal</a></div>
+</div>
+<header class="signed-navbar" id="shellNav">
+<div class="signed-navbar-inner">
+<div class="brand-wrap">
+<a class="brand" href="dashboard.html">
+<img alt="UWI Sports Hub logo" class="brand-logo-img" onerror="this.style.display='none';" src="images/uwi-sports-hub-logo.png"/>
+<div class="brand-text"><strong>UWI Sports Hub</strong><span>University Sports Records Platform</span></div>
+</a>
+<div class="signed-campus-pill" data-campus-name></div>
+</div>
+<button aria-label="Toggle navigation" class="nav-toggle" id="navToggle" type="button"><span></span><span></span><span></span></button>
+<nav class="signed-nav-links" id="signedNavLinks">
+<a href="dashboard.html">Dashboard</a><a href="athletes.html">Athletes</a><a href="coaches.html">Coaches</a><a href="teams.html">Teams</a><a class="active" href="competitions.html">Competitions</a><a href="reports.html">Reports</a><a href="support.html">Support</a>
+<button class="sign-out-link" id="signOutButton" type="button">Sign Out</button>
+</nav>
+</div>
+</header>
+<main class="page cricket-scorecard-page cricket-live-page">
+<div aria-live="polite" class="message" id="pageMessage"></div>
+<section class="card head">
+<div>
+<h1 id="liveHeading">Cricket Live Scoring</h1>
+<p class="muted" id="liveSubtitle">Score the match ball by ball, then save the completed innings as a full USH cricket scorecard.</p>
+<div class="quick-actions">
+<a class="btn btn-campus" id="backToCompetitionLink" href="competitions.html">Back to Competition</a>
+<a class="btn btn-soft" id="manualScorecardLink" href="cricket-scorecard.html">Use Scorecard Entry</a>
+</div>
+</div>
+<div class="head-right">
+<div class="mini-card"><div class="mini-label">Mode</div><div class="mini-value">Live</div><div class="mini-sub">Ball-by-ball cricket scoring</div></div>
+<div class="mini-card"><div class="mini-label">Output</div><div class="mini-value">Scorecard</div><div class="mini-sub">Saved into competition results</div></div>
+</div>
+</section>
+<section class="live-score-shell">
+<section class="card live-setup-card">
+<div class="section-title">
+<div><h2>Match Setup</h2><p>Choose the UWI team, opponent, format, and active innings before scoring.</p></div>
+</div>
+<form id="liveSetupForm" class="live-setup-grid" novalidate>
+<div><label for="uwiTeamSelect">UWI Team</label><select class="select" id="uwiTeamSelect"><option value="">Select UWI team</option></select></div>
+<div><label for="opponentName">Opponent</label><input class="input" id="opponentName" type="text" placeholder="Opponent team name"/></div>
+<div><label for="matchTitle">Match / Scorecard Title</label><input class="input" id="matchTitle" type="text"/></div>
+<div><label for="matchDate">Date</label><input class="input" id="matchDate" type="date"/></div>
+<div><label for="matchVenue">Venue</label><input class="input" id="matchVenue" type="text"/></div>
+<div><label for="matchFormat">Format</label><select class="select" id="matchFormat"><option value="T20">T20</option><option value="ODI">ODI / 50 Overs</option><option value="T10">T10</option><option value="Two innings">Two innings</option></select></div>
+<div><label for="inningsSide">Batting Side</label><select class="select" id="inningsSide"><option value="uwi">UWI Team batting</option><option value="opponent">Opponent batting</option></select></div>
+<div><label for="inningsNumber">Innings</label><select class="select" id="inningsNumber"><option value="1">Innings 1</option><option value="2">Innings 2</option><option value="3">Innings 3</option><option value="4">Innings 4</option></select></div>
+</form>
+<div class="starting-xi-panel">
+<div class="section-title compact-title">
+<div><h3>UWI Starting XI</h3><p>These players are used for UWI batting, bowling, and fielding links.</p></div>
+</div>
+<div class="starting-xi-grid" id="startingXiGrid"></div>
+</div>
+</section>
+<section class="card live-scoring-card">
+<div class="live-scoreboard">
+<div>
+<span id="scoreSideLabel">Batting</span>
+<strong id="scoreTotal">0/0</strong>
+<small id="scoreOvers">0.0 overs</small>
+</div>
+<div>
+<span>Run Rate</span>
+<strong id="runRate">0.00</strong>
+<small id="targetText">No target</small>
+</div>
+<div>
+<span>Current Over</span>
+<strong id="currentOver">-</strong>
+<small id="recentBalls">No balls yet</small>
+</div>
+</div>
+<form id="ballForm" class="live-ball-form" novalidate>
+<div class="live-player-grid">
+<div><label for="strikerSelect">Striker</label><select class="select" id="strikerSelect"></select></div>
+<div><label for="nonStrikerSelect">Non-striker</label><select class="select" id="nonStrikerSelect"></select></div>
+<div><label for="bowlerSelect">Bowler</label><select class="select" id="bowlerSelect"></select></div>
+</div>
+<div class="live-ball-grid">
+<div><label for="runsInput">Bat Runs</label><input class="input" id="runsInput" min="0" max="6" type="number" value="0"/></div>
+<div><label for="extraType">Extra</label><select class="select" id="extraType"><option value="">None</option><option value="wide">Wide</option><option value="no-ball">No ball</option><option value="bye">Bye</option><option value="leg-bye">Leg bye</option></select></div>
+<div><label for="extraRuns">Extra Runs</label><input class="input" id="extraRuns" min="0" type="number" value="0"/></div>
+<div><label for="wicketMode">Wicket</label><select class="select" id="wicketMode"><option value="">No wicket</option><option value="bowled">Bowled</option><option value="caught">Caught</option><option value="caught-and-bowled">Caught and bowled</option><option value="lbw">LBW</option><option value="run-out">Run out</option><option value="stumped">Stumped</option><option value="hit-wicket">Hit wicket</option><option value="retired-out">Retired out</option><option value="retired-hurt">Retired hurt</option></select></div>
+<div><label for="outBatterSelect">Out Batter</label><select class="select" id="outBatterSelect"></select></div>
+<div><label for="fielderSelect">Fielder / Keeper</label><select class="select" id="fielderSelect"></select></div>
+</div>
+<div><label for="ballNotes">Ball Notes</label><input class="input" id="ballNotes" type="text" placeholder="Optional note, appeal, milestone, injury, correction context"/></div>
+<div class="ball-button-row">
+<button class="btn btn-soft" type="button" data-quick-run="0">0</button>
+<button class="btn btn-soft" type="button" data-quick-run="1">1</button>
+<button class="btn btn-soft" type="button" data-quick-run="2">2</button>
+<button class="btn btn-soft" type="button" data-quick-run="3">3</button>
+<button class="btn btn-soft" type="button" data-quick-run="4">4</button>
+<button class="btn btn-soft" type="button" data-quick-run="6">6</button>
+<button class="btn btn-soft" type="button" data-quick-extra="wide">Wide</button>
+<button class="btn btn-soft" type="button" data-quick-extra="no-ball">No Ball</button>
+<button class="btn btn-campus" type="submit">Record Ball</button>
+</div>
+</form>
+<div class="live-control-row">
+<button class="btn btn-soft" id="undoBallButton" type="button">Undo Last Ball</button>
+<button class="btn btn-soft" id="endInningsButton" type="button">End Innings</button>
+<button class="btn btn-campus" id="saveScorecardButton" type="button">Complete & Save Scorecard</button>
+</div>
+<div aria-live="polite" class="message" id="scoreMessage"></div>
+</section>
+</section>
+<section class="card live-scorecard-preview">
+<div class="section-title">
+<div><h2>Live Scorecard Preview</h2><p>Preview updates as balls are recorded. Saving creates the same scorecard type used by USH result pages.</p></div>
+</div>
+<div id="scorecardPreview"></div>
+</section>
+</main>
+<footer class="footer"><div class="footer-left"><strong>UWI Sports Hub</strong><span>Internal university sports platform</span></div><div class="footer-right"><a href="about.html">About</a><a href="legal.html">Legal</a></div></footer>
+<script src="config.js"></script>
+<script src="uwi-app.js"></script>
+<script src="cricket-live-score.js"></script>
+</body>
+</html>

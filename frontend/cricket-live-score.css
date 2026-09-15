@@ -1,0 +1,31 @@
+.cricket-live-page{max-width:1500px}
+.live-score-shell{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(520px,1.1fr);gap:18px;align-items:start}
+.live-setup-card,.live-scoring-card,.live-scorecard-preview{border-radius:14px}
+.live-setup-grid,.live-player-grid,.live-ball-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.live-player-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px}
+.live-ball-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}
+.starting-xi-panel{margin-top:18px;padding-top:16px;border-top:1px solid rgba(15,39,66,.1)}
+.compact-title{margin-bottom:10px}
+.compact-title h3{margin:0;color:#0f2742;font-size:20px}
+.live-scoreboard{display:grid;grid-template-columns:1.2fr .8fr 1.3fr;gap:12px;margin-bottom:14px}
+.live-scoreboard>div{border:1px solid rgba(15,39,66,.1);border-radius:12px;background:#fbfdff;padding:14px 16px;min-width:0}
+.live-scoreboard span{display:block;color:#4d5870;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.live-scoreboard strong{display:block;color:#0f2742;font-size:34px;line-height:1.1;margin-top:4px;overflow-wrap:anywhere}
+.live-scoreboard small{display:block;color:#4d5870;margin-top:6px;line-height:1.35}
+.live-ball-form{display:grid;gap:12px}
+.ball-button-row,.live-control-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.live-control-row{padding-top:14px;border-top:1px solid rgba(15,39,66,.1)}
+.live-ball-list{display:flex;flex-wrap:wrap;gap:6px}
+.live-ball-pill{border:1px solid rgba(15,39,66,.12);border-radius:999px;background:#fff;padding:4px 8px;font-size:12px;font-weight:700;color:#0f2742}
+.live-innings-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:14px 16px;background:#fbfdff;border-top:1px solid rgba(15,39,66,.08);border-bottom:1px solid rgba(15,39,66,.08)}
+.live-innings-summary div{min-width:0}
+.live-innings-summary span{display:block;color:#4d5870;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.live-innings-summary strong{display:block;color:#0f2742;font-size:18px;overflow-wrap:anywhere}
+.live-over-note{color:#8a5a00;font-weight:700}
+@media(max-width:1100px){
+  .live-score-shell{grid-template-columns:1fr}
+  .live-scoreboard,.live-player-grid,.live-ball-grid{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .live-setup-grid,.starting-xi-grid,.live-innings-summary{grid-template-columns:1fr}
+}

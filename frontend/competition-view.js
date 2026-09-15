@@ -477,6 +477,7 @@
     const resultsHref = isFootball ? `football-results.html?competitionId=${encodeURIComponent(state.competitionId)}` : isBasketball ? `basketball-results.html?competitionId=${encodeURIComponent(state.competitionId)}` : isTrackField ? `track-field-results-archive.html?competitionId=${encodeURIComponent(state.competitionId)}` : isVolleyball || isHockey || isSwimming || isNetball || isBadminton || isTableTennis || isTennis || isTaekwondo || isChess ? "" : `cricket-results.html?competitionId=${encodeURIComponent(state.competitionId)}`;
     const sportLabel = isFootball ? "football score sheets" : isVolleyball ? "volleyball scoresheets" : isHockey ? "hockey score sheets" : isBasketball ? "basketball score sheets" : isSwimming ? "swimming results sheets" : isTrackField ? "track and field results sheets" : isNetball ? "netball match sheets" : isBadminton ? "badminton match sheets" : isTableTennis ? "table tennis score sheets" : isTennis ? "tennis score sheets" : isTaekwondo ? "taekwondo judge score sheets" : isChess ? "chess score sheets" : "cricket scorecards";
     const addLabel = isTrackField ? "Add Results Sheet" : "Add Score Sheet";
+    const liveScoringLink = sportSlug === "cricket" ? `<a class="btn btn-soft" href="cricket-live-score.html?competitionId=${encodeURIComponent(state.competitionId)}">Live Scoring</a>` : "";
 
     if (!scorecards.length) {
       els.competitionRecentResults.innerHTML = `
@@ -485,7 +486,10 @@
             <h2>Recent Results</h2>
             <p>Saved ${sportLabel} for this competition will appear here.</p>
           </div>
-          ${isFootball || isVolleyball || isHockey || isBasketball || isSwimming || isTrackField || isNetball || isBadminton || isTableTennis || isTennis || isTaekwondo || isChess || sportSlug === "cricket" ? `<a class="btn btn-campus" href="${entryHref}?competitionId=${encodeURIComponent(state.competitionId)}">${addLabel}</a>` : ""}
+          <div class="quick-actions">
+            ${isFootball || isVolleyball || isHockey || isBasketball || isSwimming || isTrackField || isNetball || isBadminton || isTableTennis || isTennis || isTaekwondo || isChess || sportSlug === "cricket" ? `<a class="btn btn-campus" href="${entryHref}?competitionId=${encodeURIComponent(state.competitionId)}">${addLabel}</a>` : ""}
+            ${liveScoringLink}
+          </div>
         </div>
         <div class="empty-state">No match sheets have been saved for this competition yet.</div>
       `;
@@ -502,6 +506,7 @@
         <div class="quick-actions">
           ${resultsHref ? `<a class="btn btn-soft" href="${resultsHref}">View All Results</a>` : ""}
           <a class="btn btn-campus" href="${entryHref}?competitionId=${encodeURIComponent(state.competitionId)}">${addLabel}</a>
+          ${liveScoringLink}
         </div>
       </div>
       <div class="result-strip">${cards}</div>
