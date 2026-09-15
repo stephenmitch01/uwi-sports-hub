@@ -90,7 +90,9 @@
     minute: document.getElementById("minute"),
     addedTime: document.getElementById("addedTime"),
     eventFields: document.getElementById("eventFields"),
+    notesWrap: document.getElementById("eventNotesWrap"),
     notes: document.getElementById("eventNotes"),
+    recordButton: document.getElementById("recordEventButton"),
     uwiTeamLabel: document.getElementById("uwiTeamLabel"),
     score: document.getElementById("scoreText"),
     periodText: document.getElementById("periodText"),
@@ -225,6 +227,11 @@
    */
   function renderEventFields(preselectedStat) {
     const type = els.eventType.value;
+    toggleEventDetailState(type, preselectedStat);
+    if (!type) {
+      els.eventFields.innerHTML = `<div class="live-event-empty">Choose an event above, or use a quick event button, to open the fields needed for that specific football event.</div>`;
+      return;
+    }
     if (type === "goal") renderGoalFields();
     else if (type === "card") renderCardFields();
     else if (type === "substitution") renderSubstitutionFields();
@@ -338,7 +345,7 @@
       return;
     }
     state.events.push(liveEvent.event);
-    els.notes.value = "";
+    resetEventEntry();
     updateLiveDisplay();
   }
 
@@ -352,12 +359,29 @@
       notes: els.notes.value.trim(),
       enteredAt: new Date().toISOString()
     };
+    if (!base.type) return invalid("Choose a live event before recording.");
     if (base.type === "goal") return readGoalEvent(base);
     if (base.type === "card") return readCardEvent(base);
     if (base.type === "substitution") return readSubEvent(base);
     if (base.type === "team-stat") return readTeamStatEvent(base);
     if (base.type === "player-stat") return readPlayerStatEvent(base);
     return readShootoutEvent(base);
+  }
+
+  function resetEventEntry() {
+    els.eventType.value = "";
+    els.notes.value = "";
+    renderEventFields();
+  }
+
+  function toggleEventDetailState(type, preselectedStat) {
+    if (els.notesWrap) els.notesWrap.classList.toggle("is-visible", Boolean(type));
+    if (els.recordButton) els.recordButton.disabled = !type;
+    document.querySelectorAll("[data-quick-event]").forEach((button) => {
+      const eventMatches = Boolean(type) && button.dataset.quickEvent === type;
+      const statMatches = !button.dataset.quickStat || button.dataset.quickStat === preselectedStat;
+      button.classList.toggle("is-active", eventMatches && statMatches);
+    });
   }
 
   function readGoalEvent(base) {

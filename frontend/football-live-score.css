@@ -12,8 +12,12 @@
 .football-live-scoreboard strong{display:block;color:#0f2742;font-size:34px;line-height:1.1;margin-top:4px;overflow-wrap:anywhere}
 .football-live-scoreboard small{display:block;color:#4d5870;margin-top:6px;line-height:1.35}
 .live-event-form{display:grid;gap:12px}
+.event-detail-only{display:none}
+.event-detail-only.is-visible{display:block}
+.live-event-empty{border:1px dashed rgba(15,39,66,.22);border-radius:12px;background:#fbfdff;color:#4d5870;padding:16px;line-height:1.45}
 .live-button-row,.live-control-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
 .live-button-row .btn{min-width:76px}
+.live-button-row .btn.is-active{background:#05070a;color:#fff}
 .live-control-row{padding-top:14px;border-top:1px solid rgba(15,39,66,.1)}
 .football-live-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .football-live-summary-grid>div{border:1px solid rgba(15,39,66,.1);border-radius:10px;background:#fbfdff;padding:12px;min-width:0}
