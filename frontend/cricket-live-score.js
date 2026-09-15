@@ -53,7 +53,8 @@
     athletes: [],
     teams: [],
     innings: [],
-    activeInningsIndex: 0
+    activeInningsIndex: 0,
+    draftControl: null
   };
 
   // Page Fields
@@ -131,6 +132,11 @@
       }
 
       renderPage();
+      state.draftControl = APP.registerScoringDraft(liveDraftKey(), document.body, {
+        prompt: "Restore the unsaved cricket live scoring draft for this competition?",
+        serialize: serializeLiveDraft,
+        onRestore: restoreLiveDraft
+      });
       bindEvents();
       ensureActiveInnings();
       updateLiveDisplay();
@@ -165,6 +171,35 @@
       ? String(preferredTeamId)
       : String(cricketTeams[0]?.id || "");
     renderStartingXi();
+  }
+
+  // Draft Recovery
+  /**
+   * Captures both DOM control values and ball-by-ball innings state so live
+   * scoring survives page refreshes, browser restarts, and network outages.
+   */
+  function liveDraftKey() {
+    return `cricket-live:${state.session?.id || "session"}:${competitionId}`;
+  }
+
+  function serializeLiveDraft() {
+    return {
+      controls: APP.snapshotFormControls(document.body),
+      innings: state.innings,
+      activeInningsIndex: state.activeInningsIndex
+    };
+  }
+
+  function restoreLiveDraft(draft) {
+    APP.restoreFormControls(document.body, draft.controls);
+    renderStartingXi();
+    APP.restoreFormControls(document.body, draft.controls);
+    state.innings = Array.isArray(draft.innings) ? draft.innings : [];
+    state.activeInningsIndex = Number(draft.activeInningsIndex || 0);
+  }
+
+  function saveLiveDraft() {
+    if (state.draftControl) state.draftControl.save();
   }
 
   // Event Wiring
@@ -546,6 +581,7 @@
     els.recentBalls.textContent = innings.balls.length ? `${innings.balls.length} balls recorded` : "No balls yet";
     renderPreview();
     updatePlayerControls();
+    saveLiveDraft();
   }
 
   function renderPreview() {
@@ -652,6 +688,7 @@
     try {
       const saved = await APP.apiPost("/competition-stat-lines", payload);
       const row = saved?.data || saved;
+      APP.clearScoringDraft(liveDraftKey());
       showScoreMessage("Live scorecard saved successfully.", "success");
       if (row?.id) {
         window.location.href = `cricket-scorecard-view.html?scorecardId=${encodeURIComponent(row.id)}`;

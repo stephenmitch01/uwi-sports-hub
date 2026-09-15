@@ -50,7 +50,8 @@
     scorecard: null,
     athletes: [],
     teams: [],
-    inningsCount: 2
+    inningsCount: 2,
+    draftControl: null
   };
 
   // Scorecard Fields
@@ -110,6 +111,11 @@
         state.scorecard = scorecard?.data || scorecard;
         applyExistingScorecard();
       }
+      state.draftControl = APP.registerScoringDraft(scorecardDraftKey(), els.form, {
+        prompt: "Restore the unsaved cricket scorecard draft for this competition?",
+        serialize: () => ({ controls: APP.snapshotFormControls(els.form) }),
+        onRestore: restoreScorecardDraft
+      });
       bindEvents();
       updateDerivedFields();
     } catch (error) {
@@ -165,6 +171,26 @@
       writeInnings(index + 1, innings || {});
     });
     els.result.value = data.result || "";
+    updateDerivedFields();
+  }
+
+  // Draft Recovery
+  /**
+   * Keeps long cricket scorecard entries recoverable if the browser refreshes or
+   * the final API save is interrupted by the network.
+   */
+  function scorecardDraftKey() {
+    return `cricket-scorecard:${state.session?.id || "session"}:${competitionId}:${scorecardId || "new"}`;
+  }
+
+  function restoreScorecardDraft(draft) {
+    const controls = draft.controls || {};
+    state.inningsCount = clamp(Number(controls.inningsCount || state.inningsCount) || 2, 1, 4);
+    els.inningsCount.value = String(state.inningsCount);
+    renderStartingXi();
+    renderInningsSet();
+    APP.restoreFormControls(els.form, controls);
+    refreshUwiPlayerOptions();
     updateDerivedFields();
   }
 
@@ -578,6 +604,7 @@
       } else {
         await APP.apiPost("/competition-stat-lines", payload);
       }
+      APP.clearScoringDraft(scorecardDraftKey());
       showSuccess(scorecardId ? "Cricket scorecard updated successfully." : "Cricket scorecard saved successfully.");
     } catch (error) {
       showError(error?.message || "Cricket scorecard could not be saved.");

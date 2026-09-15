@@ -23,7 +23,8 @@
     athletes: [],
     teams: [],
     audit: [],
-    leaderboardSort: { metric: "", order: "desc" }
+    leaderboardSort: { metric: "", order: "desc" },
+    statDraftControl: null
   };
 
   // URL Parameters
@@ -1327,6 +1328,15 @@
     }
 
     if (statLineForm) {
+      state.statDraftControl = APP.registerScoringDraft(statEntryDraftKey(), statLineForm, {
+        prompt: "Restore the unsaved competition result/stat entry draft for this competition?",
+        serialize: () => ({ controls: APP.snapshotFormControls(statLineForm) }),
+        onRestore: (draft) => {
+          populateSubjectOptions(valueOf("statSubjectType") || getDefaultSubjectType(sportSlug));
+          renderDynamicStatFields(sportSlug, valueOf("statEventType") || getDefaultEventType(sportSlug));
+          APP.restoreFormControls(statLineForm, draft.controls);
+        }
+      });
       statLineForm.addEventListener("submit", handleStatLineSubmit);
     }
 
@@ -1341,6 +1351,10 @@
         ? items.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>`).join("")
         : `<option value="">No available ${escapeHtml(subjectType || "subjects")}</option>`;
     }
+  }
+
+  function statEntryDraftKey() {
+    return `competition-stat-entry:${state.session?.id || "session"}:${state.competitionId}`;
   }
 
   // Save Workflow
@@ -1386,6 +1400,7 @@
     try {
       await APP.apiPost("/competition-stat-lines", payload);
       setSuccess(messageEl, "Cricket scorecard saved successfully.");
+      APP.clearScoringDraft(statEntryDraftKey());
       event.target.reset();
       await refreshPage();
     } catch (error) {
@@ -1425,6 +1440,7 @@
     await APP.apiPost("/competition-stat-lines", payload);
 
     setSuccess(messageEl, "Stat line saved successfully.");
+    APP.clearScoringDraft(statEntryDraftKey());
 
     event.target.reset();
 

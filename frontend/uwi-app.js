@@ -1,6 +1,10 @@
 (function () {
   "use strict";
 
+  // Network Resilience Storage
+  const SCORE_SAVE_QUEUE_KEY = "uwi_score_save_queue_v1";
+  const SCORE_DRAFT_PREFIX = "uwi_score_draft_v1";
+
   // API Helper
   /**
    * Shared frontend runtime for USH signed-in pages.
@@ -380,17 +384,33 @@
 
     const headers = Object.assign({ Accept: "application/json" }, opts.headers || {});
     let body = opts.body;
+    if (!opts.skipScoreSaveQueue && isScoreSaveMutation(pathOrUrl, method, body)) {
+      body = withClientSaveId(body);
+    }
+    const originalBody = body;
     if (body && typeof body === "object" && !(body instanceof FormData)) {
       headers["Content-Type"] = headers["Content-Type"] || "application/json";
       body = JSON.stringify(body);
     }
 
-    const response = await fetch(url, {
-      method,
-      credentials: "include",
-      headers,
-      body
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method,
+        credentials: "include",
+        headers,
+        body
+      });
+    } catch (error) {
+      if (shouldQueueScoreSave(pathOrUrl, method, originalBody, opts, error)) {
+        const queued = queueScoreSave(pathOrUrl, method, originalBody, error);
+        const queuedError = new Error("Network interrupted. This score sheet was saved locally and will retry automatically when your connection returns.");
+        queuedError.queued = true;
+        queuedError.pendingId = queued?.id || "";
+        throw queuedError;
+      }
+      throw error;
+    }
 
     if (response.status === 401 && (tolerateFailure || !redirectOn401)) {
       return null;
@@ -418,6 +438,211 @@
   const apiPost = (pathOrUrl, body, options) => apiFetch(pathOrUrl, Object.assign({}, options, { method: "POST", body }));
   const apiPatch = (pathOrUrl, body, options) => apiFetch(pathOrUrl, Object.assign({}, options, { method: "PATCH", body }));
   const apiDelete = (pathOrUrl, body, options) => apiFetch(pathOrUrl, Object.assign({}, options, { method: "DELETE", body }));
+
+  // Score Save Queue
+  /**
+   * Detects score/result mutations that should survive transient network loss.
+   *
+   * Only competition stat-line creates/updates are queued. Authentication,
+   * profile editing, roster changes, and destructive actions still fail loudly
+   * so staff are not misled about whether operational data changed.
+   */
+  function shouldQueueScoreSave(pathOrUrl, method, payload, options, error) {
+    if (options?.skipScoreSaveQueue) return false;
+    if (!isScoreSaveMutation(pathOrUrl, method, payload)) return false;
+    return isNetworkDisruption(error);
+  }
+
+  function isScoreSaveMutation(pathOrUrl, method, payload) {
+    if (!["POST", "PATCH"].includes(method)) return false;
+    if (!payload || typeof payload !== "object" || payload instanceof FormData) return false;
+    const path = String(pathOrUrl || "");
+    return /\/competition-stat-lines(?:\/[^/?#]+)?(?:[?#].*)?$/.test(path);
+  }
+
+  function isNetworkDisruption(error) {
+    const message = String(error?.message || error || "").toLowerCase();
+    return !navigator.onLine ||
+      error instanceof TypeError ||
+      message.includes("failed to fetch") ||
+      message.includes("network") ||
+      message.includes("load failed");
+  }
+
+  function queueScoreSave(pathOrUrl, method, payload, error) {
+    const pending = readScoreSaveQueue();
+    const body = withClientSaveId(payload);
+    const item = {
+      id: cryptoRandomId(),
+      path: String(pathOrUrl || ""),
+      method,
+      payload: body,
+      queuedAt: new Date().toISOString(),
+      attempts: 0,
+      lastError: String(error?.message || "Network unavailable")
+    };
+    writeScoreSaveQueue(pending.concat(item));
+    return item;
+  }
+
+  function withClientSaveId(payload) {
+    const copy = cloneJson(payload);
+    copy.statData = copy.statData && typeof copy.statData === "object" ? copy.statData : {};
+    copy.statData.clientSaveId = copy.statData.clientSaveId || cryptoRandomId();
+    return copy;
+  }
+
+  async function flushPendingScoreSaves() {
+    if (flushPendingScoreSaves.running || !API_BASE) return;
+    const pending = readScoreSaveQueue();
+    if (!pending.length) return;
+    flushPendingScoreSaves.running = true;
+    const remaining = [];
+    for (const item of pending) {
+      try {
+        const saved = await apiFetch(item.path, {
+          method: item.method,
+          body: item.payload,
+          redirectOn401: false,
+          skipScoreSaveQueue: true
+        });
+        if (!saved) remaining.push(item);
+      } catch (error) {
+        remaining.push({
+          ...item,
+          attempts: Number(item.attempts || 0) + 1,
+          lastError: error?.message || "Retry failed",
+          lastAttemptAt: new Date().toISOString()
+        });
+        if (isNetworkDisruption(error) || error?.status === 401) break;
+      }
+    }
+    writeScoreSaveQueue(remaining);
+    flushPendingScoreSaves.running = false;
+  }
+
+  function readScoreSaveQueue() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(SCORE_SAVE_QUEUE_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function writeScoreSaveQueue(items) {
+    try {
+      localStorage.setItem(SCORE_SAVE_QUEUE_KEY, JSON.stringify(Array.isArray(items) ? items : []));
+    } catch (_) {
+      // If browser storage is full or blocked, the active page still retains the entered form state.
+    }
+  }
+
+  window.addEventListener("online", flushPendingScoreSaves);
+  document.addEventListener("DOMContentLoaded", () => {
+    flushPendingScoreSaves();
+  });
+
+  // Score Drafts
+  /**
+   * Stores in-progress score entry data on the device.
+   *
+   * These helpers protect live scoring and long score sheets from refreshes,
+   * browser restarts, and unstable connections. They are deliberately scoped by
+   * page/session keys so a draft for one competition cannot overwrite another.
+   */
+  function saveScoringDraft(key, data) {
+    if (!key) return;
+    try {
+      localStorage.setItem(scoringDraftKey(key), JSON.stringify({
+        savedAt: new Date().toISOString(),
+        data
+      }));
+    } catch (_) {
+      // Drafting is best-effort; score submission remains the authoritative save path.
+    }
+  }
+
+  function readScoringDraft(key) {
+    if (!key) return null;
+    try {
+      const parsed = JSON.parse(localStorage.getItem(scoringDraftKey(key)) || "null");
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function clearScoringDraft(key) {
+    if (!key) return;
+    try {
+      localStorage.removeItem(scoringDraftKey(key));
+    } catch (_) {}
+  }
+
+  function scoringDraftKey(key) {
+    return `${SCORE_DRAFT_PREFIX}:${String(key)}`;
+  }
+
+  function snapshotFormControls(scope) {
+    if (!scope) return {};
+    const snapshot = {};
+    scope.querySelectorAll("input[id], select[id], textarea[id]").forEach((control) => {
+      snapshot[control.id] = control.type === "checkbox" || control.type === "radio"
+        ? control.checked
+        : control.value;
+    });
+    return snapshot;
+  }
+
+  function restoreFormControls(scope, snapshot) {
+    if (!scope || !snapshot || typeof snapshot !== "object") return;
+    Object.entries(snapshot).forEach(([id, value]) => {
+      const control = scope.querySelector(`#${cssEscape(id)}`);
+      if (!control) return;
+      if (control.type === "checkbox" || control.type === "radio") control.checked = Boolean(value);
+      else control.value = value ?? "";
+    });
+  }
+
+  function cssEscape(value) {
+    if (window.CSS?.escape) return window.CSS.escape(value);
+    return String(value).replace(/["\\#.;?+*~':^$[\]()=>|/@]/g, "\\$&");
+  }
+
+  function cloneJson(value) {
+    return JSON.parse(JSON.stringify(value || {}));
+  }
+
+  function registerScoringDraft(key, scope, options = {}) {
+    const draft = readScoringDraft(key);
+    let restored = false;
+    if (draft?.data && window.confirm(options.prompt || "Restore the unsaved score entry draft for this page?")) {
+      restoreFormControls(scope, draft.data.controls || draft.data);
+      if (typeof options.onRestore === "function") options.onRestore(draft.data);
+      restored = true;
+    }
+    let timer = null;
+    const save = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        const data = typeof options.serialize === "function"
+          ? options.serialize()
+          : { controls: snapshotFormControls(scope) };
+        saveScoringDraft(key, data);
+      }, 250);
+    };
+    if (scope) {
+      scope.addEventListener("input", save);
+      scope.addEventListener("change", save);
+    }
+    return {
+      save,
+      clear: () => clearScoringDraft(key),
+      draft,
+      restored
+    };
+  }
 
   // Lookup Session
   /**
@@ -1260,6 +1485,14 @@
     confirmReportImpact,
     confirmArchive,
     trackUnsavedChanges,
+    flushPendingScoreSaves,
+    readScoreSaveQueue,
+    saveScoringDraft,
+    readScoringDraft,
+    clearScoringDraft,
+    snapshotFormControls,
+    restoreFormControls,
+    registerScoringDraft,
     saveRecentSearch,
     readRecentSearches,
     renderRecentSearches,

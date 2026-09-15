@@ -21,7 +21,8 @@
     competition: null,
     scorecard: null,
     athletes: [],
-    teams: []
+    teams: [],
+    draftControl: null
   };
 
   // Scorecard Fields
@@ -77,6 +78,11 @@
         state.scorecard = scorecard?.data || scorecard;
         applyExistingScorecard();
       }
+      state.draftControl = APP.registerScoringDraft(scorecardDraftKey(), els.form, {
+        prompt: "Restore the unsaved football score sheet draft for this competition?",
+        serialize: () => ({ controls: APP.snapshotFormControls(els.form) }),
+        onRestore: restoreScorecardDraft
+      });
       bindEvents();
       updateDerivedFields();
     } catch (error) {
@@ -161,6 +167,25 @@
     writeTeamMatchStats("uwi", data.matchStats?.uwi || {});
     writeTeamMatchStats("opp", data.matchStats?.opponent || {});
     els.result.value = data.result || "";
+    updateDerivedFields();
+  }
+
+  // Draft Recovery
+  /**
+   * Stores the current score sheet controls locally so match data is recoverable
+   * after refreshes, browser restarts, or failed network saves.
+   */
+  function scorecardDraftKey() {
+    return `football-scorecard:${state.session?.id || "session"}:${competitionId}:${scorecardId || "new"}`;
+  }
+
+  function restoreScorecardDraft(draft) {
+    const controls = draft.controls || {};
+    renderSquad();
+    renderPlayerRows();
+    renderGoalEvents();
+    APP.restoreFormControls(els.form, controls);
+    refreshSquadPlayerOptions();
     updateDerivedFields();
   }
 
@@ -345,6 +370,7 @@
       } else {
         await APP.apiPost("/competition-stat-lines", payload);
       }
+      APP.clearScoringDraft(scorecardDraftKey());
       showSuccess(scorecardId ? "Football score sheet updated successfully." : "Football score sheet saved successfully.");
     } catch (error) {
       showError(error?.message || "Football score sheet could not be saved.");

@@ -67,7 +67,8 @@
     competition: null,
     athletes: [],
     teams: [],
-    events: []
+    events: [],
+    draftControl: null
   };
 
   // Page Fields
@@ -134,8 +135,13 @@
         return;
       }
       renderPage();
+      state.draftControl = APP.registerScoringDraft(liveDraftKey(), document.body, {
+        prompt: "Restore the unsaved football live scoring draft for this competition?",
+        serialize: serializeLiveDraft,
+        onRestore: restoreLiveDraft
+      });
       bindEvents();
-      renderEventFields();
+      if (!state.draftControl.restored) renderEventFields();
       updateLiveDisplay();
     } catch (error) {
       console.error("Football live scoring load error:", error);
@@ -164,6 +170,34 @@
       ? String(preferredTeamId)
       : String(footballTeams[0]?.id || "");
     renderSquad();
+  }
+
+  // Draft Recovery
+  /**
+   * Persists the live football event log and current controls locally so a
+   * disrupted browser/network session can resume without losing match events.
+   */
+  function liveDraftKey() {
+    return `football-live:${state.session?.id || "session"}:${competitionId}`;
+  }
+
+  function serializeLiveDraft() {
+    return {
+      controls: APP.snapshotFormControls(document.body),
+      events: state.events
+    };
+  }
+
+  function restoreLiveDraft(draft) {
+    APP.restoreFormControls(document.body, draft.controls);
+    renderSquad();
+    renderEventFields();
+    APP.restoreFormControls(document.body, draft.controls);
+    state.events = Array.isArray(draft.events) ? draft.events : [];
+  }
+
+  function saveLiveDraft() {
+    if (state.draftControl) state.draftControl.save();
   }
 
   // Event Wiring
@@ -601,6 +635,7 @@
     els.eventCount.textContent = `${state.events.length} event${state.events.length === 1 ? "" : "s"} recorded`;
     renderSummary(data);
     renderTimeline();
+    saveLiveDraft();
   }
 
   function renderSummary(data) {
@@ -678,6 +713,7 @@
     try {
       const saved = await APP.apiPost("/competition-stat-lines", payload);
       const row = saved?.data || saved;
+      APP.clearScoringDraft(liveDraftKey());
       showScoreMessage("Football live score sheet saved successfully.", "success");
       if (row?.id) window.location.href = `football-scorecard-view.html?scorecardId=${encodeURIComponent(row.id)}`;
     } catch (error) {
