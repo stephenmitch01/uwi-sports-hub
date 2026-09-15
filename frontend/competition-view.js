@@ -477,7 +477,7 @@
     const resultsHref = isFootball ? `football-results.html?competitionId=${encodeURIComponent(state.competitionId)}` : isBasketball ? `basketball-results.html?competitionId=${encodeURIComponent(state.competitionId)}` : isTrackField ? `track-field-results-archive.html?competitionId=${encodeURIComponent(state.competitionId)}` : isVolleyball || isHockey || isSwimming || isNetball || isBadminton || isTableTennis || isTennis || isTaekwondo || isChess ? "" : `cricket-results.html?competitionId=${encodeURIComponent(state.competitionId)}`;
     const sportLabel = isFootball ? "football score sheets" : isVolleyball ? "volleyball scoresheets" : isHockey ? "hockey score sheets" : isBasketball ? "basketball score sheets" : isSwimming ? "swimming results sheets" : isTrackField ? "track and field results sheets" : isNetball ? "netball match sheets" : isBadminton ? "badminton match sheets" : isTableTennis ? "table tennis score sheets" : isTennis ? "tennis score sheets" : isTaekwondo ? "taekwondo judge score sheets" : isChess ? "chess score sheets" : "cricket scorecards";
     const addLabel = isTrackField ? "Add Results Sheet" : "Add Score Sheet";
-    const liveScoringLink = sportSlug === "cricket" ? `<a class="btn btn-soft" href="cricket-live-score.html?competitionId=${encodeURIComponent(state.competitionId)}">Live Scoring</a>` : "";
+    const liveScoringLink = sportSlug === "cricket" ? `<a class="btn btn-campus" href="cricket-live-score.html?competitionId=${encodeURIComponent(state.competitionId)}">Live Scoring</a>` : "";
 
     if (!scorecards.length) {
       els.competitionRecentResults.innerHTML = `
