@@ -24,13 +24,27 @@
     "run-out": "Run out",
     stumped: "Stumped",
     "hit-wicket": "Hit wicket",
+    "obstructing-the-field": "Obstructing the field",
+    "hit-the-ball-twice": "Hit the ball twice",
+    "timed-out": "Timed out",
     "retired-out": "Retired out",
     "retired-hurt": "Retired hurt"
   };
-  const WICKET_DISMISSALS = new Set(["bowled", "caught", "caught-and-bowled", "lbw", "run-out", "stumped", "hit-wicket", "retired-out"]);
+  const WICKET_DISMISSALS = new Set(["bowled", "caught", "caught-and-bowled", "lbw", "run-out", "stumped", "hit-wicket", "obstructing-the-field", "hit-the-ball-twice", "timed-out", "retired-out"]);
+  const BATTER_LEAVES_EVENTS = new Set([...WICKET_DISMISSALS, "retired-hurt"]);
   const BOWLER_CREDIT_DISMISSALS = new Set(["bowled", "caught", "caught-and-bowled", "lbw", "stumped", "hit-wicket"]);
   const FIELDING_DISMISSALS = new Set(["caught", "caught-and-bowled", "run-out", "stumped"]);
-  const NON_LEGAL_EXTRAS = new Set(["wide", "no-ball"]);
+  const NON_LEGAL_EXTRAS = new Set(["wide", "no-ball", "penalty"]);
+  const NON_DELIVERY_EVENTS = new Set(["timed-out", "retired-out", "retired-hurt"]);
+  const BOWLER_CHARGED_EXTRAS = new Set(["wide", "no-ball"]);
+  const EXTRA_LABELS = { wide: "wd", "no-ball": "nb", bye: "b", "leg-bye": "lb", penalty: "pen" };
+  const EXTRA_WICKET_RULES = {
+    wide: new Set(["", "run-out", "stumped", "hit-wicket", "obstructing-the-field", "hit-the-ball-twice", "retired-out", "retired-hurt"]),
+    "no-ball": new Set(["", "run-out", "obstructing-the-field", "hit-the-ball-twice", "retired-out", "retired-hurt"]),
+    bye: new Set(["", "run-out", "stumped", "hit-wicket", "obstructing-the-field", "hit-the-ball-twice", "retired-out", "retired-hurt"]),
+    "leg-bye": new Set(["", "run-out", "stumped", "hit-wicket", "obstructing-the-field", "hit-the-ball-twice", "retired-out", "retired-hurt"]),
+    penalty: new Set(["", "timed-out", "retired-out", "retired-hurt"])
+  };
 
   // Page State
   const state = {
@@ -185,13 +199,22 @@
         els.runs.value = button.dataset.quickRun || "0";
         els.extraType.value = "";
         els.extraRuns.value = "0";
+        updateWicketControls();
       });
     });
     document.querySelectorAll("[data-quick-extra]").forEach((button) => {
       button.addEventListener("click", () => {
         els.extraType.value = button.dataset.quickExtra || "";
         els.runs.value = "0";
+        els.extraRuns.value = button.dataset.extraRuns || "1";
         syncExtraDefault();
+      });
+    });
+    document.querySelectorAll("[data-quick-wicket]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const requested = button.dataset.quickWicket || "run-out";
+        els.wicketMode.value = allowedDismissalsForExtra(els.extraType.value).has(requested) ? requested : "run-out";
+        updateWicketControls();
       });
     });
     els.undo.addEventListener("click", undoLastBall);
@@ -308,9 +331,9 @@
     const bowler = readSelectedPlayer(els.bowler);
     const wicketMode = els.wicketMode.value;
     const extraType = els.extraType.value;
-    const legalBall = !NON_LEGAL_EXTRAS.has(extraType);
-    const batRuns = clamp(Number(els.runs.value) || 0, 0, 6);
-    const extraRuns = Math.max(0, Number(els.extraRuns.value) || 0);
+    const legalBall = !NON_LEGAL_EXTRAS.has(extraType) && !NON_DELIVERY_EVENTS.has(wicketMode);
+    const batRuns = clamp(Number(els.runs.value) || 0, 0, 7);
+    let extraRuns = Math.max(0, Number(els.extraRuns.value) || 0);
 
     if (!striker.value || !bowler.value) {
       showScoreMessage("Select the striker and bowler before recording a ball.", "error");
@@ -320,8 +343,29 @@
       showScoreMessage("Striker and non-striker must be different players.", "error");
       return;
     }
-    if (wicketMode && WICKET_DISMISSALS.has(wicketMode) && !els.outBatter.value) {
-      showScoreMessage("Select the batter who was out before recording the wicket.", "error");
+    if ((extraType === "wide" || extraType === "bye" || extraType === "leg-bye" || extraType === "penalty") && batRuns > 0) {
+      showScoreMessage("Bat runs cannot be recorded with wides, byes, leg byes, or penalty runs. Use Extra Runs for those.", "error");
+      return;
+    }
+    if (!extraType && extraRuns > 0) {
+      showScoreMessage("Choose the extra type before entering extra runs.", "error");
+      return;
+    }
+    if (NON_DELIVERY_EVENTS.has(wicketMode) && (batRuns > 0 || extraRuns > 0)) {
+      showScoreMessage("Timed out and retirement events are recorded between deliveries, so they cannot include ball runs or extras.", "error");
+      return;
+    }
+    if ((extraType === "wide" || extraType === "no-ball") && extraRuns < 1) extraRuns = 1;
+    if (extraType === "penalty" && extraRuns < 1) {
+      showScoreMessage("Enter the penalty runs before recording the event.", "error");
+      return;
+    }
+    if (wicketMode && !allowedDismissalsForExtra(extraType).has(wicketMode)) {
+      showScoreMessage(invalidWicketMessage(extraType, wicketMode), "error");
+      return;
+    }
+    if (wicketMode && BATTER_LEAVES_EVENTS.has(wicketMode) && !els.outBatter.value) {
+      showScoreMessage("Select the batter involved in the wicket or retirement event.", "error");
       return;
     }
 
@@ -349,11 +393,15 @@
   function applyStrikeForNextBall(innings, ball) {
     let strikerId = ball.striker.value;
     let nonStrikerId = ball.nonStriker.value;
-    if (ball.wicketMode && ball.outBatter?.value === strikerId) strikerId = "";
-    if (ball.wicketMode && ball.outBatter?.value === nonStrikerId) nonStrikerId = "";
+    if (BATTER_LEAVES_EVENTS.has(ball.wicketMode) && ball.outBatter?.value === strikerId) {
+      strikerId = nextAvailableBatter(innings, [nonStrikerId]);
+    }
+    if (BATTER_LEAVES_EVENTS.has(ball.wicketMode) && ball.outBatter?.value === nonStrikerId) {
+      nonStrikerId = nextAvailableBatter(innings, [strikerId]);
+    }
 
     const completedOver = ball.legalBall && legalBallsInCurrentOver(innings) === 6;
-    const rotateForRuns = (ball.batRuns + (["bye", "leg-bye"].includes(ball.extraType) ? ball.extraRuns : 0)) % 2 === 1;
+    const rotateForRuns = runsForStrikeRotation(ball) % 2 === 1;
     if (rotateForRuns || completedOver) {
       [strikerId, nonStrikerId] = [nonStrikerId, strikerId];
     }
@@ -370,7 +418,7 @@
   function recomputeInnings(innings) {
     const batting = new Map();
     const bowling = new Map();
-    const extras = { wide: 0, "no-ball": 0, bye: 0, "leg-bye": 0 };
+    const extras = { wide: 0, "no-ball": 0, bye: 0, "leg-bye": 0, penalty: 0 };
     let total = 0;
     let wickets = 0;
     let legalBalls = 0;
@@ -381,6 +429,7 @@
       const bowler = ensureBowlingRow(bowling, ball.bowler);
       const extraRuns = ball.extraRuns || 0;
       const teamRuns = ball.batRuns + extraRuns;
+      const bowlerRuns = ball.batRuns + (BOWLER_CHARGED_EXTRAS.has(ball.extraType) ? extraRuns : 0);
       total += teamRuns;
       batter.runs += ball.batRuns;
       batter.fours += ball.batRuns === 4 ? 1 : 0;
@@ -391,19 +440,19 @@
         legalBalls += 1;
       }
       if (ball.extraType) extras[ball.extraType] += extraRuns;
-      if (!["bye", "leg-bye"].includes(ball.extraType)) bowler.runs += teamRuns;
+      bowler.runs += bowlerRuns;
 
-      if (ball.wicketMode && WICKET_DISMISSALS.has(ball.wicketMode)) {
-        wickets += 1;
+      if (ball.wicketMode && BATTER_LEAVES_EVENTS.has(ball.wicketMode)) {
+        if (WICKET_DISMISSALS.has(ball.wicketMode)) wickets += 1;
         const out = ball.outBatter?.value ? ensureBattingRow(batting, ball.outBatter) : batter;
         out.dismissalMode = ball.wicketMode;
         out.dismissalLabel = DISMISSAL_LABELS[ball.wicketMode] || "";
-        out.bowlerAthleteId = BOWLER_CREDIT_DISMISSALS.has(ball.wicketMode) ? ball.bowler.athleteId : null;
-        out.bowlerName = BOWLER_CREDIT_DISMISSALS.has(ball.wicketMode) ? ball.bowler.label : "";
+        out.bowlerAthleteId = bowlerGetsWicketCredit(ball) ? ball.bowler.athleteId : null;
+        out.bowlerName = bowlerGetsWicketCredit(ball) ? ball.bowler.label : "";
         out.fielderAthleteId = FIELDING_DISMISSALS.has(ball.wicketMode) ? ball.fielder.athleteId : null;
         out.fielderName = FIELDING_DISMISSALS.has(ball.wicketMode) ? ball.fielder.label : "";
-        if (BOWLER_CREDIT_DISMISSALS.has(ball.wicketMode)) bowler.wickets += 1;
-        innings.fallOfWickets.push(`${wickets}-${total} (${out.name})`);
+        if (bowlerGetsWicketCredit(ball)) bowler.wickets += 1;
+        if (WICKET_DISMISSALS.has(ball.wicketMode)) innings.fallOfWickets.push(`${wickets}-${total} (${out.name})`);
       }
     });
 
@@ -492,7 +541,7 @@
     els.scoreOvers.textContent = `${innings.overs || "0.0"} overs`;
     els.runRate.textContent = innings.runRate || "0.00";
     els.target.textContent = innings.target ? `Target ${innings.target}` : "No target";
-    const overBalls = innings.balls.slice(-6).map(ballDisplay);
+    const overBalls = currentOverEvents(innings).map(ballDisplay);
     els.currentOver.innerHTML = overBalls.length ? `<span class="live-ball-list">${overBalls.map((value) => `<span class="live-ball-pill">${escapeHtml(value)}</span>`).join("")}</span>` : "-";
     els.recentBalls.textContent = innings.balls.length ? `${innings.balls.length} balls recorded` : "No balls yet";
     renderPreview();
@@ -685,10 +734,22 @@
     if ((els.extraType.value === "wide" || els.extraType.value === "no-ball") && Number(els.extraRuns.value || 0) < 1) {
       els.extraRuns.value = "1";
     }
+    if ((els.extraType.value === "bye" || els.extraType.value === "leg-bye") && Number(els.extraRuns.value || 0) < 1) {
+      els.extraRuns.value = "1";
+    }
+    if (els.extraType.value === "penalty" && Number(els.extraRuns.value || 0) < 1) {
+      els.extraRuns.value = "5";
+    }
     if (!els.extraType.value) els.extraRuns.value = "0";
+    updateWicketControls();
   }
 
   function updateWicketControls() {
+    const allowed = allowedDismissalsForExtra(els.extraType.value);
+    Array.from(els.wicketMode.options).forEach((option) => {
+      option.disabled = !allowed.has(option.value);
+    });
+    if (!allowed.has(els.wicketMode.value)) els.wicketMode.value = "";
     const needsWicket = Boolean(els.wicketMode.value);
     const needsFielder = FIELDING_DISMISSALS.has(els.wicketMode.value);
     els.outBatter.disabled = !needsWicket;
@@ -717,12 +778,64 @@
   }
 
   function ballDisplay(ball) {
-    if (ball.wicketMode && WICKET_DISMISSALS.has(ball.wicketMode)) return `W${ball.batRuns ? `+${ball.batRuns}` : ""}`;
-    if (ball.extraType === "wide") return `${ball.extraRuns}wd`;
-    if (ball.extraType === "no-ball") return `${ball.extraRuns}nb`;
-    if (ball.extraType === "bye") return `${ball.extraRuns}b`;
-    if (ball.extraType === "leg-bye") return `${ball.extraRuns}lb`;
-    return String(ball.batRuns);
+    const base = ball.extraType
+      ? `${ball.batRuns ? `${ball.batRuns}+` : ""}${ball.extraRuns}${EXTRA_LABELS[ball.extraType] || "ex"}`
+      : String(ball.batRuns);
+    return ball.wicketMode && WICKET_DISMISSALS.has(ball.wicketMode) ? `${base}+W` : base;
+  }
+
+  function currentOverEvents(innings) {
+    const events = [];
+    let legalBalls = 0;
+    for (let index = innings.balls.length - 1; index >= 0; index -= 1) {
+      const ball = innings.balls[index];
+      events.unshift(ball);
+      if (ball.legalBall) legalBalls += 1;
+      if (legalBalls === 6) break;
+    }
+    return events;
+  }
+
+  function allowedDismissalsForExtra(extraType) {
+    return EXTRA_WICKET_RULES[extraType] || new Set(["", ...Object.keys(DISMISSAL_LABELS)]);
+  }
+
+  function invalidWicketMessage(extraType, wicketMode) {
+    const extraLabel = extraType ? extraType.replace(/-/g, " ") : "this delivery";
+    const wicketLabel = DISMISSAL_LABELS[wicketMode] || "that wicket";
+    return `${wicketLabel} is not a valid wicket event with ${extraLabel}. Use run out, stumped where legal, retirement, or another valid dismissal.`;
+  }
+
+  function bowlerGetsWicketCredit(ball) {
+    if (!BOWLER_CREDIT_DISMISSALS.has(ball.wicketMode)) return false;
+    if (ball.extraType === "no-ball") return false;
+    if (ball.extraType === "wide") return ball.wicketMode === "stumped" || ball.wicketMode === "hit-wicket";
+    return true;
+  }
+
+  function runsForStrikeRotation(ball) {
+    if (ball.extraType === "wide" || ball.extraType === "no-ball") {
+      return ball.batRuns + Math.max(0, (ball.extraRuns || 0) - 1);
+    }
+    if (ball.extraType === "bye" || ball.extraType === "leg-bye") return ball.extraRuns || 0;
+    if (ball.extraType === "penalty") return 0;
+    return ball.batRuns || 0;
+  }
+
+  function nextAvailableBatter(innings, excludedValues) {
+    const excluded = new Set((excludedValues || []).filter(Boolean).map(String));
+    const dismissed = new Set(innings.balls
+      .filter((ball) => BATTER_LEAVES_EVENTS.has(ball.wicketMode) && ball.outBatter?.value)
+      .map((ball) => String(ball.outBatter.value)));
+    const appeared = new Set();
+    innings.balls.forEach((ball) => {
+      if (ball.striker?.value) appeared.add(String(ball.striker.value));
+      if (ball.nonStriker?.value) appeared.add(String(ball.nonStriker.value));
+    });
+    const options = innings.battingSide === "uwi" ? selectedXiPlayers() : opponentPlayers("Batter");
+    return options.find((player) => !excluded.has(String(player.value)) && !dismissed.has(String(player.value)) && !appeared.has(String(player.value)))?.value
+      || options.find((player) => !excluded.has(String(player.value)) && !dismissed.has(String(player.value)))?.value
+      || "";
   }
 
   function deriveTarget(inningsNumber) {

@@ -94,10 +94,10 @@
 <div><label for="bowlerSelect">Bowler</label><select class="select" id="bowlerSelect"></select></div>
 </div>
 <div class="live-ball-grid">
-<div><label for="runsInput">Bat Runs</label><input class="input" id="runsInput" min="0" max="6" type="number" value="0"/></div>
-<div><label for="extraType">Extra</label><select class="select" id="extraType"><option value="">None</option><option value="wide">Wide</option><option value="no-ball">No ball</option><option value="bye">Bye</option><option value="leg-bye">Leg bye</option></select></div>
+<div><label for="runsInput">Bat Runs</label><input class="input" id="runsInput" min="0" max="7" type="number" value="0"/></div>
+<div><label for="extraType">Extra</label><select class="select" id="extraType"><option value="">None</option><option value="wide">Wide</option><option value="no-ball">No ball</option><option value="bye">Bye</option><option value="leg-bye">Leg bye</option><option value="penalty">Penalty runs</option></select></div>
 <div><label for="extraRuns">Extra Runs</label><input class="input" id="extraRuns" min="0" type="number" value="0"/></div>
-<div><label for="wicketMode">Wicket</label><select class="select" id="wicketMode"><option value="">No wicket</option><option value="bowled">Bowled</option><option value="caught">Caught</option><option value="caught-and-bowled">Caught and bowled</option><option value="lbw">LBW</option><option value="run-out">Run out</option><option value="stumped">Stumped</option><option value="hit-wicket">Hit wicket</option><option value="retired-out">Retired out</option><option value="retired-hurt">Retired hurt</option></select></div>
+<div><label for="wicketMode">Wicket / Batter Event</label><select class="select" id="wicketMode"><option value="">No wicket</option><option value="bowled">Bowled</option><option value="caught">Caught</option><option value="caught-and-bowled">Caught and bowled</option><option value="lbw">LBW</option><option value="run-out">Run out</option><option value="stumped">Stumped</option><option value="hit-wicket">Hit wicket</option><option value="obstructing-the-field">Obstructing the field</option><option value="hit-the-ball-twice">Hit the ball twice</option><option value="timed-out">Timed out</option><option value="retired-out">Retired out</option><option value="retired-hurt">Retired hurt</option></select></div>
 <div><label for="outBatterSelect">Out Batter</label><select class="select" id="outBatterSelect"></select></div>
 <div><label for="fielderSelect">Fielder / Keeper</label><select class="select" id="fielderSelect"></select></div>
 </div>
@@ -108,9 +108,15 @@
 <button class="btn btn-soft" type="button" data-quick-run="2">2</button>
 <button class="btn btn-soft" type="button" data-quick-run="3">3</button>
 <button class="btn btn-soft" type="button" data-quick-run="4">4</button>
+<button class="btn btn-soft" type="button" data-quick-run="5">5</button>
 <button class="btn btn-soft" type="button" data-quick-run="6">6</button>
-<button class="btn btn-soft" type="button" data-quick-extra="wide">Wide</button>
-<button class="btn btn-soft" type="button" data-quick-extra="no-ball">No Ball</button>
+<button class="btn btn-soft" type="button" data-quick-extra="wide" data-extra-runs="1">Wide</button>
+<button class="btn btn-soft" type="button" data-quick-extra="no-ball" data-extra-runs="1">No Ball</button>
+<button class="btn btn-soft" type="button" data-quick-extra="bye" data-extra-runs="1">Bye</button>
+<button class="btn btn-soft" type="button" data-quick-extra="leg-bye" data-extra-runs="1">Leg Bye</button>
+<button class="btn btn-soft" type="button" data-quick-extra="penalty" data-extra-runs="5">Penalty</button>
+<button class="btn btn-soft" type="button" data-quick-wicket="bowled">Wicket</button>
+<button class="btn btn-soft" type="button" data-quick-wicket="run-out">Run Out</button>
 <button class="btn btn-campus" type="submit">Record Ball</button>
 </div>
 </form>
